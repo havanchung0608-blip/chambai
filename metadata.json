@@ -1,0 +1,6 @@
+{
+  "name": "MathAI Grader - Chấm Bài Toán Tự Luận",
+  "description": "Ứng dụng hỗ trợ giáo viên chấm bài Toán tự luận bằng AI, giúp học sinh nhận phản hồi chi tiết và khích lệ.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["AI Grading", "Exam Management", "Student Statistics"]
+}
