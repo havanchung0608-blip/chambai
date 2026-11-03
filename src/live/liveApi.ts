@@ -120,6 +120,12 @@ export async function revealQuestion(room: Room, players: Player[]): Promise<{ u
 
 export const endRoom = (code: string) => updateDoc(roomRef(code), { status: 'ended' });
 
+/** Bản chơi thử: vị trí đáp án đúng của câu i (để người chơi ảo trả lời). */
+export async function demoCorrectIndex(code: string, i: number): Promise<number> {
+  const key = (await getDoc(keyRef(code))).data() as Key;
+  return key.orders[i].indexOf(0);
+}
+
 // ---------- Người chơi ----------
 export async function joinRoom(code: string, uid: string, name: string): Promise<'ok' | 'missing' | 'ended'> {
   const r = await getDoc(roomRef(code));

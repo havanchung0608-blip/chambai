@@ -3,10 +3,16 @@ import QRCode from 'qrcode';
 import './live.css';
 import Avatar from './Avatar';
 import {
+  demoCorrectIndex, joinRoom, sendAnswer,
   Player, Room, createRoom, endRoom, joinUrl, ms, revealQuestion, showQuestion, watchAnswered, watchPlayers, watchRoom,
 } from './liveApi';
 import { GRADES, LEVELS, gradeLabel, timeFactor } from '../game/levels';
 import { SND, isMuted, setMuted } from '../game/sound';
+
+// Bản chơi thử (không có Firebase): có nút thêm người chơi ảo tự trả lời.
+const DEMO = import.meta.env.VITE_DEMO === '1';
+const BOT_NAMES = ['Minh An', 'Bảo Ngọc', 'Gia Huy', 'Thu Trang', 'Đức Anh', 'Khánh Linh', 'Quốc Bảo', 'Hà My', 'Tuấn Kiệt', 'Ngọc Hân',
+  'Phúc Lâm', 'Diệu Linh', 'Hoàng Nam', 'Mai Chi', 'Trọng Nhân', 'Thảo Vy', 'Đăng Khoa', 'Yến Nhi', 'Minh Khôi', 'Bích Ngân'];
 
 const LET = ['A', 'B', 'C', 'D'];
 const OPT_COLORS = ['#d9534f', '#3f7cc4', '#e0a12a', '#2f8a5f'];
@@ -155,6 +161,29 @@ export function HostScreen({ code, onExit }: { code: string; onExit: () => void 
   }, [code, room?.qIndex]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { const id = setInterval(() => setNow(Date.now()), 250); return () => clearInterval(id); }, []);
 
+  // Người chơi ảo (chỉ bản thử): tự chọn đáp án sau vài giây, đúng khoảng 70%.
+  async function addBots(k = 8) {
+    const used = new Set(players.map(p => p.name));
+    const pool = BOT_NAMES.filter(nm => !used.has(nm));
+    for (let i = 0; i < k; i++) {
+      const nm = pool[i] || `Bạn số ${players.length + i + 1}`;
+      await joinRoom(code, `bot${Date.now().toString(36)}${i}`, nm);
+    }
+  }
+  useEffect(() => {
+    if (!DEMO || room?.status !== 'question') return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const qi = room.qIndex, limit = room.timeLimit;
+    demoCorrectIndex(code, qi).then(ci => {
+      players.filter(p => p.uid.startsWith('bot') && !answered.includes(p.uid)).forEach(p => {
+        const delay = 1500 + Math.random() * Math.max(1000, limit * 700);
+        const choice = Math.random() < 0.7 ? ci : (ci + 1 + Math.floor(Math.random() * 3)) % 4;
+        timers.push(setTimeout(() => { sendAnswer(code, p.uid, qi, choice).catch(() => {}); }, delay));
+      });
+    }).catch(() => {});
+    return () => timers.forEach(clearTimeout);
+  }, [room?.status, room?.qIndex, players.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const left = room?.status === 'question' ? Math.max(0, room.timeLimit - (now - ms(room.startedAt)) / 1000) : 0;
   const ranked = useMemo(() => [...players].sort((a, b) => b.score - a.score || a.name.localeCompare(b.name)), [players]);
 
@@ -224,7 +253,9 @@ export function HostScreen({ code, onExit }: { code: string; onExit: () => void 
         <span className="lv-label">Quét để vào chùa</span>
         {qr ? <img src={qr} alt={`Mã QR vào phòng ${code}`} /> : <div className="lv-qr-ph" />}
         <span className="lv-code">{code}</span>
-        <span className="lv-url">{url.replace(/^https?:\/\//, '')}</span>
+        {DEMO
+          ? <span className="lv-url">Bản chơi thử: bấm “+ 8 người chơi ảo” ở góc dưới để có bạn chơi cùng.</span>
+          : <span className="lv-url">{url.replace(/^https?:\/\//, '')}</span>}
       </aside>
 
       <aside className="lv-board">
@@ -301,6 +332,7 @@ export function HostScreen({ code, onExit }: { code: string; onExit: () => void 
       </section>
 
       <nav className="lv-host-ctrl">
+        {DEMO && room.status !== 'ended' && <button className="lv-btn ghost" onClick={() => addBots(8)}>+ 8 người chơi ảo</button>}
         {room.status === 'lobby' && <button className="lv-btn" disabled={busy} onClick={next}>Bắt đầu ({n} người)</button>}
         {room.status === 'question' && <button className="lv-btn" disabled={busy} onClick={doReveal}>Hiện đáp án</button>}
         {room.status === 'reveal' && <button className="lv-btn" disabled={busy} onClick={next}>{room.qIndex + 1 >= room.total ? 'Vinh danh' : 'Câu tiếp →'}</button>}
