@@ -111,9 +111,9 @@ export default function Scene({ steps, monkStep, level, bubble, anim }: Props) {
           </g>
         </g>
         <g className="ctg-bubble" opacity={bubble ? 1 : 0}>
-          <rect x="-24" y="-112" width="168" height="32" rx="12" fill="#fbf3e2" />
+          <rect x="-24" y="-112" width="214" height="32" rx="12" fill="#fbf3e2" />
           <path d="M-2 -81 L4 -72 L10 -81Z" fill="#fbf3e2" />
-          <text x="60" y="-91" textAnchor="middle" fontWeight="700" fontSize="15" fill="#2a1b12">{bubble}</text>
+          <text x="83" y="-91" textAnchor="middle" fontWeight="700" fontSize="14" fill="#2a1b12">{bubble}</text>
         </g>
       </g>
     </svg>

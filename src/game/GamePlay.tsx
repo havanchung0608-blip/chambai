@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Scene from './Scene';
-import { LEVELS } from './levels';
+import { LEVELS, timeFactor } from './levels';
 import { makeRound, shuffle } from './questions';
 import { GameConfig, RoundResult, WrongItem } from './progress';
 import { SND, isMuted, setMuted } from './sound';
@@ -18,6 +18,38 @@ type Props = {
 const LET = ['A', 'B', 'C', 'D'];
 const CHEER = ['Tâm an, tính đúng!', 'Lên một bậc rồi!', 'Giỏi quá đi!', 'Công đức tăng rồi!'];
 const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+/** Chuyển nội dung câu hỏi (HTML) thành lời đọc tiếng Việt. */
+function toSpeech(html: string) {
+  return html
+    .replace(/<span class="fr"><i>(.*?)<\/i><i>(.*?)<\/i><\/span>/g, ' $1 phần $2 ')
+    .replace(/<sup>2<\/sup>/g, ' bình phương ')
+    .replace(/<sup>3<\/sup>/g, ' lập phương ')
+    .replace(/<sup>(.*?)<\/sup>/g, ' mũ $1 ')
+    .replace(/<br\s*\/?>/g, '. ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\p{Extended_Pictographic}/gu, '')
+    .replace(/cm²/g, ' xăng-ti-mét vuông').replace(/cm³/g, ' xăng-ti-mét khối').replace(/m²/g, ' mét vuông')
+    .replace(/km\/giờ/g, ' ki-lô-mét một giờ')
+    .replace(/√/g, ' căn ').replace(/×|·/g, ' nhân ').replace(/ : /g, ' chia ')
+    .replace(/−/g, ' trừ ').replace(/\+/g, ' cộng ').replace(/≠/g, ' khác ').replace(/≥/g, ' lớn hơn hoặc bằng ').replace(/≤/g, ' nhỏ hơn hoặc bằng ')
+    .replace(/=/g, ' bằng ').replace(/%/g, ' phần trăm').replace(/°/g, ' độ').replace(/π/g, ' pi').replace(/Δ/g, ' đen-ta')
+    .replace(/\s+/g, ' ').trim();
+}
+
+function speak(text: string) {
+  try {
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'vi-VN';
+    const v = synth.getVoices().find(x => x.lang?.toLowerCase().startsWith('vi'));
+    if (v) u.voice = v;
+    u.rate = 0.9;
+    synth.speak(u);
+  } catch { /* trình duyệt không hỗ trợ đọc */ }
+}
 
 function Html({ html, as = 'span', className }: { html: string; as?: 'span' | 'div'; className?: string }) {
   const Tag = as;
@@ -73,7 +105,7 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
   const passScore = Math.min(total, Math.max(1, cfg.passScore));
   const allowedWrong = total - passScore;
   const maxLives = allowedWrong + 1;           // sai quá số câu cho phép thì hết nhang
-  const limit = cfg.timeLimits?.[level - 1] ?? L.defaultTime;
+  const limit = Math.round((cfg.timeLimits?.[level - 1] ?? L.defaultTime) * timeFactor(grade));
 
   const [qs] = useState(() => makeRound(grade, level, total));
   const [order, setOrder] = useState<number[]>(() => shuffle([0, 1, 2, 3]));
@@ -91,6 +123,7 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
   const [saveState, setSaveState] = useState<'saving' | 'saved' | 'error'>('saving');
   const [muted, setMutedState] = useState(isMuted());
   const [moHit, setMoHit] = useState(0);
+  const [autoRead, setAutoRead] = useState(grade <= 2);
   const t0 = useRef(performance.now());
   const nextBtn = useRef<HTMLButtonElement>(null);
 
@@ -98,6 +131,14 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
   const lives = maxLives - wrong;
   const answeredCount = i + (picked !== null ? 1 : 0);
   const isLast = i === total - 1 || lives <= 0;
+
+  function readQuestion() {
+    if (!q) return;
+    speak(`${toSpeech(q.q)}. ${order.map((k, j) => `${LET[j]}: ${toSpeech(q.a[k])}`).join('. ')}`);
+  }
+  // Các em nhỏ: tự đọc đề khi sang câu mới
+  useEffect(() => { if (autoRead && !result) readQuestion(); }, [i, autoRead]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => { try { window.speechSynthesis?.cancel(); } catch { /* bỏ qua */ } }, []);
 
   // Lời nói của chú tiểu tự ẩn sau 2,4 giây
   useEffect(() => {
@@ -176,6 +217,7 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
     const onKey = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
       if (k === 'm') { toggleMute(); return; }
+      if (k === 'r') { readRef.current(); return; }
       if (k === 'f') { toggleFull(); return; }
       const idx = ['1', '2', '3', '4'].includes(k) ? +k - 1 : ['a', 'b', 'c', 'd'].indexOf(k);
       if (idx >= 0) { answerRef.current(orderRef.current[idx]); return; }
@@ -184,6 +226,8 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+  const readRef = useRef(readQuestion);
+  readRef.current = readQuestion;
   const orderRef = useRef(order);
   orderRef.current = order;
 
@@ -235,6 +279,13 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
             <span className="ctg-tnum">{limit ? Math.ceil(left) : '∞'}</span>
           </div>
           <Html as="div" className="ctg-q" html={q.q} />
+          <div className="ctg-read">
+            <button className="ctg-readbtn" onClick={readQuestion} title="Phím R">
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" /><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" /></svg>
+              Đọc đề
+            </button>
+            <label className="ctg-auto"><input type="checkbox" checked={autoRead} onChange={e => setAutoRead(e.target.checked)} /> Tự đọc mỗi câu</label>
+          </div>
           <div className="ctg-answers">
             {order.map((k, j) => {
               const cls = picked === null ? '' : k === 0 ? 'right' : k === picked ? 'wrong' : 'dim';

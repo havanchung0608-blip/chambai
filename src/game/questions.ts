@@ -24,7 +24,8 @@ const lcm = (a: number, b: number) => (a / gcd(a, b)) * b;
 /** Định dạng số kiểu Việt Nam: dấu trừ "−", dấu phẩy thập phân. */
 export const fmt = (n: number) => {
   const abs = Math.abs(n);
-  const s = Number.isInteger(abs) ? String(abs) : String(+abs.toFixed(4)).replace('.', ',');
+  let s = Number.isInteger(abs) ? String(abs) : String(+abs.toFixed(4)).replace('.', ',');
+  if (Number.isInteger(abs) && abs >= 10000) s = s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   return (n < 0 ? '−' : '') + s;
 };
 const par = (n: number) => (n < 0 ? `(${fmt(n)})` : fmt(n));
@@ -581,7 +582,366 @@ const L9: Gen[][] = [
   ],
 ];
 
-export const BANK: Record<number, Gen[][]> = { 6: L6, 7: L7, 8: L8, 9: L9 };
+
+// =====================================================================
+//  TIỂU HỌC (LỚP 1–5) – dùng dấu × và : như sách tiểu học
+// =====================================================================
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX'];
+const DAYS = ['thứ Hai', 'thứ Ba', 'thứ Tư', 'thứ Năm', 'thứ Sáu', 'thứ Bảy', 'Chủ nhật'];
+const THINGS: [string, string, string][] = [
+  ['🍎', 'quả táo', 'quả'], ['🐟', 'con cá', 'con'], ['⭐', 'ngôi sao', 'ngôi sao'], ['🌸', 'bông hoa', 'bông'], ['🐤', 'chú gà con', 'chú gà'], ['🎈', 'quả bóng bay', 'quả'],
+];
+const NAMES = ['Lan', 'Minh', 'An', 'Hoa', 'Nam', 'Mai', 'Bình', 'Hà'];
+/** Số có dấu cách hàng nghìn: 2534718 → "2 534 718". */
+const big = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+const L1: Gen[][] = [
+  [
+    () => {
+      const [ic, name] = pick(THINGS), n = ri(3, 10);
+      return mk(`Có bao nhiêu ${name}?<br><span style="font-size:1.3em;letter-spacing:4px">${ic.repeat(n)}</span>`, n, [n - 1, n + 1, n + 2],
+        `Đếm từng ${name}: có ${n} ${name}.`);
+    },
+    () => {
+      const nums = shuffle(Array.from({ length: 100 }, (_, i) => i + 1)).slice(0, 4), m = Math.max(...nums);
+      return mk(`Số lớn nhất trong các số ${nums.join(', ')} là`, m, nums.filter(x => x !== m),
+        `So sánh các số, số lớn nhất là ${m}.`);
+    },
+    () => {
+      const n = ri(5, 98);
+      return Math.random() < 0.5
+        ? mk(`Số liền sau của ${n} là`, n + 1, [n - 1, n + 10, n], `Số liền sau của ${n} là ${n} + 1 = ${n + 1}.`)
+        : mk(`Số liền trước của ${n} là`, n - 1, [n + 1, n + 2, n - 2], `Số liền trước của ${n} là ${n} − 1 = ${n - 1}.`);
+    },
+    () => {
+      const v = ri(0, 2);
+      const opts = ['Hình tam giác', 'Hình vuông', 'Hình tròn', 'Hình chữ nhật'];
+      const [q, a] = [['Hình nào có 3 cạnh?', 'Hình tam giác'], ['Hình nào có 4 cạnh bằng nhau và 4 góc vuông?', 'Hình vuông'], ['Hình nào không có cạnh, không có góc?', 'Hình tròn']][v];
+      return mk(q, a, opts.filter(o => o !== a), `${a} là đáp án đúng.`);
+    },
+  ],
+  [
+    () => {
+      const a = ri(0, 9), b = ri(1, 10 - a);
+      return mk(`${a} + ${b} = ?`, a + b, [a + b - 1, a + b + 1, Math.abs(a - b)], `${a} + ${b} = ${a + b}.`);
+    },
+    () => {
+      const a = ri(3, 10), b = ri(1, a);
+      return mk(`${a} − ${b} = ?`, a - b, [a + b, a - b + 1, Math.abs(a - b - 1), a - b + 2], `${a} − ${b} = ${a - b}.`);
+    },
+    () => {
+      const c = ri(1, 9), d = ri(0, 9);
+      return mk(`Số gồm ${c} chục và ${d} đơn vị là`, 10 * c + d, [10 * d + c, c + d, 100 * c + d],
+        `${c} chục là ${10 * c}, thêm ${d} đơn vị được ${10 * c + d}.`);
+    },
+  ],
+  [
+    () => {
+      const x = ri(1, 8), u = ri(0, 9 - x), y = ri(0, 9), v = ri(0, 9 - y), a = 10 * x + y, b = 10 * u + v;
+      return mk(`${a} + ${b} = ?`, a + b, [a + b + 10, a + b - 1, a + b + 1], `Cộng đơn vị với đơn vị, chục với chục: ${a} + ${b} = ${a + b}.`);
+    },
+    () => {
+      const x = ri(2, 9), y = ri(1, 9), u = ri(0, x - 1), v = ri(0, y), a = 10 * x + y, b = 10 * u + v;
+      return mk(`${a} − ${b} = ?`, a - b, [a + b, a - b + 10, a - b - 1], `Trừ đơn vị cho đơn vị, chục cho chục: ${a} − ${b} = ${a - b}.`);
+    },
+    () => {
+      const h = ri(1, 12);
+      return mk(`Kim ngắn chỉ số ${h}, kim dài chỉ số 12. Đồng hồ chỉ mấy giờ?`, `${h} giờ`,
+        [`${h === 12 ? 1 : h + 1} giờ`, `12 giờ`, `${h === 1 ? 12 : h - 1} giờ`, `${h} giờ rưỡi`],
+        `Kim dài chỉ số 12 là giờ đúng, kim ngắn chỉ số ${h} nên đồng hồ chỉ ${h} giờ.`);
+    },
+  ],
+  [
+    () => {
+      const n = pick(NAMES), at = ri(1, 5), au = ri(0, 8), a = 10 * at + au, b = ri(1, 9 - au) + 10 * ri(0, 8 - at);
+      return mk(`${n} có ${a} cái kẹo, mẹ cho thêm ${b} cái kẹo. Hỏi ${n} có tất cả bao nhiêu cái kẹo?`, a + b, [Math.abs(a - b), a + b + 1, a + b + 10],
+        `Phép tính: ${a} + ${b} = ${a + b} (cái kẹo).`, ' cái kẹo');
+    },
+    () => {
+      const at = ri(2, 9), au = ri(1, 9), a = 10 * at + au, b = ri(1, au) + 10 * ri(0, at - 1);
+      return mk(`Trên cây có ${a} con chim, ${b} con bay đi. Hỏi trên cây còn lại bao nhiêu con chim?`, a - b, [a + b, a - b + 1, a - b - 10],
+        `Phép tính: ${a} − ${b} = ${a - b} (con chim).`, ' con chim');
+    },
+    () => {
+      const i = ri(0, 6), next = Math.random() < 0.5;
+      const ans = DAYS[(i + (next ? 1 : 6)) % 7];
+      const q = next ? `Hôm nay là ${DAYS[i]}. Ngày mai là` : `Hôm nay là ${DAYS[i]}. Hôm qua là`;
+      return mk(q, ans, shuffle(DAYS.filter(d => d !== ans && d !== DAYS[i])).concat(DAYS[i]),
+        `Các ngày trong tuần: thứ Hai, thứ Ba, thứ Tư, thứ Năm, thứ Sáu, thứ Bảy, Chủ nhật. ${next ? 'Ngày mai' : 'Hôm qua'} là ${ans}.`);
+    },
+  ],
+];
+
+const L2: Gen[][] = [
+  [
+    () => {
+      let a = 0, b = 0;
+      do { a = ri(15, 79); b = ri(5, 99 - a); } while ((a % 10) + (b % 10) < 10);
+      return mk(`${a} + ${b} = ?`, a + b, [a + b - 10, a + b + 1, a + b + 10], `Cộng có nhớ: ${a} + ${b} = ${a + b}.`);
+    },
+    () => {
+      const a = pick([2, 5]), b = ri(1, 10);
+      return mk(`${a} × ${b} = ?`, a * b, [a + b, a * b + a, a * b - a], `${a} × ${b} = ${a * b} (bảng nhân ${a}).`);
+    },
+    () => {
+      const [q, c] = pick([['1 m', 10, 'dm'], ['1 dm', 10, 'cm'], ['1 m', 100, 'cm'], ['1 km', 1000, 'm']].map(([x, v, u]) => [`${x} = ? ${u}`, v as number] as [string, number]));
+      return mk(q, c, [1, 10, 100, 1000].filter(v => v !== c), `${q.replace('?', String(c))}.`);
+    },
+  ],
+  [
+    () => {
+      let a = 0, b = 0;
+      do { a = ri(21, 99); b = ri(5, a - 1); } while ((a % 10) >= (b % 10));
+      return mk(`${a} − ${b} = ?`, a - b, [a - b + 10, a - b - 1, a + b], `Trừ có nhớ: ${a} − ${b} = ${a - b}.`);
+    },
+    () => {
+      const a = pick([2, 5]), b = ri(1, 10), c = a * b;
+      return mk(`${c} : ${a} = ?`, b, [c - a, b + 1, a], `${c} : ${a} = ${b} vì ${a} × ${b} = ${c}.`);
+    },
+    () => {
+      const a = ri(1, 9), b = ri(0, 9), c = ri(0, 9);
+      return mk(`Số gồm ${a} trăm, ${b} chục và ${c} đơn vị là`, 100 * a + 10 * b + c,
+        [100 * c + 10 * b + a, 100 * a + c, a + b + c, 100 * b + 10 * a + c], `${a} trăm, ${b} chục, ${c} đơn vị viết là ${100 * a + 10 * b + c}.`);
+    },
+  ],
+  [
+    () => {
+      const a = ri(100, 800), b = ri(10, 999 - a);
+      return Math.random() < 0.5
+        ? mk(`${a} + ${b} = ?`, a + b, [a + b + 10, a + b - 10, a + b + 100], `${a} + ${b} = ${a + b}.`)
+        : mk(`${a + b} − ${b} = ?`, a, [a + 10, a - 10, a + 100], `${a + b} − ${b} = ${a}.`);
+    },
+    () => {
+      const [x, y, z] = [ri(2, 9), ri(2, 9), ri(2, 9)];
+      return mk(`Đường gấp khúc gồm ba đoạn thẳng dài ${x} cm, ${y} cm và ${z} cm. Độ dài đường gấp khúc là`, x + y + z,
+        [x + y, x * y, x + y + z + 1], `Độ dài đường gấp khúc: ${x} + ${y} + ${z} = ${x + y + z} (cm).`, ' cm');
+    },
+    () => {
+      const a = ri(5, 40), x = ri(5, 50), b = a + x;
+      return mk(`Tìm số thích hợp: ? + ${a} = ${b}`, x, [a + b, x + 1, x - 1], `Số cần tìm: ${b} − ${a} = ${x}.`);
+    },
+  ],
+  [
+    () => {
+      const a = pick([2, 5]), b = ri(2, 10);
+      return mk(`Mỗi bạn có ${a} quyển vở. Hỏi ${b} bạn có tất cả bao nhiêu quyển vở?`, a * b, [a + b, a * b + a, a * b - a],
+        `Phép tính: ${a} × ${b} = ${a * b} (quyển vở).`, ' quyển vở');
+    },
+    () => {
+      const a = pick([2, 5]), b = ri(2, 10), c = a * b;
+      return mk(`Có ${c} quả cam chia đều vào ${a} đĩa. Hỏi mỗi đĩa có mấy quả cam?`, b, [c - a, b + 1, b - 1],
+        `Phép tính: ${c} : ${a} = ${b} (quả cam).`, ' quả cam');
+    },
+    () => {
+      const h = ri(6, 10), d = ri(2, 5), r = h + d;
+      return mk(`Bây giờ là ${h} giờ sáng. Sau ${d} giờ nữa là mấy giờ?`, `${r} giờ`, [`${r - 1} giờ`, `${h - d} giờ`, `${r + 1} giờ`],
+        `${h} + ${d} = ${r}. Sau ${d} giờ nữa là ${r} giờ.`);
+    },
+  ],
+];
+
+const L3: Gen[][] = [
+  [
+    () => { const a = ri(6, 9), b = ri(2, 10); return mk(`${a} × ${b} = ?`, a * b, [a * b + a, a * b - a, a + b], `${a} × ${b} = ${a * b} (bảng nhân ${a}).`); },
+    () => { const a = ri(6, 9), b = ri(2, 10), c = a * b; return mk(`${c} : ${a} = ?`, b, [b + 1, b - 1, c - a], `${c} : ${a} = ${b} vì ${a} × ${b} = ${c}.`); },
+    () => {
+      const n = ri(4, 20);
+      return mk(`Số ${n} viết bằng chữ số La Mã là`, ROMAN[n], [ROMAN[n === 20 ? 19 : n + 1], ROMAN[n - 1], ROMAN[n > 10 ? n - 5 : n + 5], 'I'.repeat(Math.min(n, 4))],
+        `${n} viết là ${ROMAN[n]}.`);
+    },
+  ],
+  [
+    () => { const a = ri(102, 333), b = ri(2, 3); return mk(`${a} × ${b} = ?`, a * b, [a * b + 10, a * b - b, a + b], `${a} × ${b} = ${a * b}.`); },
+    () => { const d = ri(2, 9), q = ri(12, Math.floor(999 / d)), a = q * d; return mk(`${a} : ${d} = ?`, q, [q + 1, q * 10, q - 10], `${a} : ${d} = ${q} vì ${q} × ${d} = ${a}.`); },
+    () => {
+      const k = ri(2, 9), m = ri(2, 12), N = k * m;
+      return mk(`${F(1, k)} của ${N} là`, m, [N - m, N * k, m + 1], `${F(1, k)} của ${N} là ${N} : ${k} = ${m}.`);
+    },
+  ],
+  [
+    () => {
+      if (Math.random() < 0.5) { const a = ri(5, 20), b = ri(2, a - 1); return mk(`Hình chữ nhật có chiều dài ${a} cm, chiều rộng ${b} cm. Chu vi là`, 2 * (a + b), [a * b, a + b, 2 * a + b], `Chu vi: (${a} + ${b}) × 2 = ${2 * (a + b)} (cm).`, ' cm'); }
+      const a = ri(3, 25); return mk(`Hình vuông có cạnh ${a} cm. Chu vi là`, 4 * a, [a * a, 2 * a, a + 4], `Chu vi: ${a} × 4 = ${4 * a} (cm).`, ' cm');
+    },
+    () => {
+      if (Math.random() < 0.5) { const a = ri(4, 12), b = ri(2, a - 1); return mk(`Hình chữ nhật có chiều dài ${a} cm, chiều rộng ${b} cm. Diện tích là`, a * b, [2 * (a + b), a + b, a * b + b], `Diện tích: ${a} × ${b} = ${a * b} (cm²).`, ' cm²'); }
+      const a = ri(3, 12); return mk(`Hình vuông có cạnh ${a} cm. Diện tích là`, a * a, [4 * a, 2 * a, a * a + a], `Diện tích: ${a} × ${a} = ${a * a} (cm²).`, ' cm²');
+    },
+    () => {
+      const a = ri(2, 9), x = ri(3, 30);
+      return Math.random() < 0.5
+        ? mk(`Tìm số thích hợp: ? × ${a} = ${a * x}`, x, [a * x * a, x + 1, a * x - a], `Số cần tìm: ${a * x} : ${a} = ${x}.`)
+        : mk(`Tìm số thích hợp: ? : ${a} = ${x}`, a * x, [x, a + x, a * x + a], `Số cần tìm: ${x} × ${a} = ${a * x}.`);
+    },
+  ],
+  [
+    () => {
+      const k = ri(2, 6), m = ri(5, 30), N = k * m;
+      return mk(`Cửa hàng có ${N} kg gạo, đã bán ${F(1, k)} số gạo. Hỏi cửa hàng còn lại bao nhiêu ki-lô-gam gạo?`, N - m, [m, N + m, N - k],
+        `Số gạo đã bán: ${N} : ${k} = ${m} (kg). Còn lại: ${N} − ${m} = ${N - m} (kg).`, ' kg');
+    },
+    () => {
+      const a = ri(3, 30), k = ri(2, 6), b = ri(1, Math.floor((a * k) / 2)), r = a * k - b;
+      return mk(`Lấy số ${a} gấp lên ${k} lần rồi bớt đi ${b} thì được`, r, [a * k + b, r + 10, (a + k) * 2],
+        `${a} × ${k} = ${a * k}; ${a * k} − ${b} = ${r}.`);
+    },
+    () => {
+      const a = ri(10, 90), b = ri(2, 9), c = ri(2, 9);
+      return mk(`Tính giá trị biểu thức: ${a} + ${b} × ${c}`, a + b * c, [(a + b) * c, a + b + c, a * b + c],
+        `Nhân trước, cộng sau: ${a} + ${b * c} = ${a + b * c}.`);
+    },
+  ],
+];
+
+const POS = ['đơn vị', 'chục', 'trăm', 'nghìn', 'chục nghìn', 'trăm nghìn', 'triệu'];
+const L4: Gen[][] = [
+  [
+    () => {
+      const p = ri(1, 6), d = ri(1, 9);
+      const digits = Array.from({ length: 7 }, (_, i) => { let x = 0; do { x = ri(i === 6 ? 1 : 0, 9); } while (x === d); return x; });
+      digits[p] = d;
+      const n = digits.reduce((s, x, i) => s + x * 10 ** i, 0);
+      const ans = `Hàng ${POS[p]}`;
+      return mk(`Chữ số ${d} trong số ${big(n)} thuộc hàng nào?`, ans, shuffle(POS.filter((_, i) => i !== p)).map(x => `Hàng ${x}`),
+        `Đếm từ phải sang trái: đơn vị, chục, trăm, nghìn, chục nghìn, trăm nghìn, triệu. Chữ số ${d} ở hàng ${POS[p]}.`);
+    },
+    () => {
+      let p = 0, q = 0;
+      do { p = ri(1, 8); q = ri(p + 1, 9); } while (gcd(p, q) !== 1);
+      const k = ri(2, 6);
+      return mk(`Rút gọn phân số ${F(p * k, q * k)} được`, frac(p, q), [F(p * k, q), F(p, q * k), frac(p + 1, q), frac(q, p)],
+        `Chia cả tử và mẫu cho ${k}: ${F(p * k, q * k)} = ${F(`${p * k} : ${k}`, `${q * k} : ${k}`)} = ${F(p, q)}.`);
+    },
+    () => {
+      const items: [string, string][] = [['Góc bé hơn góc vuông là', 'Góc nhọn'], ['Góc lớn hơn góc vuông và bé hơn góc bẹt là', 'Góc tù'], ['Góc bằng hai góc vuông là', 'Góc bẹt']];
+      const [q, a] = pick(items);
+      return mk(q, a, ['Góc nhọn', 'Góc tù', 'Góc bẹt', 'Góc vuông'].filter(x => x !== a), `${a} là đáp án đúng.`);
+    },
+  ],
+  [
+    () => {
+      const n = pick([3, 4]), avg = ri(10, 60); const xs = Array.from({ length: n - 1 }, () => avg + ri(-9, 9));
+      xs.push(avg * n - xs.reduce((s, x) => s + x, 0));
+      return mk(`Trung bình cộng của các số ${xs.join('; ')} là`, avg, [avg * n, avg + 1, avg - 1], `(${xs.join(' + ')}) : ${n} = ${avg * n} : ${n} = ${avg}.`);
+    },
+    () => {
+      const b = ri(5, 15), a = ri(1, b - 2), c = ri(1, b - a - 1);
+      return mk(`${F(a, b)} + ${F(c, b)} = ?`, F(a + c, b), [F(a + c, b + b), F(a * c, b), F(a + c + 1, b), F(a + c + 2, b), F(a * c + 1, b * 2)],
+        `Cộng hai phân số cùng mẫu: giữ nguyên mẫu, cộng các tử: ${F(`${a} + ${c}`, b)} = ${F(a + c, b)}.`);
+    },
+    () => {
+      const v = ri(2, 9);
+      const [q, c, g] = pick([
+        [`${v} tấn = ? kg`, v * 1000, `1 tấn = 1000 kg nên ${v} tấn = ${v * 1000} kg.`],
+        [`${v} tạ = ? kg`, v * 100, `1 tạ = 100 kg nên ${v} tạ = ${v * 100} kg.`],
+        [`${v} yến = ? kg`, v * 10, `1 yến = 10 kg nên ${v} yến = ${v * 10} kg.`],
+        [`${v} phút = ? giây`, v * 60, `1 phút = 60 giây nên ${v} phút = ${v * 60} giây.`],
+        [`${v} thế kỉ = ? năm`, v * 100, `1 thế kỉ = 100 năm nên ${v} thế kỉ = ${v * 100} năm.`],
+      ] as [string, number, string][]);
+      return mk(q, c, [c / 10, c * 10, v], g);
+    },
+  ],
+  [
+    () => {
+      const b = ri(10, 60), D = ri(2, 30), a = b + D, S = a + b;
+      return mk(`Tổng của hai số là ${S}, hiệu của chúng là ${D}. Số lớn là`, a, [b, S - D, a + D], `Số lớn: (${S} + ${D}) : 2 = ${a}.`);
+    },
+    () => {
+      const b = ri(2, 7), d = ri(2, 7), a = ri(1, b - 1), c = ri(1, d - 1);
+      return mk(`${F(a, b)} × ${F(c, d)} = ?`, frac(a * c, b * d), [frac(a * d, b * c), frac(a + c, b + d), frac(a * c, b + d), frac(a * c + 1, b * d), F(a + c, b * d), F(a * c, b * d + 1)],
+        `Nhân tử với tử, mẫu với mẫu: ${F(`${a} × ${c}`, `${b} × ${d}`)} = ${F(a * c, b * d)}${frac(a * c, b * d) === F(a * c, b * d) ? '' : ' = ' + frac(a * c, b * d)}.`);
+    },
+    () => {
+      if (Math.random() < 0.5) { const a = ri(4, 20), h = ri(2, 15); return mk(`Hình bình hành có độ dài đáy ${a} cm, chiều cao ${h} cm. Diện tích là`, a * h, [2 * (a + h), (a * h) / 2, a + h], `Diện tích: ${a} × ${h} = ${a * h} (cm²).`, ' cm²'); }
+      const m = 2 * ri(2, 10), n = ri(2, 15); return mk(`Hình thoi có độ dài hai đường chéo là ${m} cm và ${n} cm. Diện tích là`, (m * n) / 2, [m * n, m + n, 2 * (m + n)], `Diện tích: ${m} × ${n} : 2 = ${(m * n) / 2} (cm²).`, ' cm²');
+    },
+  ],
+  [
+    () => {
+      const con = ri(5, 15), D = ri(20, 35), S = 2 * con + D;
+      return mk(`Tuổi mẹ và tuổi con cộng lại là ${S} tuổi. Mẹ hơn con ${D} tuổi. Hỏi con bao nhiêu tuổi?`, con, [con + D, S - D, Math.round(S / 2)],
+        `Tuổi con: (${S} − ${D}) : 2 = ${con} (tuổi).`, ' tuổi');
+    },
+    () => {
+      const q = pick([3, 4, 5]), p = ri(1, q - 1), N = q * ri(3, 12), used = (N * p) / q;
+      return mk(`Một tấm vải dài ${N} m. Người ta đã may áo hết ${F(p, q)} tấm vải. Hỏi tấm vải còn lại bao nhiêu mét?`, N - used, [used, N + used, N - p],
+        `Đã may: ${N} × ${F(p, q)} = ${used} (m). Còn lại: ${N} − ${used} = ${N - used} (m).`, ' m');
+    },
+    () => {
+      const avg = ri(20, 80), a = avg + ri(-15, 15), b = avg + ri(-15, 15), c = 3 * avg - a - b;
+      return mk(`Ba ngày cửa hàng bán được ${a} kg, ${b} kg và ${c} kg đường. Trung bình mỗi ngày bán được bao nhiêu ki-lô-gam?`, avg, [3 * avg, avg + 3, avg - 3],
+        `(${a} + ${b} + ${c}) : 3 = ${3 * avg} : 3 = ${avg} (kg).`, ' kg');
+    },
+  ],
+];
+
+const L5: Gen[][] = [
+  [
+    () => { const a = ri(11, 99) / 10, b = ri(101, 999) / 100, s = +(a + b).toFixed(2); return mk(`${fmt(a)} + ${fmt(b)} = ?`, s, [+(s + 0.1).toFixed(2), +(s + 1).toFixed(2), +(s - 0.01).toFixed(2)], `Đặt thẳng dấu phẩy rồi cộng: ${fmt(a)} + ${fmt(b)} = ${fmt(s)}.`); },
+    () => {
+      const xs = shuffle([ri(100, 999), ri(100, 999), ri(100, 999), ri(100, 999)]).map((n, i) => +(n / [10, 100, 100, 10][i]).toFixed(2));
+      const uniq = [...new Set(xs)]; if (uniq.length < 4) uniq.push(+(Math.max(...uniq) - 0.5).toFixed(2));
+      const m = Math.max(...uniq);
+      return mk(`Số lớn nhất trong các số ${uniq.map(fmt).join('; ')} là`, m, uniq.filter(x => x !== m), `So sánh phần nguyên trước, rồi đến phần thập phân. Số lớn nhất là ${fmt(m)}.`);
+    },
+    () => {
+      const v = ri(11, 99) / 10;
+      return pick([
+        () => mk(`${fmt(v)} m = ? cm`, Math.round(v * 100), [Math.round(v * 10), Math.round(v * 1000), Math.round(v * 100) + 1], `1 m = 100 cm nên ${fmt(v)} m = ${Math.round(v * 100)} cm.`),
+        () => mk(`${fmt(v)} kg = ? g`, Math.round(v * 1000), [Math.round(v * 100), Math.round(v * 10), Math.round(v * 1000) + 10], `1 kg = 1000 g nên ${fmt(v)} kg = ${Math.round(v * 1000)} g.`),
+        () => mk(`${fmt(v)} ha = ? m²`, Math.round(v * 10000), [Math.round(v * 1000), Math.round(v * 100), Math.round(v * 100000)], `1 ha = 10 000 m² nên ${fmt(v)} ha = ${big(Math.round(v * 10000))} m².`),
+      ])();
+    },
+  ],
+  [
+    () => {
+      const a = ri(101, 9999) / 100, k = pick([10, 100, 1000]), r = +(a * k).toFixed(2);
+      return mk(`${fmt(a)} × ${k} = ?`, r, [+(a * k / 10).toFixed(3), +(a * k * 10).toFixed(2), +(a + k).toFixed(2)], `Nhân với ${k}: dời dấu phẩy sang phải ${String(k).length - 1} chữ số: ${fmt(r)}.`);
+    },
+    () => {
+      const p = pick([10, 20, 25, 30, 40, 50, 75]), N = 20 * ri(2, 25), c = (N * p) / 100;
+      return mk(`${p}% của ${N} là`, c, [N - c, (N * p) / 10, c + 10], `${N} × ${p} : 100 = ${c}.`);
+    },
+    () => {
+      const b = pick([4, 5, 20, 25, 50]), a = ri(1, b - 1), pc = (a * 100) / b;
+      return mk(`Tỉ số phần trăm của ${a} và ${b} là`, `${fmt(pc)}%`, [`${fmt(+(b * 100 / a).toFixed(2))}%`, `${a}%`, `${fmt(pc / 10)}%`, `${fmt(pc + 10)}%`],
+        `${a} : ${b} = ${fmt(a / b)} = ${fmt(pc)}%.`);
+    },
+  ],
+  [
+    () => { const a = ri(3, 20), h = 2 * ri(2, 10); return mk(`Hình tam giác có độ dài đáy ${a} cm, chiều cao ${h} cm. Diện tích là`, (a * h) / 2, [a * h, a + h, (a + h) * 2], `Diện tích: ${a} × ${h} : 2 = ${(a * h) / 2} (cm²).`, ' cm²'); },
+    () => {
+      let a = 0, b = 0, h = 0;
+      do { a = ri(5, 20); b = ri(2, a - 1); h = ri(2, 12); } while (((a + b) * h) % 2);
+      return mk(`Hình thang có hai đáy dài ${a} cm và ${b} cm, chiều cao ${h} cm. Diện tích là`, ((a + b) * h) / 2, [(a + b) * h, a * b * h, (a + b + h)], `Diện tích: (${a} + ${b}) × ${h} : 2 = ${((a + b) * h) / 2} (cm²).`, ' cm²');
+    },
+    () => {
+      if (Math.random() < 0.5) { const a = ri(2, 10), b = ri(2, 10), c = ri(2, 10); return mk(`Hình hộp chữ nhật có chiều dài ${a} cm, chiều rộng ${b} cm, chiều cao ${c} cm. Thể tích là`, a * b * c, [a + b + c, (a + b) * 2 * c, a * b], `Thể tích: ${a} × ${b} × ${c} = ${a * b * c} (cm³).`, ' cm³'); }
+      const a = ri(2, 10); return mk(`Hình lập phương có cạnh ${a} cm. Thể tích là`, a ** 3, [a * a * 6, a * a, a * 3], `Thể tích: ${a} × ${a} × ${a} = ${a ** 3} (cm³).`, ' cm³');
+    },
+  ],
+  [
+    () => {
+      const v = pick([30, 36, 40, 42, 45, 48, 50, 60]), t = pick([1.5, 2, 2.5, 3, 4]), s = v * t;
+      return pick([
+        () => mk(`Một ô tô đi với vận tốc ${v} km/giờ trong ${fmt(t)} giờ. Quãng đường ô tô đi được là`, s, [v + t, s / 2, s + v], `s = v × t = ${v} × ${fmt(t)} = ${fmt(s)} (km).`, ' km'),
+        () => mk(`Một ô tô đi quãng đường ${fmt(s)} km hết ${fmt(t)} giờ. Vận tốc của ô tô là`, v, [s * t, v + 10, v / 2], `v = s : t = ${fmt(s)} : ${fmt(t)} = ${v} (km/giờ).`, ' km/giờ'),
+        () => mk(`Một ô tô đi quãng đường ${fmt(s)} km với vận tốc ${v} km/giờ. Thời gian ô tô đi là`, t, [t + 1, s * v / 100, t * 2], `t = s : v = ${fmt(s)} : ${v} = ${fmt(t)} (giờ).`, ' giờ'),
+      ])();
+    },
+    () => {
+      if (Math.random() < 0.5) { const r = ri(1, 10), S = +(r * r * 3.14).toFixed(2); return mk(`Hình tròn có bán kính ${r} cm. Diện tích hình tròn là (lấy π = 3,14)`, S, [+(r * 2 * 3.14).toFixed(2), +(r * 3.14).toFixed(2), r * r], `S = r × r × 3,14 = ${r} × ${r} × 3,14 = ${fmt(S)} (cm²).`, ' cm²'); }
+      const d = ri(2, 20), C = +(d * 3.14).toFixed(2); return mk(`Hình tròn có đường kính ${d} cm. Chu vi hình tròn là (lấy π = 3,14)`, C, [+(d * 2 * 3.14).toFixed(2), +(d * d * 3.14).toFixed(2), d * 3], `C = d × 3,14 = ${d} × 3,14 = ${fmt(C)} (cm).`, ' cm');
+    },
+    () => {
+      const p = pick([20, 25, 40, 50, 60, 75]), N = 20 * ri(1, 2) + pick([0, 20]), c = (N * p) / 100;
+      return mk(`Lớp 5A có ${N} học sinh, trong đó số học sinh nữ chiếm ${p}%. Lớp 5A có bao nhiêu học sinh nữ?`, c, [N - c, p, c + 2],
+        `Số học sinh nữ: ${N} × ${p} : 100 = ${c} (học sinh).`, ' học sinh');
+    },
+  ],
+];
+
+export const BANK: Record<number, Gen[][]> = { 1: L1, 2: L2, 3: L3, 4: L4, 5: L5, 6: L6, 7: L7, 8: L8, 9: L9 };
 
 /** Sinh một vòng chơi: n câu của khối `grade`, mức `level` (1–4). Các dạng được xoay vòng đều. */
 export function makeRound(grade: number, level: number, n: number): Question[] {

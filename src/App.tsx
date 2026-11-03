@@ -23,7 +23,6 @@ import {
   Lock,
   Unlock,
   RotateCcw,
-  Gamepad2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "./lib/utils";
@@ -35,7 +34,8 @@ import Markdown from "react-markdown";
 import * as mammoth from "mammoth";
 import * as pdfjsLib from "pdfjs-dist";
 import StudentGame from "./game/StudentGame";
-import TeacherGamePanel from "./game/TeacherGamePanel";
+import GameAdminPage from "./game/GameAdminPage";
+import { isAdminEmail } from "./game/admins";
 
 // Initialize PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
@@ -82,22 +82,22 @@ function LoginPage() {
         className="max-w-md w-full text-center space-y-8"
       >
         <div className="space-y-2">
-          <div className="w-20 h-20 bg-indigo-600 rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-indigo-100">
-            <ClipboardCheck className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 bg-amber-500 rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-amber-100">
+            <span className="text-4xl font-bold text-white font-serif">π</span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight font-sans">MathAI Grader</h1>
-          <p className="text-lg text-gray-500 italic font-serif">Chấm bài Toán tự luận bằng trí tuệ nhân tạo</p>
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight font-sans">Lên Chùa Học Toán</h1>
+          <p className="text-lg text-gray-500 italic font-serif">Trò chơi luyện Toán từ lớp 1 đến lớp 9</p>
         </div>
         
         <Card className="p-10 space-y-6">
-          <p className="text-gray-600">Đăng nhập để bắt đầu hành trình học tập và giảng dạy thông minh hơn.</p>
+          <p className="text-gray-600">Đăng nhập bằng tài khoản Google là vào chơi được ngay.</p>
           <Button onClick={signInWithGoogle} className="w-full py-4 text-lg">
             <img src="https://www.google.com/favicon.ico" className="w-5 h-5 mr-1" alt="Google" />
             Đăng nhập bằng Google
           </Button>
         </Card>
 
-        <p className="text-sm text-gray-400">© 2024 MathAI Grader. Dành cho giáo dục THCS.</p>
+        <p className="text-sm text-gray-400">Kèm công cụ chấm bài Toán tự luận MathAI dành cho thầy cô.</p>
       </motion.div>
     </div>
   );
@@ -975,7 +975,7 @@ function TeacherView() {
   const [exams, setExams] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'exams' | 'submissions' | 'trash' | 'game'>('exams');
+  const [activeTab, setActiveTab] = useState<'exams' | 'submissions' | 'trash'>('exams');
   const [showModal, setShowModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [filterCode, setFilterCode] = useState("");
@@ -1218,19 +1218,10 @@ function TeacherView() {
                   <Trash2 className="w-4 h-4" /> Thùng rác
                 </div>
               </button>
-              <button 
-                onClick={() => setActiveTab('game')}
-                className={cn("px-6 py-2.5 rounded-xl text-sm font-semibold transition-all", 
-                  activeTab === 'game' ? "bg-amber-500 text-white shadow-lg shadow-amber-200" : "text-gray-500 hover:bg-gray-50")}
-              >
-                <div className="flex items-center gap-2">
-                  <Gamepad2 className="w-4 h-4" /> Lên Chùa Học Toán
-                </div>
-              </button>
             </div>
 
             <div className="flex items-center gap-3">
-              {activeTab === 'game' ? null : activeTab === 'exams' ? (
+              {activeTab === 'exams' ? (
                 <Button onClick={() => setShowModal(true)}>
                   <PlusCircle className="w-5 h-5" /> Tạo đề thi mới
                 </Button>
@@ -1296,11 +1287,7 @@ function TeacherView() {
         </div>
 
         <AnimatePresence mode="wait">
-          {activeTab === 'game' ? (
-            <motion.div key="game" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-              <TeacherGamePanel />
-            </motion.div>
-          ) : (activeTab === 'exams' || activeTab === 'trash') ? (
+          {(activeTab === 'exams' || activeTab === 'trash') ? (
             <motion.div 
               key={activeTab}
               initial={{ opacity: 0, y: 10 }}
@@ -1525,7 +1512,7 @@ function TeacherView() {
 
 // --- STUDENT VIEWS ---
 
-function StudentView({ onOpenGame }: { onOpenGame: () => void }) {
+function StudentView() {
   const { profile } = useAuth();
   const [step, setStep] = useState<'code' | 'exam' | 'result'>('code');
   const [examCode, setExamCode] = useState("");
@@ -1699,9 +1686,6 @@ function StudentView({ onOpenGame }: { onOpenGame: () => void }) {
             <span className="font-bold text-gray-900 tracking-tight">MathAI Student</span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={onOpenGame} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 transition-colors">
-              <Gamepad2 className="w-4 h-4" /> Lên Chùa Học Toán
-            </button>
             <div className="text-right hidden sm:block">
               <div className="text-xs font-bold text-gray-900">{profile?.fullName}</div>
               <div className="text-[10px] text-gray-400">Lớp {profile?.className}</div>
@@ -1976,6 +1960,7 @@ function StudentView({ onOpenGame }: { onOpenGame: () => void }) {
 
 function AppContent() {
   const { user, profile, loading } = useAuth();
+  const [mode, setMode] = useState<'game' | 'admin' | 'grader'>('game');
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#FDFCFB]">
@@ -1984,16 +1969,29 @@ function AppContent() {
   );
 
   if (!user) return <LoginPage />;
-  if (!profile?.role) return <RoleSelection />;
 
-  return profile.role === 'teacher' ? <TeacherView /> : <StudentArea />;
-}
-
-function StudentArea() {
-  const [mode, setMode] = useState<'exam' | 'game'>('exam');
-  return mode === 'game'
-    ? <StudentGame onExit={() => setMode('exam')} />
-    : <StudentView onOpenGame={() => setMode('game')} />;
+  // Ai đăng nhập cũng vào thẳng trò chơi, không cần chọn vai trò.
+  const admin = isAdminEmail(user.email);
+  if (mode === 'admin' && admin) return <GameAdminPage onBack={() => setMode('game')} />;
+  if (mode === 'grader') {
+    return (
+      <>
+        <button onClick={() => setMode('game')}
+          className="fixed bottom-4 left-4 z-50 px-4 py-2 rounded-full bg-amber-500 text-white text-sm font-bold shadow-lg hover:bg-amber-600">
+          ← Về trò chơi
+        </button>
+        {!profile?.role ? <RoleSelection /> : profile.role === 'teacher' ? <TeacherView /> : <StudentView />}
+      </>
+    );
+  }
+  return (
+    <StudentGame
+      isAdmin={admin}
+      onOpenAdmin={() => setMode('admin')}
+      onOpenGrader={() => setMode('grader')}
+      onLogout={logout}
+    />
+  );
 }
 
 export default function App() {

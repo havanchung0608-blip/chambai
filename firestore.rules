@@ -27,9 +27,10 @@ service cloud.firestore {
       return resource.data;
     }
 
-    function isTeacher() {
+    // Người quản lý trò chơi: thêm email vào danh sách (và vào src/game/admins.ts).
+    function isGameAdmin() {
       return isSignedIn() &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+        request.auth.token.email in ['havanchung0608@gmail.com'];
     }
 
     // --- USERS ---
@@ -89,34 +90,35 @@ service cloud.firestore {
     }
 
     // --- TRÒ CHƠI "LÊN CHÙA HỌC TOÁN" ---
-    // Cấu hình chung: mọi người đăng nhập được đọc, chỉ giáo viên được sửa.
+    // Ai đăng nhập cũng chơi được, không cần chọn vai trò.
+    // Cấu hình chung: mọi người đăng nhập được đọc, chỉ người quản lý được sửa.
     match /gameConfig/{configId} {
       allow read: if isSignedIn();
-      allow write: if isTeacher();
+      allow write: if isGameAdmin();
     }
 
-    // Tiến độ của từng học sinh (mã tài liệu = uid học sinh).
-    // Học sinh chỉ ghi tiến độ của mình và không tự đổi được trường "blocked".
-    // Học sinh đang bị khóa không ghi được gì.
+    // Tiến độ của từng người chơi (mã tài liệu = uid).
+    // Người chơi chỉ ghi tiến độ của mình và không tự đổi được trường "blocked".
+    // Người chơi đang bị khóa không ghi được gì.
     match /gameProgress/{userId} {
-      allow get: if isOwner(userId) || isTeacher();
-      allow list: if isTeacher();
+      allow get: if isOwner(userId) || isGameAdmin();
+      allow list: if isGameAdmin();
       allow create: if isOwner(userId) && isValidId(userId) &&
         incoming().uid == userId &&
         incoming().get('blocked', false) == false;
-      allow update: if isTeacher() ||
+      allow update: if isGameAdmin() ||
         (isOwner(userId) &&
          existing().get('blocked', false) == false &&
          incoming().get('blocked', false) == false &&
          incoming().uid == userId);
-      allow delete: if isTeacher();
+      allow delete: if isGameAdmin();
     }
 
     // Lịch sử từng lượt chơi.
     match /gameSessions/{sessionId} {
       allow create: if isSignedIn() && incoming().uid == request.auth.uid;
-      allow read: if isTeacher() || (isSignedIn() && resource.data.uid == request.auth.uid);
-      allow delete: if isTeacher();
+      allow read: if isGameAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow delete: if isGameAdmin();
     }
   }
 }

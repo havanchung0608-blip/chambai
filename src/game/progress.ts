@@ -96,6 +96,18 @@ export async function loadProgress(uid: string): Promise<Progress | null> {
   return snap.exists() ? (snap.data() as Progress) : null;
 }
 
+/** Lưu tên và lớp người chơi tự khai báo. */
+export async function savePlayer(prev: Progress | null, who: { uid: string; name: string; className: string; email: string }): Promise<Progress> {
+  const ref = doc(db, 'gameProgress', who.uid);
+  if (!prev) {
+    const p = emptyProgress(who);
+    await setDoc(ref, p);
+    return p;
+  }
+  await setDoc(ref, { uid: who.uid, name: who.name, className: who.className, email: who.email }, { merge: true });
+  return { ...prev, name: who.name, className: who.className, email: who.email };
+}
+
 /** Mức cao nhất đã vượt qua của một khối. */
 export const maxPassed = (gp?: GradeProgress) =>
   gp ? Math.max(0, ...Object.entries(gp.levels || {}).filter(([, s]) => s.passed).map(([k]) => +k)) : 0;
