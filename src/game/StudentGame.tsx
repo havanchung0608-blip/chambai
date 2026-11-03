@@ -8,6 +8,11 @@ import {
   maxPassed, recordRound, bestPassedAll, savePlayer, setLocalMode, isLocalMode,
 } from './progress';
 import { SND } from './sound';
+import Rules from './Rules';
+import { useInstall } from './install';
+
+const RULES_KEY = 'ctg-rules-seen';
+const seenRules = () => { try { return localStorage.getItem(RULES_KEY) === '1'; } catch { return true; } };
 
 const DEG_COLORS = ['#3f7cc4', '#2f8a5f', '#d0782a', '#b0342c'];
 
@@ -79,6 +84,9 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
   const [playing, setPlaying] = useState<{ level: number; key: number } | null>(null);
   const [editing, setEditing] = useState(false);
   const [offline, setOffline] = useState(isLocalMode());
+  const [showRules, setShowRules] = useState(() => !seenRules());
+  const { canInstall, install } = useInstall();
+  const closeRules = () => { setShowRules(false); try { localStorage.setItem(RULES_KEY, '1'); } catch { /* bỏ qua */ } };
 
   const uid = localUid || profile?.uid || '';
   const isGuest = !!localUid || !profile?.email;
@@ -196,12 +204,19 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
       <div className="ctg-hub">
         <div className="ctg-hub-head">
           <div className="ctg-brand">Lên Chùa Học Toán<small>{who.name}{who.className ? ` · Lớp ${who.className}` : ''}</small></div>
-          <div className="ctg-chip">Công đức <b>{progress.merit || 0}</b></div>
-          <div className="ctg-chip">Lượt chơi <b>{progress.plays || 0}</b></div>
-          <div className="ctg-chip">Tỉ lệ đúng <b>{rate}%</b></div>
-          <button className="ctg-ibtn" onClick={() => setEditing(true)}>Sửa tên, lớp</button>
-          {isAdmin && <button className="ctg-ibtn" onClick={onOpenAdmin}>Quản lý</button>}
-          <button className="ctg-ibtn" onClick={onLogout}>{isGuest ? 'Thoát' : 'Đăng xuất'}</button>
+          <div className="ctg-tools">
+            <button className="ctg-ibtn accent" onClick={() => setShowRules(true)}>Luật chơi</button>
+            {canInstall && <button className="ctg-ibtn accent" onClick={install}>Cài app</button>}
+            <button className="ctg-ibtn" onClick={() => setEditing(true)}>Sửa tên, lớp</button>
+            {isAdmin && <button className="ctg-ibtn" onClick={onOpenAdmin}>Quản lý</button>}
+            <button className="ctg-ibtn" onClick={onLogout}>{isGuest ? 'Thoát' : 'Đăng xuất'}</button>
+          </div>
+        </div>
+
+        <div className="ctg-stats-row">
+          <div><b>{progress.merit || 0}</b>công đức</div>
+          <div><b>{progress.plays || 0}</b>lượt chơi</div>
+          <div><b>{rate}%</b>tỉ lệ đúng</div>
         </div>
 
         {(localUid || offline) && (
@@ -215,8 +230,8 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
         <div className="ctg-hero">
           <div className="ctg-box">
             <h1>Mỗi bậc đá là một câu đố</h1>
-            <p>Chọn lớp của em, rồi đi từ <b>Cổng Tam Quan</b> lên <b>Tháp Chuông</b> qua bốn mức: Nhận biết, Thông hiểu, Vận dụng, Vận dụng cao.
-              Đúng ít nhất <b>{cfg.passScore}/{cfg.questionsPerRound}</b> câu để mở khóa mức tiếp theo. Bấm <b>Đọc đề</b> để nghe câu hỏi.</p>
+            <p>Chọn lớp, rồi đi từ <b>Cổng Tam Quan</b> lên <b>Tháp Chuông</b>. Đúng từ <b>{cfg.passScore}/{cfg.questionsPerRound}</b> câu để mở khóa mức tiếp theo.</p>
+            <button className="ctg-btn small" onClick={() => setShowRules(true)}>Xem luật chơi</button>
           </div>
           <div className="ctg-box ctg-rank">
             <span className="ctg-label">Danh hiệu cao nhất</span>
@@ -280,6 +295,7 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
 
         {adminLinks}
       </div>
+      {showRules && <Rules passScore={cfg.passScore} total={cfg.questionsPerRound} onClose={closeRules} />}
     </div>
   );
 }

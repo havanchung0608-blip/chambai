@@ -25,7 +25,7 @@ const lcm = (a: number, b: number) => (a / gcd(a, b)) * b;
 export const fmt = (n: number) => {
   const abs = Math.abs(n);
   let s = Number.isInteger(abs) ? String(abs) : String(+abs.toFixed(4)).replace('.', ',');
-  if (Number.isInteger(abs) && abs >= 10000) s = s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  if (Number.isInteger(abs) && abs >= 10000) s = s.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
   return (n < 0 ? '−' : '') + s;
 };
 const par = (n: number) => (n < 0 ? `(${fmt(n)})` : fmt(n));
@@ -593,7 +593,7 @@ const THINGS: [string, string, string][] = [
 ];
 const NAMES = ['Lan', 'Minh', 'An', 'Hoa', 'Nam', 'Mai', 'Bình', 'Hà'];
 /** Số có dấu cách hàng nghìn: 2534718 → "2 534 718". */
-const big = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const big = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
 
 const L1: Gen[][] = [
   [

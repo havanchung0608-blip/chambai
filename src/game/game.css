@@ -94,6 +94,27 @@
 .ctg-links { display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: center; font-size: 15px; }
 .ctg-links button { background: none; border: none; color: #d6c6e6; text-decoration: underline; font-size: 15px; padding: 4px; }
 
+/* --- Luật chơi --- */
+.ctg-panel.ctg-rules { text-align: left; max-width: 820px; }
+.ctg-rules h2 { text-align: center; }
+.ctg-rules-lead { text-align: center; }
+.ctg-rules-list { margin: 14px 0; padding-left: 1.4em; display: grid; gap: 8px; font-size: clamp(16px, 1.6vw, 19px); line-height: 1.5; }
+.ctg-rules-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+.ctg-rules-grid div { background: var(--paper2); border-radius: 12px; padding: 10px; display: grid; gap: 2px; font-size: 14px; }
+.ctg-rules-grid .n { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.ctg-rules-grid b { font-family: var(--display); font-size: 17px; color: var(--wood); }
+.ctg-rules-grid .t { color: var(--jade); font-weight: 700; }
+.ctg-rules-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ctg-rules-row div { border: 2px solid var(--paper2); border-radius: 12px; padding: 10px 12px; font-size: 15px; line-height: 1.45; }
+.ctg-rules-row b { display: block; color: var(--wood); }
+.ctg-rules-tip { font-size: 15px !important; color: var(--muted); margin: 10px 0 0 !important; max-width: none !important; }
+.ctg-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.ctg-ibtn.accent { background: var(--saffron); border-color: var(--saffron); color: #fff; font-weight: 700; }
+.ctg-stats-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.ctg-stats-row div { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 10px 14px; font-size: 14px; color: #d6c6e6; }
+.ctg-stats-row b { display: block; font-size: 26px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.ctg-btn.small { font-size: 17px; padding: 9px 18px; margin-top: 12px; }
+
 /* --- Ký hiệu toán (dùng chung cho câu hỏi ở mọi nơi) --- */
 .fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .82em; line-height: 1.12; margin: 0 2px; }
 .fr i { font-style: normal; padding: 0 3px; }
@@ -151,16 +172,57 @@
 .ctg-gate { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
 
 @media (max-width: 900px) {
-  .ctg-play { height: auto; min-height: 100vh; }
-  .ctg-main { grid-template-columns: 1fr; }
-  .ctg-scene { height: 44vh; min-height: 260px; }
+  .ctg-play { height: auto; min-height: 100vh; min-height: 100dvh; gap: 8px; padding: max(8px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)); }
+  .ctg-main { grid-template-columns: 1fr; gap: 8px; }
+  .ctg-scene { height: 30vh; min-height: 190px; border-radius: 18px; }
   .ctg-hero { grid-template-columns: 1fr; }
-  .ctg-levels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ctg-levels { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+  .ctg-lv { margin-bottom: 0 !important; }
+  .ctg-rules-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ctg-hub { padding-top: max(14px, env(safe-area-inset-top)); }
 }
-@media (max-width: 540px) {
+@media (max-width: 600px) {
+  .ctg-head { gap: 6px; }
+  .ctg-brand { font-size: 20px; width: 100%; }
+  .ctg-brand small { font-size: 11px; }
+  .ctg-chip { font-size: 14px; padding: 4px 10px; }
+  .ctg-incense svg { width: 11px; height: 22px; }
+  .ctg-ibtn { font-size: 13px; padding: 6px 10px; }
+  .ctg-hide-sm { display: none; }
+  .ctg-card { margin: 6px; padding: 14px; gap: 10px; border-radius: 18px; }
+  .ctg-q { font-size: 23px; min-height: 0; }
+  .ctg-answers { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ctg-ans { min-height: 64px; padding: 8px 10px; gap: 8px; font-size: 21px; }
+  .ctg-ans .L { width: 32px; height: 32px; font-size: 16px; }
+  .ctg-fb { font-size: 17px; padding: 10px 12px; }
+  .ctg-btn { font-size: 19px; padding: 12px 20px; }
+  .ctg-row .ctg-btn { flex: 1; }
+  .ctg-mo { margin-left: 0; padding: 4px 10px; font-size: 15px; }
+  .ctg-mo svg { width: 44px; height: 32px; }
+  .ctg-readbtn { font-size: 16px; padding: 5px 12px; }
+  .ctg-auto { font-size: 14px; }
+  .ctg-hero h1 { font-size: 28px; }
+  .ctg-hero p { font-size: 16px; }
+  .ctg-box { padding: 14px; border-radius: 18px; }
+  .ctg-gbtn { font-size: 15px; padding: 7px 12px; min-width: 0; }
+  .ctg-lv { padding: 12px; gap: 6px; }
+  .ctg-lv h3 { font-size: 19px; }
+  .ctg-lv .st { font-size: 20px; }
+  .ctg-lv .meta { font-size: 13px; }
+  .ctg-lv .ctg-btn { font-size: 16px; padding: 9px 10px; }
+  .ctg-stats-row b { font-size: 22px; }
+  .ctg-panel { padding: 20px 16px; border-radius: 20px; }
+  .ctg-stats div { padding: 8px 12px; }
+  .ctg-stats b { font-size: 24px; }
+  .ctg-rules-row { grid-template-columns: 1fr; }
+  .ctg-hist { font-size: 14px; }
+}
+@media (max-width: 600px) {
+  .ctg-answers.long { grid-template-columns: 1fr; }
+  .ctg-answers.long .ctg-ans { min-height: 54px; }
+}
+@media (max-width: 380px) {
   .ctg-answers { grid-template-columns: 1fr; }
-  .ctg-mo { margin-left: 0; }
-  .ctg-levels { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ctg *, .ctg *::before { animation: none !important; transition: none !important; }

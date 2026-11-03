@@ -265,9 +265,9 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
         <div className="ctg-chip">Bậc <b>{step}/{total}</b></div>
         <div className="ctg-chip">Nhang <Incense lit={Math.max(0, lives)} total={maxLives} /></div>
         <div className="ctg-chip">Công đức <b>+{merit}</b></div>
-        <button className="ctg-ibtn" onClick={toggleMute}>Âm thanh: {muted ? 'tắt' : 'bật'}</button>
-        <button className="ctg-ibtn" onClick={toggleFull}>Toàn màn hình</button>
-        <button className="ctg-ibtn" onClick={onExit}>Về sân chùa</button>
+        <button className="ctg-ibtn" onClick={toggleMute}>{muted ? 'Bật tiếng' : 'Tắt tiếng'}</button>
+        <button className="ctg-ibtn ctg-hide-sm" onClick={toggleFull}>Toàn màn hình</button>
+        <button className="ctg-ibtn" onClick={onExit}>Thoát</button>
       </header>
 
       <div className="ctg-main">
@@ -287,7 +287,7 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
             </button>
             <label className="ctg-auto"><input type="checkbox" checked={autoRead} onChange={e => setAutoRead(e.target.checked)} /> Tự đọc mỗi câu</label>
           </div>
-          <div className="ctg-answers">
+          <div className={`ctg-answers ${q.a.some(a => a.replace(/<[^>]+>/g, '').length > 14) ? 'long' : ''}`}>
             {order.map((k, j) => {
               const cls = picked === null ? '' : k === 0 ? 'right' : k === picked ? 'wrong' : 'dim';
               return (

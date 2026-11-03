@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { LevelInfo } from './levels';
 
 type Props = {
@@ -20,11 +20,20 @@ export default function Scene({ steps, monkStep, level, bubble, anim }: Props) {
     return p;
   }, [steps]);
   const [mx, my] = pos[Math.min(monkStep, steps)];
+  // Màn hình hẹp và thấp (điện thoại): khung nhìn đi theo chú tiểu để luôn thấy chú.
+  const [compact, setCompact] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 900);
+  useEffect(() => {
+    const f = () => setCompact(window.innerWidth <= 900);
+    window.addEventListener('resize', f);
+    return () => window.removeEventListener('resize', f);
+  }, []);
+  const VH = 430;
+  const y0 = compact ? Math.max(0, Math.min(700 - VH, my - 290)) : 0;
   const night = level.id === 4;
   const gid = `sky${level.id}`;
 
   return (
-    <svg viewBox="0 0 600 700" preserveAspectRatio="xMidYMid slice" role="img" aria-label={`Chú tiểu đang ở bậc ${monkStep} trên đường lên ${level.place}`}>
+    <svg viewBox={compact ? `0 ${y0} 600 ${VH}` : '0 0 600 700'} preserveAspectRatio="xMidYMid slice" role="img" aria-label={`Chú tiểu đang ở bậc ${monkStep} trên đường lên ${level.place}`}>
       <defs>
         <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor={level.sky[0]} /><stop offset=".55" stopColor={level.sky[1]} /><stop offset="1" stopColor={level.sky[2]} />
