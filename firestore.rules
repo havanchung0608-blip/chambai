@@ -30,7 +30,7 @@ service cloud.firestore {
     // Người quản lý trò chơi: thêm email vào danh sách (và vào src/game/admins.ts).
     function isGameAdmin() {
       return isSignedIn() &&
-        request.auth.token.email in ['havanchung0608@gmail.com'];
+        request.auth.token.get('email', '') in ['havanchung0608@gmail.com'];
     }
 
     // --- USERS ---

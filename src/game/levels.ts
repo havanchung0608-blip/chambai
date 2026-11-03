@@ -15,7 +15,10 @@ export const LEVELS: LevelInfo[] = [
   { id: 4, place: 'Tháp Chuông', degree: 'Vận dụng cao', title: 'Đại sư Toán học', sky: ['#0f1530', '#1f2a55', '#46407a'], defaultTime: 60 },
 ];
 
-export const GRADES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+export const GRADES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+/** Tên hiển thị của khối: 0 = Mầm non (lớp Bé). */
+export const gradeLabel = (g: number) => (g === 0 ? 'Mầm non' : `Lớp ${g}`);
 export const NEWCOMER = 'Khách mới vào chùa';
 
 /** Danh hiệu theo mức cao nhất đã vượt qua (0 = chưa vượt mức nào). */
@@ -23,9 +26,11 @@ export const titleOf = (passed: number) => (passed > 0 ? LEVELS[passed - 1].titl
 
 /** Khối lớp đọc từ tên lớp, ví dụ "9A1" → 9, "3B" → 3. */
 export const gradeFromClass = (className?: string) => {
-  const m = (className || '').match(/[1-9]/);
+  const c = (className || '').toLowerCase();
+  if (/bé|mầm|chồi|lá|mẫu giáo|mau giao|mam non|mầm non/.test(c)) return 0;
+  const m = c.match(/[1-9]/);
   return m ? +m[0] : 1;
 };
 
 /** Hệ số thời gian: các em nhỏ được thêm thời gian suy nghĩ. */
-export const timeFactor = (grade: number) => (grade <= 2 ? 2 : grade <= 5 ? 1.5 : 1);
+export const timeFactor = (grade: number) => (grade === 0 ? 3 : grade <= 2 ? 2 : grade <= 5 ? 1.5 : 1);

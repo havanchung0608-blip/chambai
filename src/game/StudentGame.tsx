@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './game.css';
 import { useAuth } from '../components/AuthProvider';
 import GamePlay from './GamePlay';
-import { GRADES, LEVELS, gradeFromClass, titleOf } from './levels';
+import { GRADES, LEVELS, gradeFromClass, gradeLabel, titleOf } from './levels';
 import {
   GameConfig, Progress, RoundResult, Session, classAllowed, loadConfig, loadProgress, listSessions,
   maxPassed, recordRound, bestPassedAll, savePlayer,
@@ -14,8 +14,9 @@ const DEG_COLORS = ['#3f7cc4', '#2f8a5f', '#d0782a', '#b0342c'];
 type Props = {
   isAdmin: boolean;
   onOpenAdmin: () => void;
-  onOpenGrader: () => void;
+  onOpenGrader?: () => void;  // không có khi chơi khách trên máy
   onLogout: () => void;
+  localUid?: string;          // chế độ khách lưu trên máy
 };
 
 function Gate({ title, text, children }: { title: string; text: string; children?: React.ReactNode }) {
@@ -67,7 +68,7 @@ function PlayerForm({ initName, initClass, onSave, onCancel }: {
 }
 
 /** Trò chơi cho mọi người đăng nhập: sân chùa (chọn lớp, mức) và màn chơi. */
-export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogout }: Props) {
+export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogout, localUid }: Props) {
   const { profile } = useAuth();
   const [cfg, setCfg] = useState<GameConfig | null>(null);
   const [progress, setProgress] = useState<Progress | null>(null);
@@ -78,7 +79,8 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
   const [playing, setPlaying] = useState<{ level: number; key: number } | null>(null);
   const [editing, setEditing] = useState(false);
 
-  const uid = profile?.uid || '';
+  const uid = localUid || profile?.uid || '';
+  const isGuest = !!localUid || !profile?.email;
   const email = profile?.email || '';
   const who = {
     uid,
@@ -107,8 +109,8 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
   const adminLinks = (
     <div className="ctg-links">
       {isAdmin && <button onClick={onOpenAdmin}>Quản lý trò chơi</button>}
-      <button onClick={onOpenGrader}>Công cụ chấm bài tự luận</button>
-      <button onClick={onLogout}>Đăng xuất</button>
+      {onOpenGrader && !isGuest && <button onClick={onOpenGrader}>Công cụ chấm bài tự luận</button>}
+      <button onClick={onLogout}>{isGuest ? 'Thoát' : 'Đăng xuất'}</button>
     </div>
   );
 
@@ -182,8 +184,12 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
           <div className="ctg-chip">Tỉ lệ đúng <b>{rate}%</b></div>
           <button className="ctg-ibtn" onClick={() => setEditing(true)}>Sửa tên, lớp</button>
           {isAdmin && <button className="ctg-ibtn" onClick={onOpenAdmin}>Quản lý</button>}
-          <button className="ctg-ibtn" onClick={onLogout}>Đăng xuất</button>
+          <button className="ctg-ibtn" onClick={onLogout}>{isGuest ? 'Thoát' : 'Đăng xuất'}</button>
         </div>
+
+        {localUid && (
+          <div className="ctg-box">Em đang chơi không cần tài khoản. Kết quả được lưu trên máy này.</div>
+        )}
 
         {!cfg.isOpen && isAdmin && (
           <div className="ctg-box" style={{ borderColor: 'var(--cinnabar)' }}>Trò chơi đang đóng với người chơi. Thầy vẫn vào được vì là người quản lý.</div>
@@ -198,7 +204,7 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
           <div className="ctg-box ctg-rank">
             <span className="ctg-label">Danh hiệu cao nhất</span>
             <span className="t">{titleOf(best)}</span>
-            <span className="ctg-label">Tiến độ lớp {grade}: {passedHere}/4 mức</span>
+            <span className="ctg-label">Tiến độ {gradeLabel(grade).toLowerCase()}: {passedHere}/4 mức</span>
             <div className="ctg-bar"><i style={{ width: `${(passedHere / 4) * 100}%` }} /></div>
           </div>
         </div>
@@ -206,7 +212,7 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
         <div className="ctg-grades" role="group" aria-label="Chọn lớp">
           <span className="ctg-label" style={{ marginRight: 6 }}>Chọn lớp</span>
           {GRADES.map(g => (
-            <button key={g} className="ctg-gbtn" aria-pressed={g === grade} onClick={() => setGrade(g)}>Lớp {g}</button>
+            <button key={g} className="ctg-gbtn" aria-pressed={g === grade} onClick={() => setGrade(g)}>{gradeLabel(g)}</button>
           ))}
         </div>
 
@@ -244,7 +250,7 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
                 {recent.map((s, k) => (
                   <tr key={s.id || k}>
                     <td>{new Date(s.playedAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</td>
-                    <td>{s.grade}</td>
+                    <td>{gradeLabel(s.grade)}</td>
                     <td>{LEVELS[s.level - 1]?.place}</td>
                     <td className={s.passed ? 'ctg-ok' : 'ctg-no'}>{s.correct}/{s.total} · {s.passed ? 'Vượt mức' : 'Chưa đạt'}</td>
                     <td>+{s.merit}</td>

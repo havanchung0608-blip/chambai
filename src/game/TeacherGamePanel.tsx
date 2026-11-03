@@ -3,7 +3,7 @@ import './game.css';
 import { Lock, Unlock, RotateCcw, Eye, X, Save, FileDown, Search, RefreshCw } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useAuth } from '../components/AuthProvider';
-import { GRADES, LEVELS, NEWCOMER, titleOf } from './levels';
+import { GRADES, LEVELS, NEWCOMER, gradeLabel, titleOf } from './levels';
 import {
   DEFAULT_CONFIG, GameConfig, Progress, Session, bestPassedAll, listProgress, listSessions, loadConfig,
   maxPassed, resetProgress, saveConfig, setBlocked, setUnlocked,
@@ -27,7 +27,7 @@ function LevelDots({ p, grade }: { p: Progress; grade: number }) {
   if (!gp) return null;
   return (
     <span className="inline-flex items-center gap-1 mr-3 whitespace-nowrap">
-      <span className="text-[11px] font-bold text-gray-400">L{grade}</span>
+      <span className="text-[11px] font-bold text-gray-400">{grade === 0 ? 'MN' : `L${grade}`}</span>
       {LEVELS.map(L => {
         const st = gp.levels?.[String(L.id)];
         const cls = st?.passed ? 'bg-emerald-500' : L.id <= (gp.unlocked || 1) ? 'bg-amber-300' : 'bg-gray-200';
@@ -63,14 +63,14 @@ function ConfigCard() {
       <div className="flex flex-wrap items-center gap-4 justify-between">
         <div>
           <h3 className="text-lg font-extrabold text-indigo-950">Cài đặt trò chơi</h3>
-          <p className="text-sm text-gray-500">Áp dụng cho mọi học sinh khi bắt đầu lượt chơi mới.</p>
+          <p className="text-sm text-gray-500">Áp dụng cho mọi người chơi khi bắt đầu lượt chơi mới.</p>
         </div>
         <button
           onClick={() => upd({ isOpen: !cfg.isOpen })}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border ${cfg.isOpen ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-600 border-red-200'}`}
         >
           {cfg.isOpen ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-          {cfg.isOpen ? 'Đang mở cho học sinh' : 'Đang đóng trò chơi'}
+          {cfg.isOpen ? 'Đang mở cho mọi người' : 'Đang đóng trò chơi'}
         </button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -123,7 +123,7 @@ function StudentDetail({ p, onClose, onChanged }: { p: Progress; onClose: () => 
   useEffect(() => { listSessions(p.uid).then(setSessions).catch(() => setSessions([])); }, [p.uid]);
 
   const chart = (sessions || []).map((s, i) => ({
-    lan: i + 1, phanTram: Math.round((s.correct / s.total) * 100), muc: s.level, label: `Lớp ${s.grade} · ${LEVELS[s.level - 1]?.place}`,
+    lan: i + 1, phanTram: Math.round((s.correct / s.total) * 100), muc: s.level, label: `${gradeLabel(s.grade)} · ${LEVELS[s.level - 1]?.place}`,
   }));
   const grades = GRADES.filter(g => p.grades?.[String(g)]);
 
@@ -139,7 +139,7 @@ function StudentDetail({ p, onClose, onChanged }: { p: Progress; onClose: () => 
         <div className="flex items-start justify-between gap-4 p-6 border-b border-gray-100">
           <div>
             <h3 className="text-2xl font-extrabold text-indigo-950">{p.name}</h3>
-            <p className="text-sm text-gray-500">Lớp {p.className} · {p.email}</p>
+            <p className="text-sm text-gray-500">Lớp {p.className || '—'}{p.email ? ` · ${p.email}` : ' · Khách'}</p>
             <p className="text-sm mt-1"><span className={`px-2 py-0.5 rounded-full text-xs font-bold ${LV_BADGE[bestPassedAll(p)]}`}>{titleOf(bestPassedAll(p))}</span>
               <span className="ml-3 text-gray-600">Công đức <b>{p.merit}</b> · {p.plays} lượt · đúng {pct(p)}%</span></p>
           </div>
@@ -180,7 +180,7 @@ function StudentDetail({ p, onClose, onChanged }: { p: Progress; onClose: () => 
                       const gp = p.grades[String(g)];
                       return (
                         <tr key={g} className="border-t border-gray-100">
-                          <td className="py-3 pr-4 font-bold">Lớp {g}</td>
+                          <td className="py-3 pr-4 font-bold">{gradeLabel(g)}</td>
                           {LEVELS.map(L => {
                             const st = gp.levels?.[String(L.id)];
                             return (
@@ -238,7 +238,7 @@ function StudentDetail({ p, onClose, onChanged }: { p: Progress; onClose: () => 
                     <div key={id} className="border border-gray-100 rounded-2xl">
                       <button onClick={() => setOpen(open === id ? null : id)} className="w-full flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 text-sm text-left hover:bg-gray-50 rounded-2xl">
                         <span className="text-gray-500 w-32">{fmtDate(s.playedAt)}</span>
-                        <span className="font-semibold">Lớp {s.grade} · Mức {s.level}: {LEVELS[s.level - 1]?.place}</span>
+                        <span className="font-semibold">{gradeLabel(s.grade)} · Mức {s.level}: {LEVELS[s.level - 1]?.place}</span>
                         <span className={s.passed ? 'text-emerald-600 font-bold' : 'text-red-500 font-bold'}>{s.correct}/{s.total} {s.passed ? '· vượt mức' : '· chưa đạt'}</span>
                         <Stars n={s.stars} />
                         <span className="text-gray-400">{Math.floor(s.durationSec / 60)} phút {s.durationSec % 60} giây</span>
@@ -301,7 +301,7 @@ export default function TeacherGamePanel() {
   const detail = rows?.find(p => p.uid === detailUid) || null;
 
   const exportCSV = () => {
-    const head = ['Họ tên', 'Email', 'Lớp', 'Danh hiệu', ...GRADES.map(g => `Lớp ${g}: mức đã vượt`), 'Công đức', 'Lượt chơi', 'Tỉ lệ đúng (%)', 'Lần chơi cuối', 'Trạng thái'];
+    const head = ['Họ tên', 'Email', 'Lớp', 'Danh hiệu', ...GRADES.map(g => `${gradeLabel(g)}: mức đã vượt`), 'Công đức', 'Lượt chơi', 'Tỉ lệ đúng (%)', 'Lần chơi cuối', 'Trạng thái'];
     const body = filtered.map(p => [
       p.name, p.email, p.className, titleOf(bestPassedAll(p)),
       ...GRADES.map(g => String(maxPassed(p.grades?.[String(g)]))),

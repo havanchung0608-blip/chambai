@@ -941,7 +941,90 @@ const L5: Gen[][] = [
   ],
 ];
 
-export const BANK: Record<number, Gen[][]> = { 1: L1, 2: L2, 3: L3, 4: L4, 5: L5, 6: L6, 7: L7, 8: L8, 9: L9 };
+
+// =====================================================================
+//  MẦM NON (lớp Bé) – học bằng hình ảnh, máy đọc đề
+// =====================================================================
+const BIGI = (t: string) => `<span style="font-size:1.5em;letter-spacing:6px;line-height:1.6">${t}</span>`;
+const SHAPES: [string, string][] = [['🔴', 'hình tròn'], ['🟦', 'hình vuông'], ['🔺', 'hình tam giác'], ['⭐', 'ngôi sao']];
+const ANIMALS: [string, string, number][] = [['🐘', 'con voi', 5], ['🐄', 'con bò', 4], ['🐕', 'con chó', 3], ['🐈', 'con mèo', 2], ['🐜', 'con kiến', 1], ['🐭', 'con chuột', 1.5]];
+
+const L0: Gen[][] = [
+  [
+    () => {
+      const [ic, name] = pick(THINGS), n = ri(1, 5);
+      return mk(`Có mấy ${name}?<br>${BIGI(ic.repeat(n))}`, n, [n + 1, n - 1 || 6, n + 2], `Bé đếm: ${Array.from({ length: n }, (_, i) => i + 1).join(', ')}. Có ${n} ${name}.`);
+    },
+    () => {
+      const [ic, name] = pick(SHAPES);
+      return mk(`Đâu là ${name}?`, BIGI(ic), SHAPES.filter(x => x[0] !== ic).map(x => BIGI(x[0])), `Đây là ${name}: ${ic}`);
+    },
+    () => {
+      const n = ri(1, 5);
+      return mk(`Bé tìm số ${n} nhé!`, BIGI(String(n)), shuffle([1, 2, 3, 4, 5, 6, 7].filter(x => x !== n)).slice(0, 3).map(x => BIGI(String(x))), `Đây là số ${n}.`);
+    },
+  ],
+  [
+    () => {
+      const [ic, name] = pick(THINGS), n = ri(4, 10);
+      return mk(`Có mấy ${name}?<br>${BIGI(ic.repeat(n))}`, n, [n - 1, n + 1, n - 2], `Bé đếm từng ${name}: có ${n} ${name}.`);
+    },
+    () => {
+      const n = ri(1, 9);
+      return mk(`Số nào đứng ngay sau số ${n}?`, n + 1, [n, n + 2, n - 1 || 10], `Đếm: ${n}, ${n + 1}. Số đứng sau số ${n} là ${n + 1}.`);
+    },
+    () => {
+      const ans = pick(ANIMALS.slice(0, 3));
+      const small = ANIMALS.filter(a => a[2] < ans[2]);
+      const opts = shuffle(small).slice(0, 3);
+      if (Math.random() < 0.5 || opts.length < 3) {
+        const big4 = shuffle(ANIMALS.slice(0, 4)), top = big4.reduce((a, b) => (a[2] > b[2] ? a : b));
+        return mk('Con vật nào to nhất?', BIGI(top[0]) + ' ' + top[1], big4.filter(a => a !== top).map(a => BIGI(a[0]) + ' ' + a[1]), `${top[1][0].toUpperCase() + top[1].slice(1)} to nhất.`);
+      }
+      return mk('Con vật nào to nhất?', BIGI(ans[0]) + ' ' + ans[1], opts.map(a => BIGI(a[0]) + ' ' + a[1]), `${ans[1][0].toUpperCase() + ans[1].slice(1)} to nhất.`);
+    },
+  ],
+  [
+    () => {
+      const [ic, name, unit] = pick(THINGS), n = ri(1, 8);
+      return mk(`Có ${n} ${name}, thêm 1 ${unit} nữa. Có tất cả mấy ${name}?<br>${BIGI(ic.repeat(n) + ' ➕ ' + ic)}`, n + 1, [n, n + 2, n - 1 || 10],
+        `${n} thêm 1 là ${n + 1}.`);
+    },
+    () => {
+      const [ic, name, unit] = pick(THINGS), n = ri(2, 9);
+      return mk(`Có ${n} ${name}, bớt đi 1 ${unit}. Còn lại mấy ${name}?<br>${BIGI(ic.repeat(n))}`, n - 1, [n, n + 1, n - 2 || 10],
+        `${n} bớt 1 còn ${n - 1}.`);
+    },
+    () => {
+      const [a, b] = shuffle(SHAPES).slice(0, 2), len = ri(4, 6);
+      const seq = Array.from({ length: len }, (_, i) => (i % 2 ? b[0] : a[0])).join('');
+      const nxt = len % 2 ? b : a;
+      return mk(`Hình tiếp theo là hình nào?<br>${BIGI(seq + ' ❓')}`, BIGI(nxt[0]), SHAPES.filter(x => x !== nxt).map(x => BIGI(x[0])),
+        `Các hình lặp lại: ${a[1]}, ${b[1]}, ${a[1]}, ${b[1]}… Hình tiếp theo là ${nxt[1]}.`);
+    },
+  ],
+  [
+    () => {
+      const [ic, name] = pick(THINGS), a = ri(1, 5), b = ri(1, 10 - a);
+      return mk(`Gộp lại có tất cả mấy ${name}?<br>${BIGI(ic.repeat(a) + ' ➕ ' + ic.repeat(b))}`, a + b, [a + b - 1, a + b + 1, Math.abs(a - b) || a + b + 2],
+        `${a} và ${b} gộp lại là ${a + b}.`);
+    },
+    () => {
+      const [ic1, n1] = pick(THINGS), others = THINGS.filter(t => t[0] !== ic1), [ic2, n2] = pick(others);
+      let a = 0, b = 0;
+      do { a = ri(1, 7); b = ri(1, 7); } while (a === b);
+      const more = a > b ? n1 : n2;
+      return mk(`Nhóm nào nhiều hơn?<br>${BIGI(ic1.repeat(a))}<br>${BIGI(ic2.repeat(b))}`, `Nhóm ${more}`, [`Nhóm ${a > b ? n2 : n1}`, 'Hai nhóm bằng nhau', 'Không biết'],
+        `Có ${a} ${n1} và ${b} ${n2}. Nhóm ${more} nhiều hơn.`);
+    },
+    () => {
+      const n = ri(2, 10);
+      return mk(`Số nào đứng ngay trước số ${n}?`, n - 1, [n + 1, n, n - 2 || 10], `Đếm: ${n - 1}, ${n}. Số đứng trước số ${n} là ${n - 1}.`);
+    },
+  ],
+];
+
+export const BANK: Record<number, Gen[][]> = { 0: L0, 1: L1, 2: L2, 3: L3, 4: L4, 5: L5, 6: L6, 7: L7, 8: L8, 9: L9 };
 
 /** Sinh một vòng chơi: n câu của khối `grade`, mức `level` (1–4). Các dạng được xoay vòng đều. */
 export function makeRound(grade: number, level: number, n: number): Question[] {

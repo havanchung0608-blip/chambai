@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Scene from './Scene';
-import { LEVELS, timeFactor } from './levels';
+import { LEVELS, gradeLabel, timeFactor } from './levels';
 import { makeRound, shuffle } from './questions';
 import { GameConfig, RoundResult, WrongItem } from './progress';
 import { SND, isMuted, setMuted } from './sound';
@@ -134,7 +134,8 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
 
   function readQuestion() {
     if (!q) return;
-    speak(`${toSpeech(q.q)}. ${order.map((k, j) => `${LET[j]}: ${toSpeech(q.a[k])}`).join('. ')}`);
+    const opts = order.map((k, j) => [LET[j], toSpeech(q.a[k])]).filter(([, t]) => t).map(([l, t]) => `${l}: ${t}`);
+    speak([toSpeech(q.q), ...opts].join('. '));
   }
   // Các em nhỏ: tự đọc đề khi sang câu mới
   useEffect(() => { if (autoRead && !result) readQuestion(); }, [i, autoRead]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -259,7 +260,7 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
   return (
     <div className="ctg-play">
       <header className="ctg-head">
-        <div className="ctg-brand">Lên Chùa Học Toán<small>Lớp {grade} · Mức {level}: {L.place} ({L.degree})</small></div>
+        <div className="ctg-brand">Lên Chùa Học Toán<small>{gradeLabel(grade)} · Mức {level}: {L.place} ({L.degree})</small></div>
         <div className="ctg-chip">Câu <b>{i + 1}/{total}</b></div>
         <div className="ctg-chip">Bậc <b>{step}/{total}</b></div>
         <div className="ctg-chip">Nhang <Incense lit={Math.max(0, lives)} total={maxLives} /></div>
@@ -330,7 +331,7 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
               {result.passed
                 ? level < 4
                   ? <>Em nhận danh hiệu <b>{L.title}</b> và mở khóa <b>{LEVELS[level].place}</b> ({LEVELS[level].degree}).</>
-                  : <>Em đã chinh phục cả bốn mức của lớp {grade}. Danh hiệu: <b>{L.title}</b>.</>
+                  : <>Em đã chinh phục cả bốn mức của {gradeLabel(grade).toLowerCase()}. Danh hiệu: <b>{L.title}</b>.</>
                 : <>Cần đúng ít nhất {passScore}/{total} câu để vượt mức. Xem lại lời giải các câu sai rồi thử lại nhé!</>}
             </p>
             <div className="ctg-stats">

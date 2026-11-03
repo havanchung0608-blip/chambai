@@ -64,7 +64,17 @@ export type RoundResult = Omit<Session, 'id' | 'uid' | 'name' | 'className' | 'p
 
 const CONFIG_REF = () => doc(db, 'gameConfig', 'main');
 
+// ---------- Chế độ khách trên máy (khi Firebase chưa cho đăng nhập ẩn danh) ----------
+// Tiến độ lưu ngay trên trình duyệt của máy đang chơi, người quản lý không xem được.
+let LOCAL = false;
+export const setLocalMode = (v: boolean) => { LOCAL = v; };
+export const isLocalMode = () => LOCAL;
+const LS_P = 'ctg-guest-progress', LS_S = 'ctg-guest-sessions';
+const lsGet = <T,>(k: string): T | null => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } };
+const lsSet = (k: string, v: unknown) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* bộ nhớ đầy hoặc bị chặn */ } };
+
 export async function loadConfig(): Promise<GameConfig> {
+  if (LOCAL) return { ...DEFAULT_CONFIG };
   try {
     const snap = await getDoc(CONFIG_REF());
     if (snap.exists()) return { ...DEFAULT_CONFIG, ...(snap.data() as Partial<GameConfig>) };
@@ -92,12 +102,18 @@ export function emptyProgress(p: { uid: string; name: string; className: string;
 }
 
 export async function loadProgress(uid: string): Promise<Progress | null> {
+  if (LOCAL) return lsGet<Progress>(LS_P);
   const snap = await getDoc(doc(db, 'gameProgress', uid));
   return snap.exists() ? (snap.data() as Progress) : null;
 }
 
 /** Lưu tên và lớp người chơi tự khai báo. */
 export async function savePlayer(prev: Progress | null, who: { uid: string; name: string; className: string; email: string }): Promise<Progress> {
+  if (LOCAL) {
+    const p = prev ? { ...prev, name: who.name, className: who.className } : emptyProgress(who);
+    lsSet(LS_P, p);
+    return p;
+  }
   const ref = doc(db, 'gameProgress', who.uid);
   if (!prev) {
     const p = emptyProgress(who);
@@ -147,6 +163,11 @@ export async function recordRound(
     lastLevel: r.level,
     lastPlayedAt: now,
   };
+  if (LOCAL) {
+    lsSet(LS_P, next);
+    lsSet(LS_S, [...(lsGet<Session[]>(LS_S) || []), { ...r, uid: who.uid, name: who.name, className: who.className, playedAt: now }].slice(-200));
+    return next;
+  }
   const ref = doc(db, 'gameProgress', who.uid);
   if (prev) {
     // Không gửi trường "blocked": chỉ giáo viên mới được đổi trường này.
@@ -168,6 +189,7 @@ export async function listProgress(): Promise<Progress[]> {
 }
 
 export async function listSessions(uid: string): Promise<Session[]> {
+  if (LOCAL) return lsGet<Session[]>(LS_S) || [];
   const snap = await getDocs(query(collection(db, 'gameSessions'), where('uid', '==', uid)));
   return snap.docs
     .map(d => ({ id: d.id, ...(d.data() as Session) }))

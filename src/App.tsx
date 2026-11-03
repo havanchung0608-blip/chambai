@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
-import { signInWithGoogle, logout } from "./lib/firebase";
+import { signInWithGoogle, logout, signInGuest } from "./lib/firebase";
 import { 
   PlusCircle, 
   LogOut, 
@@ -36,6 +36,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import StudentGame from "./game/StudentGame";
 import GameAdminPage from "./game/GameAdminPage";
 import { isAdminEmail } from "./game/admins";
+import { setLocalMode } from "./game/progress";
 
 // Initialize PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
@@ -73,7 +74,7 @@ const Card = ({ children, className }: { children: React.ReactNode, className?: 
 
 // --- PAGES ---
 
-function LoginPage() {
+function LoginPage({ onGuest }: { onGuest: () => void }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFCFB] p-4">
       <motion.div 
@@ -95,6 +96,10 @@ function LoginPage() {
             <img src="https://www.google.com/favicon.ico" className="w-5 h-5 mr-1" alt="Google" />
             Đăng nhập bằng Google
           </Button>
+          <button onClick={onGuest} className="w-full py-4 text-lg font-bold rounded-2xl bg-amber-500 text-white hover:bg-amber-600 transition-colors shadow-lg shadow-amber-100">
+            Chơi ngay, không cần đăng nhập
+          </button>
+          <p className="text-sm text-gray-500">Dành cho các bé và người chưa có tài khoản Google.</p>
         </Card>
 
         <p className="text-sm text-gray-400">Kèm công cụ chấm bài Toán tự luận MathAI dành cho thầy cô.</p>
@@ -1961,6 +1966,14 @@ function StudentView() {
 function AppContent() {
   const { user, profile, loading } = useAuth();
   const [mode, setMode] = useState<'game' | 'admin' | 'grader'>('game');
+  const [localGuest, setLocalGuest] = useState(false);
+
+  // Chơi khách: ưu tiên đăng nhập ẩn danh (lưu tiến độ lên Firebase để người quản lý theo dõi);
+  // nếu Firebase chưa bật chế độ này thì lưu ngay trên máy.
+  const playAsGuest = async () => {
+    try { await signInGuest(); }
+    catch (e) { console.warn('Chưa bật đăng nhập ẩn danh, chuyển sang lưu trên máy.', e); setLocalMode(true); setLocalGuest(true); }
+  };
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#FDFCFB]">
@@ -1968,7 +1981,13 @@ function AppContent() {
     </div>
   );
 
-  if (!user) return <LoginPage />;
+  if (!user && localGuest) {
+    return (
+      <StudentGame isAdmin={false} localUid="khach-tren-may" onOpenAdmin={() => {}}
+        onLogout={() => { setLocalGuest(false); setLocalMode(false); }} />
+    );
+  }
+  if (!user) return <LoginPage onGuest={playAsGuest} />;
 
   // Ai đăng nhập cũng vào thẳng trò chơi, không cần chọn vai trò.
   const admin = isAdminEmail(user.email);
