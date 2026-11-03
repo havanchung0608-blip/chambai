@@ -27,6 +27,11 @@ service cloud.firestore {
       return resource.data;
     }
 
+    function isTeacher() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+
     // --- USERS ---
     match /users/{userId} {
       allow get: if isSignedIn();
@@ -81,6 +86,37 @@ service cloud.firestore {
         isValidId(logId) &&
         incoming().teacherId == request.auth.uid &&
         get(/databases/$(database)/documents/exams/$(incoming().examId)).data.teacherId == request.auth.uid;
+    }
+
+    // --- TRÒ CHƠI "LÊN CHÙA HỌC TOÁN" ---
+    // Cấu hình chung: mọi người đăng nhập được đọc, chỉ giáo viên được sửa.
+    match /gameConfig/{configId} {
+      allow read: if isSignedIn();
+      allow write: if isTeacher();
+    }
+
+    // Tiến độ của từng học sinh (mã tài liệu = uid học sinh).
+    // Học sinh chỉ ghi tiến độ của mình và không tự đổi được trường "blocked".
+    // Học sinh đang bị khóa không ghi được gì.
+    match /gameProgress/{userId} {
+      allow get: if isOwner(userId) || isTeacher();
+      allow list: if isTeacher();
+      allow create: if isOwner(userId) && isValidId(userId) &&
+        incoming().uid == userId &&
+        incoming().get('blocked', false) == false;
+      allow update: if isTeacher() ||
+        (isOwner(userId) &&
+         existing().get('blocked', false) == false &&
+         incoming().get('blocked', false) == false &&
+         incoming().uid == userId);
+      allow delete: if isTeacher();
+    }
+
+    // Lịch sử từng lượt chơi.
+    match /gameSessions/{sessionId} {
+      allow create: if isSignedIn() && incoming().uid == request.auth.uid;
+      allow read: if isTeacher() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow delete: if isTeacher();
     }
   }
 }

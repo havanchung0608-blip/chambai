@@ -23,6 +23,7 @@ import {
   Lock,
   Unlock,
   RotateCcw,
+  Gamepad2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "./lib/utils";
@@ -33,6 +34,8 @@ import { gradeSubmission, GradingResult } from "./lib/gemini";
 import Markdown from "react-markdown";
 import * as mammoth from "mammoth";
 import * as pdfjsLib from "pdfjs-dist";
+import StudentGame from "./game/StudentGame";
+import TeacherGamePanel from "./game/TeacherGamePanel";
 
 // Initialize PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
@@ -972,7 +975,7 @@ function TeacherView() {
   const [exams, setExams] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'exams' | 'submissions' | 'trash'>('exams');
+  const [activeTab, setActiveTab] = useState<'exams' | 'submissions' | 'trash' | 'game'>('exams');
   const [showModal, setShowModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [filterCode, setFilterCode] = useState("");
@@ -1215,10 +1218,19 @@ function TeacherView() {
                   <Trash2 className="w-4 h-4" /> Thùng rác
                 </div>
               </button>
+              <button 
+                onClick={() => setActiveTab('game')}
+                className={cn("px-6 py-2.5 rounded-xl text-sm font-semibold transition-all", 
+                  activeTab === 'game' ? "bg-amber-500 text-white shadow-lg shadow-amber-200" : "text-gray-500 hover:bg-gray-50")}
+              >
+                <div className="flex items-center gap-2">
+                  <Gamepad2 className="w-4 h-4" /> Lên Chùa Học Toán
+                </div>
+              </button>
             </div>
 
             <div className="flex items-center gap-3">
-              {activeTab === 'exams' ? (
+              {activeTab === 'game' ? null : activeTab === 'exams' ? (
                 <Button onClick={() => setShowModal(true)}>
                   <PlusCircle className="w-5 h-5" /> Tạo đề thi mới
                 </Button>
@@ -1284,7 +1296,11 @@ function TeacherView() {
         </div>
 
         <AnimatePresence mode="wait">
-          {(activeTab === 'exams' || activeTab === 'trash') ? (
+          {activeTab === 'game' ? (
+            <motion.div key="game" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+              <TeacherGamePanel />
+            </motion.div>
+          ) : (activeTab === 'exams' || activeTab === 'trash') ? (
             <motion.div 
               key={activeTab}
               initial={{ opacity: 0, y: 10 }}
@@ -1509,7 +1525,7 @@ function TeacherView() {
 
 // --- STUDENT VIEWS ---
 
-function StudentView() {
+function StudentView({ onOpenGame }: { onOpenGame: () => void }) {
   const { profile } = useAuth();
   const [step, setStep] = useState<'code' | 'exam' | 'result'>('code');
   const [examCode, setExamCode] = useState("");
@@ -1683,6 +1699,9 @@ function StudentView() {
             <span className="font-bold text-gray-900 tracking-tight">MathAI Student</span>
           </div>
           <div className="flex items-center gap-3">
+            <button onClick={onOpenGame} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 transition-colors">
+              <Gamepad2 className="w-4 h-4" /> Lên Chùa Học Toán
+            </button>
             <div className="text-right hidden sm:block">
               <div className="text-xs font-bold text-gray-900">{profile?.fullName}</div>
               <div className="text-[10px] text-gray-400">Lớp {profile?.className}</div>
@@ -1967,7 +1986,14 @@ function AppContent() {
   if (!user) return <LoginPage />;
   if (!profile?.role) return <RoleSelection />;
 
-  return profile.role === 'teacher' ? <TeacherView /> : <StudentView />;
+  return profile.role === 'teacher' ? <TeacherView /> : <StudentArea />;
+}
+
+function StudentArea() {
+  const [mode, setMode] = useState<'exam' | 'game'>('exam');
+  return mode === 'game'
+    ? <StudentGame onExit={() => setMode('exam')} />
+    : <StudentView onOpenGame={() => setMode('game')} />;
 }
 
 export default function App() {

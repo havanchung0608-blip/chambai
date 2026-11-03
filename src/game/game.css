@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap');
+
+/* ===== Trò chơi "Lên Chùa Học Toán" =====
+   Bố cục: cảnh núi chùa (chú tiểu leo bậc đá) bên trái, tấm biển gỗ câu hỏi bên phải. */
+.ctg {
+  --dusk: #221c3a; --saffron: #e8902e; --gold: #f4c95d; --wood: #6b3f22;
+  --paper: #fbf3e2; --paper2: #f2e3c4; --ink: #2a1b12; --jade: #2f8a5f; --cinnabar: #c13d36; --muted: #7a6656;
+  --display: 'Lora', 'Times New Roman', serif;
+  --body: 'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif;
+  font-family: var(--body);
+  background: var(--dusk);
+  color: var(--paper);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.ctg button { font-family: inherit; cursor: pointer; }
+.ctg button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.ctg button:disabled { cursor: default; }
+
+/* --- Màn chơi --- */
+.ctg-play { height: 100vh; height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; padding: 12px 16px; box-sizing: border-box; }
+.ctg-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.ctg-brand { font-family: var(--display); font-size: clamp(20px, 2.2vw, 30px); font-weight: 700; color: var(--gold); margin-right: auto; line-height: 1.1; }
+.ctg-brand small { display: block; font-family: var(--body); font-size: 13px; font-weight: 600; color: #d6c6e6; letter-spacing: .8px; text-transform: uppercase; margin-top: 2px; }
+.ctg-chip { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); border-radius: 999px; padding: 6px 14px; font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ctg-chip b { color: var(--gold); }
+.ctg-incense { display: flex; gap: 3px; align-items: flex-end; }
+.ctg-incense svg { width: 14px; height: 28px; }
+.ctg-incense .out { opacity: .28; }
+.ctg-incense .out .smoke { display: none; }
+.ctg-ibtn { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.22); color: var(--paper); border-radius: 12px; padding: 8px 12px; font-size: 15px; font-weight: 600; }
+.ctg-ibtn:hover { background: rgba(255,255,255,.2); }
+
+.ctg-main { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: 16px; min-height: 0; }
+.ctg-scene { position: relative; border-radius: 22px; overflow: hidden; min-height: 0; background: #2c2a48; }
+.ctg-scene svg { width: 100%; height: 100%; display: block; }
+.ctg-monk { transition: transform .8s cubic-bezier(.4, 1.4, .5, 1); }
+.ctg-hop { animation: ctg-hop .8s ease; }
+@keyframes ctg-hop { 40% { transform: translateY(-26px); } }
+.ctg-shake { animation: ctg-shake .5s ease; }
+@keyframes ctg-shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.ctg-breath { animation: ctg-breath 3s ease-in-out infinite; }
+@keyframes ctg-breath { 50% { transform: scaleY(1.03); } }
+.ctg .smoke { animation: ctg-smoke 2.4s ease-in-out infinite; }
+@keyframes ctg-smoke { 0% { opacity: 0; transform: translateY(2px); } 50% { opacity: .8; } 100% { opacity: 0; transform: translateY(-6px); } }
+.ctg-glow { animation: ctg-glow 2.5s ease-in-out infinite; }
+@keyframes ctg-glow { 50% { opacity: .5; } }
+.ctg-bubble { transition: opacity .3s; }
+
+.ctg-card { background: var(--paper); color: var(--ink); border-radius: 22px; padding: clamp(14px, 2vw, 26px); display: flex; flex-direction: column; gap: 14px; min-height: 0; overflow-y: auto;
+  box-shadow: 0 0 0 6px var(--wood), 0 0 0 9px #8a5a34, 0 18px 40px rgba(0,0,0,.4); margin: 9px; }
+.ctg-qtop { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ctg-tag { background: var(--wood); color: var(--paper); font-weight: 700; border-radius: 10px; padding: 6px 14px; font-size: 17px; }
+.ctg-timer { flex: 1; min-width: 120px; height: 16px; background: var(--paper2); border-radius: 999px; overflow: hidden; }
+.ctg-timer i { display: block; height: 100%; border-radius: 999px; transition: width .1s linear, background .3s; }
+.ctg-tnum { font-size: 24px; font-weight: 800; min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
+.ctg-q { font-family: var(--display); font-size: clamp(24px, 2.5vw, 38px); font-weight: 700; line-height: 1.4; text-wrap: balance; min-height: 2.8em; }
+.ctg-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ctg-ans { display: flex; align-items: center; gap: 14px; text-align: left; background: #fff; border: 3px solid var(--paper2); border-radius: 16px; padding: 12px 16px; min-height: 76px;
+  font-size: clamp(20px, 2vw, 30px); font-weight: 600; color: var(--ink); transition: transform .15s, border-color .2s, background .2s; }
+.ctg-ans:hover:not(:disabled) { border-color: var(--saffron); transform: translateY(-2px); }
+.ctg-ans .L { flex: none; width: 42px; height: 42px; border-radius: 50%; background: var(--saffron); color: #fff; display: grid; place-items: center; font-size: 21px; font-weight: 800; }
+.ctg-ans.right { background: #e3f4ea; border-color: var(--jade); }
+.ctg-ans.right .L { background: var(--jade); }
+.ctg-ans.wrong { background: #fbe3e1; border-color: var(--cinnabar); }
+.ctg-ans.wrong .L { background: var(--cinnabar); }
+.ctg-ans.dim { opacity: .5; }
+.ctg-fb { border-radius: 14px; padding: 12px 16px; font-size: clamp(18px, 1.7vw, 24px); line-height: 1.5; background: var(--paper2); }
+.ctg-fb strong { display: block; font-size: 1.08em; margin-bottom: 2px; }
+.ctg-fb.ok strong { color: var(--jade); }
+.ctg-fb.no strong { color: var(--cinnabar); }
+.ctg-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: auto; }
+.ctg-btn { border: none; border-radius: 14px; padding: 13px 24px; font-size: 21px; font-weight: 800; background: var(--saffron); color: #fff; box-shadow: 0 4px 0 #a85f17; }
+.ctg-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #a85f17; }
+.ctg-btn:disabled { opacity: .4; }
+.ctg-btn.ghost { background: transparent; color: var(--wood); box-shadow: inset 0 0 0 2px var(--wood); }
+.ctg-btn.jade { background: var(--jade); box-shadow: 0 4px 0 #1f5f41; }
+.ctg-mo { margin-left: auto; display: flex; align-items: center; gap: 8px; background: none; border: 2px dashed var(--wood); border-radius: 14px; padding: 6px 14px; color: var(--wood); font-weight: 800; font-size: 17px; }
+.ctg-mo svg { width: 60px; height: 42px; }
+.ctg-mo.hit .stick { animation: ctg-strike .18s ease; }
+.ctg-mo .stick { transform-origin: 58px 6px; }
+@keyframes ctg-strike { 50% { transform: rotate(-28deg); } }
+
+/* --- Ký hiệu toán (dùng chung cho câu hỏi ở mọi nơi) --- */
+.fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .82em; line-height: 1.12; margin: 0 2px; }
+.fr i { font-style: normal; padding: 0 3px; }
+.fr i:first-child { border-bottom: 2px solid currentColor; }
+.ov { border-top: 2px solid currentColor; padding: 0 2px; }
+.sys { display: inline-flex; flex-direction: column; vertical-align: middle; border-left: 2px solid currentColor; border-radius: 10px 0 0 10px; padding: 0 8px; margin: 0 4px; line-height: 1.3; font-size: .9em; }
+
+/* --- Màn che kết quả --- */
+.ctg-overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(20,14,36,.72); backdrop-filter: blur(3px); z-index: 50; padding: 16px; overflow-y: auto; }
+.ctg-panel { background: var(--paper); color: var(--ink); border-radius: 26px; padding: clamp(20px, 3vw, 40px); max-width: 760px; width: 100%; box-shadow: 0 0 0 7px var(--wood), 0 30px 60px rgba(0,0,0,.5); text-align: center; }
+.ctg-panel h2 { font-family: var(--display); font-size: clamp(30px, 4vw, 52px); margin: 0 0 6px; color: var(--wood); text-wrap: balance; }
+.ctg-panel p { font-size: clamp(17px, 1.6vw, 21px); line-height: 1.5; margin: 6px auto; max-width: 60ch; }
+.ctg-stars { font-size: 46px; letter-spacing: 6px; color: #d8c7a6; }
+.ctg-stars .on { color: #f2b230; }
+.ctg-stats { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.ctg-stats div { background: var(--paper2); border-radius: 14px; padding: 10px 18px; font-size: 16px; }
+.ctg-stats b { display: block; font-size: 30px; color: var(--wood); font-variant-numeric: tabular-nums; }
+.ctg-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+.ctg-save { font-size: 14px; color: var(--muted); margin-top: 10px; }
+.ctg-petals { position: fixed; inset: 0; pointer-events: none; z-index: 60; width: 100%; height: 100%; }
+.ctg-float { position: fixed; pointer-events: none; font-weight: 800; color: var(--saffron); font-size: 20px; animation: ctg-up 1s ease-out forwards; z-index: 70; text-shadow: 0 1px 0 #fff; }
+@keyframes ctg-up { to { transform: translateY(-60px); opacity: 0; } }
+
+/* --- Sân chùa (chọn mức) --- */
+.ctg-hub { max-width: 1180px; margin: 0 auto; padding: 18px 16px 48px; display: flex; flex-direction: column; gap: 20px; }
+.ctg-hub-head { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; }
+.ctg-hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; }
+.ctg-box { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 22px; padding: 20px; }
+.ctg-hero h1 { font-family: var(--display); font-size: clamp(30px, 4vw, 50px); color: var(--gold); margin: 0; line-height: 1.1; text-wrap: balance; }
+.ctg-hero p { font-size: 18px; line-height: 1.55; color: #e9def5; margin: 10px 0 0; }
+.ctg-rank { display: grid; gap: 10px; align-content: start; }
+.ctg-rank .t { font-family: var(--display); font-size: 28px; color: var(--gold); }
+.ctg-label { font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px; color: #c9b8dc; font-weight: 700; }
+.ctg-bar { height: 12px; background: rgba(255,255,255,.12); border-radius: 999px; overflow: hidden; }
+.ctg-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--saffron), var(--gold)); border-radius: 999px; }
+.ctg-grades { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.ctg-gbtn { border: 2px solid rgba(255,255,255,.2); background: transparent; color: var(--paper); border-radius: 12px; padding: 8px 18px; font-size: 18px; font-weight: 700; }
+.ctg-gbtn[aria-pressed="true"] { background: var(--saffron); border-color: var(--saffron); color: #fff; }
+.ctg-levels { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: end; }
+.ctg-lv { background: var(--paper); color: var(--ink); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 0 0 4px var(--wood); position: relative; }
+.ctg-lv.locked { background: #d9cfc0; opacity: .8; }
+.ctg-lv .n { font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.ctg-lv h3 { font-family: var(--display); font-size: 24px; margin: 0; color: var(--wood); }
+.ctg-lv .deg { display: inline-block; align-self: flex-start; font-size: 14px; font-weight: 700; padding: 3px 10px; border-radius: 999px; color: #fff; }
+.ctg-lv .st { font-size: 26px; letter-spacing: 3px; color: #cbbd9f; }
+.ctg-lv .st .on { color: #f2b230; }
+.ctg-lv .meta { font-size: 15px; color: var(--muted); }
+.ctg-lv .ctg-btn { font-size: 18px; padding: 10px 16px; }
+.ctg-hist { width: 100%; border-collapse: collapse; font-size: 16px; }
+.ctg-hist th, .ctg-hist td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.1); }
+.ctg-hist th { color: #c9b8dc; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+.ctg-ok { color: #7fd3a5; font-weight: 700; }
+.ctg-no { color: #f4a19a; font-weight: 700; }
+.ctg-gate { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+
+@media (max-width: 900px) {
+  .ctg-play { height: auto; min-height: 100vh; }
+  .ctg-main { grid-template-columns: 1fr; }
+  .ctg-scene { height: 44vh; min-height: 260px; }
+  .ctg-hero { grid-template-columns: 1fr; }
+  .ctg-levels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 540px) {
+  .ctg-answers { grid-template-columns: 1fr; }
+  .ctg-mo { margin-left: 0; }
+  .ctg-levels { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ctg *, .ctg *::before { animation: none !important; transition: none !important; }
+}
