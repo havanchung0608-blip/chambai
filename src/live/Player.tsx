@@ -3,7 +3,7 @@ import './live.css';
 import Avatar from './Avatar';
 import { Player as P, Room, cleanCode, joinRoom, ms, myAnswer, sendAnswer, watchPlayer, watchPlayers, watchRoom } from './liveApi';
 import { LEVELS, gradeLabel } from '../game/levels';
-import { SND } from '../game/sound';
+import { SND, stopMusic } from '../game/sound';
 
 const LET = ['A', 'B', 'C', 'D'];
 const OPT_COLORS = ['#d9534f', '#3f7cc4', '#e0a12a', '#2f8a5f'];
@@ -65,6 +65,7 @@ export function PlayerScreen({ code, uid, onExit }: { code: string; uid: string;
   const [sending, setSending] = useState(false);
   const [now, setNow] = useState(Date.now());
 
+  useEffect(() => { stopMusic(); }, []); // điện thoại học sinh: không phát nhạc nền để lớp đỡ ồn
   useEffect(() => watchRoom(code, setRoom), [code]);
   useEffect(() => watchPlayer(code, uid, setMe), [code, uid]);
   useEffect(() => watchPlayers(code, setPlayers), [code]);
@@ -80,8 +81,13 @@ export function PlayerScreen({ code, uid, onExit }: { code: string; uid: string;
   // Âm thanh khi có kết quả
   useEffect(() => {
     if (room?.status !== 'reveal' || !me || me.lastQ !== room.qIndex) return;
-    if (me.lastCorrect) SND.ok(); else SND.bad();
+    if (me.lastCorrect) { SND.ok(); if (me.streak >= 3) setTimeout(SND.streak, 600); } else SND.bad();
   }, [room?.status, me?.lastQ]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Tiếng báo câu mới và tích tắc 3 giây cuối trên điện thoại
+  const pSec = room && room.status === 'question' ? Math.ceil(Math.max(0, room.timeLimit - (now - ms(room.startedAt)) / 1000)) : -1;
+  useEffect(() => { if (room?.status === 'question') SND.gong(); }, [room?.qIndex, room?.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (pSec > 0 && pSec <= 3 && choice === null) SND.tickHot(); }, [pSec]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const rank = useMemo(() => {
     const sorted = [...players].sort((a, b) => b.score - a.score);
@@ -94,7 +100,7 @@ export function PlayerScreen({ code, uid, onExit }: { code: string; uid: string;
   const left = room.status === 'question' ? Math.max(0, room.timeLimit - (now - ms(room.startedAt)) / 1000) : 0;
   const pick = async (i: number) => {
     if (choice !== null || sending || room.status !== 'question' || left <= 0) return;
-    setSending(true); setChoice(i); SND.mo();
+    setSending(true); setChoice(i); SND.tap(); SND.mo(0.05);
     try { await sendAnswer(code, uid, room.qIndex, i); }
     catch (e) { console.error(e); setChoice(null); alert('Chưa gửi được. Em bấm lại nhé.'); }
     finally { setSending(false); }

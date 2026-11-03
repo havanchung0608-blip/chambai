@@ -7,7 +7,7 @@ import {
   GameConfig, Progress, RoundResult, Session, classAllowed, loadConfig, loadProgress, listSessions,
   maxPassed, recordRound, bestPassedAll, savePlayer, setLocalMode, isLocalMode,
 } from './progress';
-import { SND } from './sound';
+import { SND, isMusicOn, setMusicOn, startMusic } from './sound';
 import Rules from './Rules';
 import { useInstall } from './install';
 
@@ -88,6 +88,8 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
   const [offline, setOffline] = useState(isLocalMode());
   const [showRules, setShowRules] = useState(() => !seenRules());
   const { canInstall, install } = useInstall();
+  const [music, setMusic] = useState(isMusicOn());
+  useEffect(() => { startMusic('calm'); }, []);
   const closeRules = () => { setShowRules(false); try { localStorage.setItem(RULES_KEY, '1'); } catch { /* bỏ qua */ } };
 
   const uid = localUid || profile?.uid || '';
@@ -207,7 +209,8 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
         <div className="ctg-hub-head">
           <div className="ctg-brand">Lên Chùa Học Toán<small>{who.name}{who.className ? ` · Lớp ${who.className}` : ''}</small></div>
           <div className="ctg-tools">
-            <button className="ctg-ibtn accent" onClick={() => setShowRules(true)}>Luật chơi</button>
+            <button className="ctg-ibtn accent" onClick={() => { SND.tap(); setShowRules(true); }}>Luật chơi</button>
+            <button className="ctg-ibtn" onClick={() => { const m = !music; setMusicOn(m); setMusic(m); if (m) startMusic('calm'); }}>{music ? 'Nhạc: bật' : 'Nhạc: tắt'}</button>
             {canInstall && <button className="ctg-ibtn accent" onClick={install}>Cài app</button>}
             <button className="ctg-ibtn" onClick={() => setEditing(true)}>Sửa tên, lớp</button>
             {isAdmin && <button className="ctg-ibtn" onClick={onOpenAdmin}>Quản lý</button>}
@@ -260,7 +263,7 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
         <div className="ctg-grades" role="group" aria-label="Chọn lớp">
           <span className="ctg-label" style={{ marginRight: 6 }}>Chọn lớp</span>
           {GRADES.map(g => (
-            <button key={g} className="ctg-gbtn" aria-pressed={g === grade} onClick={() => setGrade(g)}>{gradeLabel(g)}</button>
+            <button key={g} className="ctg-gbtn" aria-pressed={g === grade} onClick={() => { SND.tap(); setGrade(g); }}>{gradeLabel(g)}</button>
           ))}
         </div>
 
@@ -279,7 +282,7 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
                 <span className="meta">
                   {locked ? `Vượt mức ${L.id - 1} để mở khóa` : st ? `Cao nhất ${st.best}/${st.total} · ${st.plays} lượt` : 'Chưa chơi'}
                 </span>
-                <button className="ctg-btn" disabled={locked} onClick={() => { SND.unlock(); setPlaying({ level: L.id, key: Date.now() }); }}>
+                <button className="ctg-btn" disabled={locked} onClick={() => { SND.tap(); SND.mo(0.08); setPlaying({ level: L.id, key: Date.now() }); }}>
                   {locked ? 'Đang khóa' : st ? 'Chơi lại' : 'Vào chơi'}
                 </button>
               </div>

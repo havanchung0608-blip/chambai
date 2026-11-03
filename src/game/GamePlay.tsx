@@ -3,7 +3,8 @@ import Scene from './Scene';
 import { LEVELS, gradeLabel, timeFactor } from './levels';
 import { makeRound, shuffle } from './questions';
 import { GameConfig, RoundResult, WrongItem } from './progress';
-import { SND, isMuted, setMuted } from './sound';
+import { SND, isMuted, setMuted, isMusicOn, setMusicOn, startMusic } from './sound';
+import { speak, toSpeech } from './speech';
 
 type Props = {
   grade: number;
@@ -18,38 +19,6 @@ type Props = {
 const LET = ['A', 'B', 'C', 'D'];
 const CHEER = ['Tâm an, tính đúng!', 'Lên một bậc rồi!', 'Giỏi quá đi!', 'Công đức tăng rồi!'];
 const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-/** Chuyển nội dung câu hỏi (HTML) thành lời đọc tiếng Việt. */
-function toSpeech(html: string) {
-  return html
-    .replace(/<span class="fr"><i>(.*?)<\/i><i>(.*?)<\/i><\/span>/g, ' $1 phần $2 ')
-    .replace(/<sup>2<\/sup>/g, ' bình phương ')
-    .replace(/<sup>3<\/sup>/g, ' lập phương ')
-    .replace(/<sup>(.*?)<\/sup>/g, ' mũ $1 ')
-    .replace(/<br\s*\/?>/g, '. ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\p{Extended_Pictographic}/gu, '')
-    .replace(/cm²/g, ' xăng-ti-mét vuông').replace(/cm³/g, ' xăng-ti-mét khối').replace(/m²/g, ' mét vuông')
-    .replace(/km\/giờ/g, ' ki-lô-mét một giờ')
-    .replace(/√/g, ' căn ').replace(/×|·/g, ' nhân ').replace(/ : /g, ' chia ')
-    .replace(/−/g, ' trừ ').replace(/\+/g, ' cộng ').replace(/≠/g, ' khác ').replace(/≥/g, ' lớn hơn hoặc bằng ').replace(/≤/g, ' nhỏ hơn hoặc bằng ')
-    .replace(/=/g, ' bằng ').replace(/%/g, ' phần trăm').replace(/°/g, ' độ').replace(/π/g, ' pi').replace(/Δ/g, ' đen-ta')
-    .replace(/\s+/g, ' ').trim();
-}
-
-function speak(text: string) {
-  try {
-    const synth = window.speechSynthesis;
-    if (!synth) return;
-    synth.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'vi-VN';
-    const v = synth.getVoices().find(x => x.lang?.toLowerCase().startsWith('vi'));
-    if (v) u.voice = v;
-    u.rate = 0.9;
-    synth.speak(u);
-  } catch { /* trình duyệt không hỗ trợ đọc */ }
-}
 
 function Html({ html, as = 'span', className }: { html: string; as?: 'span' | 'div'; className?: string }) {
   const Tag = as;
@@ -122,6 +91,9 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
   const [result, setResult] = useState<RoundResult | null>(null);
   const [saveState, setSaveState] = useState<'saving' | 'saved' | 'error'>('saving');
   const [muted, setMutedState] = useState(isMuted());
+  const [music, setMusic] = useState(isMusicOn());
+  const streak = useRef(0);
+  useEffect(() => { startMusic('calm'); }, []);
   const [moHit, setMoHit] = useState(0);
   const [autoRead, setAutoRead] = useState(grade <= 2);
   const t0 = useRef(performance.now());
@@ -158,13 +130,17 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
       setMerit(m => m + 10 * level);
       setStep(s => s + 1);
       setAnim(a => ({ kind: 'hop', n: a.n + 1 }));
+      SND.tap();
       SND.ok();
+      streak.current++;
+      if (streak.current >= 3) setTimeout(SND.streak, 700);
       say(CHEER[Math.floor(Math.random() * CHEER.length)]);
     } else {
       setWrong(w => w + 1);
       setWrongs(ws => [...ws, { q: q.q, chosen: k === -1 ? '(hết giờ)' : q.a[k], correct: q.a[0] }]);
       setAnim(a => ({ kind: 'shake', n: a.n + 1 }));
-      SND.bad();
+      streak.current = 0;
+      if (k === -1) SND.timeUp(); else { SND.tap(); SND.bad(); }
       say(k === -1 ? 'Ối, hết giờ mất rồi!' : 'Bình tĩnh, tu tiếp!');
     }
     setTimeout(() => nextBtn.current?.focus({ preventScroll: true }), 50);
@@ -182,7 +158,7 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
       const l = limit - (performance.now() - start) / 1000;
       setLeft(Math.max(0, l));
       const s = Math.ceil(l);
-      if (s !== last) { last = s; if (s <= 5 && s > 0) SND.tick(); }
+      if (s !== last) { last = s; if (s <= 3 && s > 0) SND.tickHot(); else if (s <= 5 && s > 0) SND.tick(); }
       if (l <= 0) { clearInterval(id); answerRef.current(-1); }
     }, 100);
     return () => clearInterval(id);
@@ -198,7 +174,7 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
       wrong: wrongs,
     };
     setResult(r);
-    if (passed) { SND.bell(); if (level < 4) setTimeout(SND.levelUp, 600); } else SND.bad();
+    if (passed) { SND.fanfare(); setTimeout(SND.bell, 1500); } else { SND.bad(); setTimeout(() => SND.mo(), 600); }
     setSaveState('saving');
     onFinish(r).then(() => setSaveState('saved')).catch(err => { console.error(err); setSaveState('error'); });
   }
@@ -233,6 +209,7 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
   orderRef.current = order;
 
   function toggleMute() { const m = !isMuted(); setMuted(m); setMutedState(m); }
+  function toggleMusic() { const m = !isMusicOn(); setMusicOn(m); setMusic(m); if (m) startMusic('calm'); }
   function toggleFull() {
     try {
       if (document.fullscreenElement) document.exitFullscreen();
@@ -265,7 +242,8 @@ export default function GamePlay({ grade, level, cfg, onFinish, onReplay, onNext
         <div className="ctg-chip">Bậc <b>{step}/{total}</b></div>
         <div className="ctg-chip">Nhang <Incense lit={Math.max(0, lives)} total={maxLives} /></div>
         <div className="ctg-chip">Công đức <b>+{merit}</b></div>
-        <button className="ctg-ibtn" onClick={toggleMute}>{muted ? 'Bật tiếng' : 'Tắt tiếng'}</button>
+        <button className="ctg-ibtn" onClick={toggleMusic} title="Nhạc nền">{music ? 'Nhạc: bật' : 'Nhạc: tắt'}</button>
+        <button className="ctg-ibtn" onClick={toggleMute} title="Phím M">{muted ? 'Bật tiếng' : 'Tắt tiếng'}</button>
         <button className="ctg-ibtn ctg-hide-sm" onClick={toggleFull}>Toàn màn hình</button>
         <button className="ctg-ibtn" onClick={onExit}>Thoát</button>
       </header>

@@ -7,7 +7,8 @@ import {
   Player, Room, createRoom, endRoom, joinUrl, ms, revealQuestion, showQuestion, watchAnswered, watchPlayers, watchRoom,
 } from './liveApi';
 import { GRADES, LEVELS, gradeLabel, timeFactor } from '../game/levels';
-import { SND, isMuted, setMuted } from '../game/sound';
+import { SND, isMuted, setMuted, isMusicOn, setMusicOn, startMusic } from '../game/sound';
+import { speak, toSpeech } from '../game/speech';
 
 // Bản chơi thử (không có Firebase): có nút thêm người chơi ảo tự trả lời.
 const DEMO = import.meta.env.VITE_DEMO === '1';
@@ -140,6 +141,9 @@ export function HostScreen({ code, onExit }: { code: string; onExit: () => void 
   const [floats, setFloats] = useState<Floating[]>([]);
   const [busy, setBusy] = useState(false);
   const [muted, setM] = useState(isMuted());
+  const [music, setMusicState] = useState(isMusicOn());
+  const [voice, setVoice] = useState(true);
+  useEffect(() => { startMusic('live'); }, []);
   const known = useRef<Set<string>>(new Set());
   const revealing = useRef(false);
   const url = joinUrl(code);
@@ -149,7 +153,7 @@ export function HostScreen({ code, onExit }: { code: string; onExit: () => void 
   useEffect(() => watchPlayers(code, ps => {
     const fresh = ps.filter(p => !known.current.has(p.uid));
     if (known.current.size && fresh.length) {
-      SND.mo();
+      SND.join();
       setTicker(t => [...fresh.map(p => `${p.name} vừa vào chùa · Chúc con học giỏi`), ...t].slice(0, 6));
     }
     fresh.forEach(p => known.current.add(p.uid));
@@ -185,14 +189,29 @@ export function HostScreen({ code, onExit }: { code: string; onExit: () => void 
   }, [room?.status, room?.qIndex, players.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const left = room?.status === 'question' ? Math.max(0, room.timeLimit - (now - ms(room.startedAt)) / 1000) : 0;
+  const secLeft = Math.ceil(left);
+
+  // Đọc câu hỏi khi chiếu câu mới
+  useEffect(() => {
+    if (!voice || room?.status !== 'question') return;
+    const id = setTimeout(() => speak(`Câu ${room.qIndex + 1}. ${toSpeech(room.q)}`), 1200);
+    return () => clearTimeout(id);
+  }, [room?.qIndex, room?.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Tích tắc 5 giây cuối
+  useEffect(() => {
+    if (room?.status !== 'question' || secLeft <= 0 || secLeft > 5) return;
+    if (secLeft <= 3) SND.tickHot(); else SND.tick();
+  }, [secLeft]); // eslint-disable-line react-hooks/exhaustive-deps
   const ranked = useMemo(() => [...players].sort((a, b) => b.score - a.score || a.name.localeCompare(b.name)), [players]);
 
   async function doReveal() {
     if (!room || room.status !== 'question' || revealing.current) return;
     revealing.current = true; setBusy(true);
     try {
-      const gains = await revealQuestion(room, players);
+      SND.drumRoll(0.9);
+      const [gains] = await Promise.all([revealQuestion(room, players), new Promise(r => setTimeout(r, 950))]);
       SND.ok();
+      if (gains.length && gains.length === players.length) setTimeout(SND.streak, 600);
       const names = new Map(players.map(p => [p.uid, p.name]));
       const best = gains.sort((a, b) => b.points - a.points)[0];
       setTicker(t => [
@@ -215,8 +234,8 @@ export function HostScreen({ code, onExit }: { code: string; onExit: () => void 
     if (!room) return;
     setBusy(true);
     try {
-      if (room.qIndex + 1 >= room.total) { await endRoom(code); SND.bell(); }
-      else { await showQuestion(code, room.qIndex + 1); SND.unlock(); if (room.qIndex < 0) SND.bell(); }
+      if (room.qIndex + 1 >= room.total) { await endRoom(code); SND.fanfare(); setTimeout(SND.bell, 1400); }
+      else { await showQuestion(code, room.qIndex + 1); SND.gong(); }
     } catch (e) { console.error(e); alert('Không chuyển được câu. Kiểm tra mạng rồi thử lại.'); }
     finally { setBusy(false); }
   }
@@ -337,6 +356,8 @@ export function HostScreen({ code, onExit }: { code: string; onExit: () => void 
         {room.status === 'question' && <button className="lv-btn" disabled={busy} onClick={doReveal}>Hiện đáp án</button>}
         {room.status === 'reveal' && <button className="lv-btn" disabled={busy} onClick={next}>{room.qIndex + 1 >= room.total ? 'Vinh danh' : 'Câu tiếp →'}</button>}
         {room.status !== 'ended' && room.status !== 'lobby' && <button className="lv-btn ghost" disabled={busy} onClick={() => endRoom(code)}>Kết thúc</button>}
+        <button className="lv-btn ghost" onClick={() => { const m = !music; setMusicOn(m); setMusicState(m); if (m) startMusic('live'); }}>{music ? 'Nhạc: bật' : 'Nhạc: tắt'}</button>
+        <button className="lv-btn ghost" onClick={() => setVoice(v => !v)}>{voice ? 'Đọc đề: bật' : 'Đọc đề: tắt'}</button>
         <button className="lv-btn ghost" onClick={() => { const m = !isMuted(); setMuted(m); setM(m); }}>{muted ? 'Bật tiếng' : 'Tắt tiếng'}</button>
         <button className="lv-btn ghost" onClick={toggleFull}>Toàn màn hình</button>
         <button className="lv-btn ghost" onClick={onExit}>Thoát</button>
