@@ -5,7 +5,7 @@ import GamePlay from './GamePlay';
 import { GRADES, LEVELS, gradeFromClass, gradeLabel, titleOf } from './levels';
 import {
   GameConfig, Progress, RoundResult, Session, classAllowed, loadConfig, loadProgress, listSessions,
-  maxPassed, recordRound, bestPassedAll, savePlayer,
+  maxPassed, recordRound, bestPassedAll, savePlayer, setLocalMode, isLocalMode,
 } from './progress';
 import { SND } from './sound';
 
@@ -78,6 +78,7 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
   const [grade, setGrade] = useState(gradeFromClass(profile?.className));
   const [playing, setPlaying] = useState<{ level: number; key: number } | null>(null);
   const [editing, setEditing] = useState(false);
+  const [offline, setOffline] = useState(isLocalMode());
 
   const uid = localUid || profile?.uid || '';
   const isGuest = !!localUid || !profile?.email;
@@ -98,8 +99,12 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
         if (p?.lastGrade) setGrade(p.lastGrade);
         else if (p?.className) setGrade(gradeFromClass(p.className));
       } catch (e) {
-        console.error(e);
-        setLoadError('Không tải được dữ liệu trò chơi. Kiểm tra mạng rồi thử lại.');
+        // Không đọc được Firebase (mất mạng, chưa cập nhật luật…): vẫn cho chơi, lưu trên máy.
+        console.warn('Không đọc được dữ liệu trực tuyến, chuyển sang lưu trên máy.', e);
+        setLocalMode(true); setOffline(true);
+        const [c, p, s] = await Promise.all([loadConfig(), loadProgress(uid), listSessions(uid)]);
+        setCfg(c); setProgress(p); setSessions(s);
+        if (p?.lastGrade) setGrade(p.lastGrade);
       } finally {
         setLoading(false);
       }
@@ -126,7 +131,13 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
         initClass={who.className}
         onCancel={progress ? () => setEditing(false) : undefined}
         onSave={async (name, cls) => {
-          const p = await savePlayer(progress, { uid, name, className: cls, email });
+          let p: Progress;
+          try { p = await savePlayer(progress, { uid, name, className: cls, email }); }
+          catch (e) {
+            console.warn('Không lưu được trực tuyến, lưu trên máy.', e);
+            setLocalMode(true); setOffline(true);
+            p = await savePlayer(progress, { uid, name, className: cls, email });
+          }
           setProgress(p);
           if (cls) setGrade(gradeFromClass(cls));
           setEditing(false);
@@ -145,7 +156,13 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
   }
 
   const handleFinish = async (r: RoundResult) => {
-    const np = await recordRound(who, progress, r);
+    let np: Progress;
+    try { np = await recordRound(who, progress, r); }
+    catch (e) {
+      console.warn('Không lưu được trực tuyến, lưu trên máy.', e);
+      setLocalMode(true); setOffline(true);
+      np = await recordRound(who, progress, r);
+    }
     setProgress(np);
     setSessions(s => [...s, { ...r, uid, name: who.name, className: who.className, playedAt: np.lastPlayedAt }]);
   };
@@ -187,8 +204,8 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
           <button className="ctg-ibtn" onClick={onLogout}>{isGuest ? 'Thoát' : 'Đăng xuất'}</button>
         </div>
 
-        {localUid && (
-          <div className="ctg-box">Em đang chơi không cần tài khoản. Kết quả được lưu trên máy này.</div>
+        {(localUid || offline) && (
+          <div className="ctg-box">{localUid ? 'Em đang chơi không cần tài khoản.' : 'Chưa kết nối được máy chủ.'} Kết quả được lưu trên máy này.</div>
         )}
 
         {!cfg.isOpen && isAdmin && (
