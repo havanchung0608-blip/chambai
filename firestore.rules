@@ -120,5 +120,46 @@ service cloud.firestore {
       allow read: if isGameAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
       allow delete: if isGameAdmin();
     }
+
+    // --- CHÙA TOÁN ONLINE (phòng chơi trực tiếp) ---
+    function roomData(code) {
+      return get(/databases/$(database)/documents/rooms/$(code)).data;
+    }
+    function isRoomHost(code) {
+      return isSignedIn() && roomData(code).hostUid == request.auth.uid;
+    }
+
+    match /rooms/{code} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(code) && incoming().hostUid == request.auth.uid;
+      allow update: if isSignedIn() && existing().hostUid == request.auth.uid &&
+        incoming().hostUid == existing().hostUid;
+      allow delete: if isSignedIn() && existing().hostUid == request.auth.uid;
+
+      // Bộ câu hỏi và đáp án: chỉ chủ phòng đọc/ghi.
+      match /private/{docId} {
+        allow read, write: if isRoomHost(code);
+      }
+
+      // Người chơi: tự vào phòng với 0 điểm, chỉ được đổi tên; chủ phòng chấm điểm.
+      match /players/{userId} {
+        allow read: if isSignedIn();
+        allow create: if isOwner(userId) && incoming().uid == userId && incoming().score == 0 &&
+          incoming().name is string && incoming().name.size() <= 24;
+        allow update: if isRoomHost(code) ||
+          (isOwner(userId) && incoming().diff(existing()).affectedKeys().hasOnly(['name']) &&
+           incoming().name is string && incoming().name.size() <= 24);
+        allow delete: if isRoomHost(code) || isOwner(userId);
+      }
+
+      // Câu trả lời: mỗi người một lần cho mỗi câu, chỉ khi câu đó đang mở.
+      match /answers/{answerId} {
+        allow create: if isSignedIn() && incoming().uid == request.auth.uid &&
+          answerId == string(incoming().qIndex) + '_' + request.auth.uid &&
+          roomData(code).status == 'question' && roomData(code).qIndex == incoming().qIndex &&
+          incoming().choice is int && incoming().choice >= 0 && incoming().choice <= 3;
+        allow read: if isRoomHost(code) || (isSignedIn() && resource.data.uid == request.auth.uid);
+      }
+    }
   }
 }

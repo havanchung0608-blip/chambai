@@ -37,6 +37,9 @@ import StudentGame from "./game/StudentGame";
 import GameAdminPage from "./game/GameAdminPage";
 import { isAdminEmail } from "./game/admins";
 import { setLocalMode } from "./game/progress";
+import { HostSetup, HostScreen } from "./live/Host";
+import { JoinForm, PlayerScreen } from "./live/Player";
+import { auth } from "./lib/firebase";
 
 // Initialize PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
@@ -74,7 +77,7 @@ const Card = ({ children, className }: { children: React.ReactNode, className?: 
 
 // --- PAGES ---
 
-function LoginPage({ onGuest }: { onGuest: () => void }) {
+function LoginPage({ onGuest, onJoinRoom }: { onGuest: () => void; onJoinRoom: () => void }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFCFB] p-4">
       <motion.div 
@@ -100,6 +103,9 @@ function LoginPage({ onGuest }: { onGuest: () => void }) {
             Chơi ngay, không cần đăng nhập
           </button>
           <p className="text-sm text-gray-500">Dành cho các bé và người chưa có tài khoản Google.</p>
+          <button onClick={onJoinRoom} className="w-full py-3 text-base font-bold rounded-2xl border-2 border-amber-500 text-amber-700 hover:bg-amber-50 transition-colors">
+            Vào phòng Chùa Toán Online bằng mã
+          </button>
         </Card>
 
         <p className="text-sm text-gray-400">Kèm công cụ chấm bài Toán tự luận MathAI dành cho thầy cô.</p>
@@ -1967,6 +1973,25 @@ function AppContent() {
   const { user, profile, loading } = useAuth();
   const [mode, setMode] = useState<'game' | 'admin' | 'grader'>('game');
   const [localGuest, setLocalGuest] = useState(false);
+  // Phòng chơi trực tiếp: link QR có dạng ...?phong=MÃ
+  const [live, setLive] = useState<null | { kind: 'join'; code: string } | { kind: 'play'; code: string; uid: string } | { kind: 'setup' } | { kind: 'host'; code: string }>(() => {
+    const c = new URLSearchParams(window.location.search).get('phong');
+    return c ? { kind: 'join', code: c.toUpperCase() } : null;
+  });
+  const leaveLive = () => {
+    setLive(null);
+    if (window.location.search) window.history.replaceState(null, '', window.location.pathname);
+  };
+  const ensureUser = async () => {
+    if (auth.currentUser) return auth.currentUser.uid;
+    try { const cred = await signInGuest(); return cred.user.uid; }
+    catch (e) {
+      console.error(e);
+      const err = new Error('Phòng chơi cần bật đăng nhập khách (Anonymous) trong Firebase. Em hãy báo thầy cô, hoặc đăng nhập Google rồi vào lại.');
+      err.name = 'LiveError';
+      throw err;
+    }
+  };
 
   // Chơi khách: ưu tiên đăng nhập ẩn danh (lưu tiến độ lên Firebase để người quản lý theo dõi);
   // nếu Firebase chưa bật chế độ này thì lưu ngay trên máy.
@@ -1981,13 +2006,25 @@ function AppContent() {
     </div>
   );
 
+  if (live?.kind === 'join') {
+    return <JoinForm initCode={live.code} initName={profile?.fullName || profile?.displayName || ''} ensureUser={ensureUser}
+      onJoined={(code, uid) => setLive({ kind: 'play', code, uid })} onBack={leaveLive} />;
+  }
+  if (live?.kind === 'play') return <PlayerScreen code={live.code} uid={live.uid} onExit={leaveLive} />;
+  if (user && live?.kind === 'setup') {
+    return <HostSetup host={{ uid: user.uid, name: profile?.fullName || profile?.displayName || 'Thầy cô' }}
+      onCreated={code => setLive({ kind: 'host', code })} onBack={leaveLive} />;
+  }
+  if (user && live?.kind === 'host') return <HostScreen code={live.code} onExit={leaveLive} />;
+
   if (!user && localGuest) {
     return (
       <StudentGame isAdmin={false} localUid="khach-tren-may" onOpenAdmin={() => {}}
+        onJoinRoom={() => setLive({ kind: 'join', code: '' })}
         onLogout={() => { setLocalGuest(false); setLocalMode(false); }} />
     );
   }
-  if (!user) return <LoginPage onGuest={playAsGuest} />;
+  if (!user) return <LoginPage onGuest={playAsGuest} onJoinRoom={() => setLive({ kind: 'join', code: '' })} />;
 
   // Ai đăng nhập cũng vào thẳng trò chơi, không cần chọn vai trò.
   const admin = isAdminEmail(user.email);
@@ -2008,6 +2045,8 @@ function AppContent() {
       isAdmin={admin}
       onOpenAdmin={() => setMode('admin')}
       onOpenGrader={() => setMode('grader')}
+      onOpenLiveHost={() => setLive({ kind: 'setup' })}
+      onJoinRoom={() => setLive({ kind: 'join', code: '' })}
       onLogout={logout}
     />
   );

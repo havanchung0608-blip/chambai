@@ -22,6 +22,8 @@ type Props = {
   onOpenGrader?: () => void;  // không có khi chơi khách trên máy
   onLogout: () => void;
   localUid?: string;          // chế độ khách lưu trên máy
+  onOpenLiveHost?: () => void; // mở phòng Chùa Toán Online (chiếu lên TV)
+  onJoinRoom?: () => void;     // vào phòng bằng mã
 };
 
 function Gate({ title, text, children }: { title: string; text: string; children?: React.ReactNode }) {
@@ -73,7 +75,7 @@ function PlayerForm({ initName, initClass, onSave, onCancel }: {
 }
 
 /** Trò chơi cho mọi người đăng nhập: sân chùa (chọn lớp, mức) và màn chơi. */
-export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogout, localUid }: Props) {
+export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogout, localUid, onOpenLiveHost, onJoinRoom }: Props) {
   const { profile } = useAuth();
   const [cfg, setCfg] = useState<GameConfig | null>(null);
   const [progress, setProgress] = useState<Progress | null>(null);
@@ -240,6 +242,20 @@ export default function StudentGame({ isAdmin, onOpenAdmin, onOpenGrader, onLogo
             <div className="ctg-bar"><i style={{ width: `${(passedHere / 4) * 100}%` }} /></div>
           </div>
         </div>
+
+        {(onOpenLiveHost || onJoinRoom) && (
+          <div className="ctg-box ctg-live">
+            <div>
+              <span className="ctg-label">Chơi cùng cả lớp</span>
+              <h2>Chùa Toán Online</h2>
+              <p>Chiếu chánh điện lên TV hoặc livestream. Mọi người quét mã QR, mỗi người thành một chú tiểu ngồi trong chùa và thi trả lời nhanh.</p>
+            </div>
+            <div className="ctg-live-btns">
+              {onOpenLiveHost && <button className="ctg-btn" onClick={onOpenLiveHost}>Mở phòng chơi</button>}
+              {onJoinRoom && <button className="ctg-btn jade" onClick={onJoinRoom}>Vào phòng bằng mã</button>}
+            </div>
+          </div>
+        )}
 
         <div className="ctg-grades" role="group" aria-label="Chọn lớp">
           <span className="ctg-label" style={{ marginRight: 6 }}>Chọn lớp</span>
