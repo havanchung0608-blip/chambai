@@ -42,9 +42,9 @@ Tính năng chung: đồng hồ vòng tròn có tiếng tích tắc 5 giây cu�
 
 ## 3b. Mẫu game hành động "Cánh chim qua cổng" (`assets/game-chim-bay-template.html`)
 Dùng khi thầy muốn game kiểu game điện tử hiện nay, học sinh **trực tiếp điều khiển nhân vật**: chim bay qua 5 cổng (hoặc nhiều hơn), mỗi cổng 1 câu, 3 cửa A–B–C, bay vào cửa đúng. Màn hình cố định 1920×1080 tự co giãn như trình chiếu PowerPoint; trang câu hỏi, trang kết quả, lời giải đều cỡ chữ 90–130 px.
-- Chỉ sửa `GAME` và mảng `GATES` (đúng 3 phương án, `answer` 0/1/2, `solution` 1–2 dòng ngắn, `speak` để đọc đề tiếng Việt).
+- Chỉ sửa `GAME`, ngân hàng `BANK` (mặc định 20 câu; đúng 3 phương án, **phương án đầu là đáp án đúng**, máy tự xáo A–B–C; `solution` 1–2 dòng ngắn; `speak` đọc đề tiếng Việt), `PER_ROUND` (số câu mỗi lượt, mặc định 3) và `DOORS` (độ khó cửa theo thứ tự cổng). Mỗi lượt bốc câu chưa chơi, hết ngân hàng mới lặp lại (nhớ qua localStorage). Có slide Luật chơi hiện trước lượt đầu.
 - Luật chơi: đâm cột, rơi xuống đất hoặc bay vào cửa sai là **chim rơi** (mất mạng; mặc định 1 mạng, chọn 3/5 ở màn hình đầu). Rơi đất/đâm cột thì bay lại cổng đó; vào cửa sai thì hiện đáp án, lời giải rồi sang cổng sau.
-- Độ khó cửa trong `door`: `gap` (rộng 220 – vừa 180 – hẹp 150), `breathe:[max,min]` cửa co giãn, `move` cửa trượt lên xuống. Tăng dần độ khó qua các cổng; **không cho cửa hẹp dưới 140 px** (chim nảy ~82 px mỗi lần vỗ cánh, hitbox cao 48 px).
+- Độ khó cửa trong `DOORS`: `gap` (rộng 220 – vừa 180 – hẹp 150), `breathe:[max,min]` cửa co giãn, `move` cửa trượt lên xuống. Tăng dần độ khó qua các cổng; **không cho cửa hẹp dưới 140 px** (chim nảy ~82 px mỗi lần vỗ cánh, hitbox cao 48 px).
 - Phương án phải ngắn (≤ 14 kí tự) để vừa biển cửa ở cỡ 88 px; lời giải mỗi dòng ≤ 32 kí tự.
 - Công thức hiển thị bằng bộ dựng sẵn trong file (không cần mạng): chỉ dùng `^`, `_`, `\cdot`, `\times`, `\le`, `\ge`, `\ne`, `\pm`, ngoặc, chữ, số.
 - Kiểm thử: lái chim tự động bằng Playwright, bot chạy trong trang: `if (bird.y > openings(gate.t+0.15)[answer].mid + 38 && bird.vy > 0) flap()`; phải qua đủ các cổng ở tốc độ Nhanh, và thử đủ 3 kiểu thua, chụp trang câu hỏi, màn bay, kết quả, kết thúc; đo phần tử không vượt 0–1080 px.

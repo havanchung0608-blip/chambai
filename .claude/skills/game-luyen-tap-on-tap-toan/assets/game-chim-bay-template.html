@@ -7,14 +7,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
 <script>
 /* =====================================================================
-   PHẦN THẦY SỬA: 5 CỔNG = 5 CÂU HỎI
+   PHẦN THẦY SỬA: NGÂN HÀNG CÂU HỎI (mỗi lượt máy bốc PER_ROUND câu chưa chơi)
    - Công thức viết giữa $...$ (mũ: x^2 ; nhân: \cdot). Dùng R`...` để gõ một dấu \.
-   - options: đúng 3 phương án (cửa A trên, B giữa, C dưới); answer: 0=A, 1=B, 2=C
+   - options: đúng 3 phương án, PHƯƠNG ÁN ĐẦU TIÊN LÀ ĐÁP ÁN ĐÚNG
+     (khi chơi, máy tự xáo vị trí A – B – C).
    - speak: câu đọc bằng giọng nói tiếng Việt (tuỳ chọn)
-   - door: độ khó của cửa
-       gap  : độ rộng cửa (px). Rộng 220 – Vừa 180 – Hẹp 150 (không nên dưới 140)
-       breathe: [rộng nhất, hẹp nhất] -> cửa co giãn liên tục
-       move : biên độ (px) -> các cửa trượt lên xuống
    ===================================================================== */
 const R = String.raw;
 const GAME = {
@@ -22,33 +19,59 @@ const GAME = {
   subtitle: "Ôn tập hằng đẳng thức đáng nhớ số 1 – 2 – 3 • Toán 8",
   teacher: "Thầy Hà Văn Chung"
 };
-const GATES = [
-  { tag:"Hằng đẳng thức 1 • Bình phương của một tổng",
-    q:R`$(x+3)^2$ bằng:`, speak:"x cộng 3, tất cả bình phương, bằng bao nhiêu?",
-    options:[R`$x^2+6x+9$`, R`$x^2+9$`, R`$x^2+3x+9$`], answer:0,
-    solution:[R`$(x+3)^2=x^2+2\cdot x\cdot 3+3^2$`, R`$=x^2+6x+9$`],
-    door:{gap:220} },
-  { tag:"Hằng đẳng thức 2 • Bình phương của một hiệu",
-    q:R`$(2x-1)^2$ bằng:`, speak:"2 x trừ 1, tất cả bình phương, bằng bao nhiêu?",
-    options:[R`$4x^2-2x+1$`, R`$4x^2-4x+1$`, R`$2x^2-4x+1$`], answer:1,
-    solution:[R`$(2x-1)^2=(2x)^2-2\cdot 2x\cdot 1+1^2$`, R`$=4x^2-4x+1$`],
-    door:{gap:170} },
-  { tag:"Hằng đẳng thức 3 • Hiệu hai bình phương",
-    q:R`$x^2-25$ bằng:`, speak:"x bình phương trừ 25 bằng bao nhiêu?",
-    options:[R`$(x-5)^2$`, R`$(x-25)(x+25)$`, R`$(x-5)(x+5)$`], answer:2,
-    solution:[R`$x^2-25=x^2-5^2$`, R`$=(x-5)(x+5)$`],
-    door:{breathe:[240,150]} },
-  { tag:"Vận dụng hằng đẳng thức 2 • Tính nhanh",
-    q:R`Tính nhanh: $99^2=\ ?$`, speak:"Tính nhanh 99 bình phương.",
-    options:[R`$9801$`, R`$9701$`, R`$9981$`], answer:0,
-    solution:[R`$99^2=(100-1)^2=100^2-2\cdot 100\cdot 1+1^2$`, R`$=10000-200+1=9801$`],
-    door:{gap:175, move:35} },
-  { tag:"Vận dụng hằng đẳng thức 3 • Tính nhanh",
-    q:R`Tính nhanh: $52\cdot 48=\ ?$`, speak:"Tính nhanh 52 nhân 48.",
-    options:[R`$2500$`, R`$2496$`, R`$2504$`], answer:1,
-    solution:[R`$52\cdot 48=(50+2)(50-2)=50^2-2^2$`, R`$=2500-4=2496$`],
-    door:{breathe:[220,150], move:25} }
+const BANK = [
+  /* ---- Hằng đẳng thức 1: (A + B)² = A² + 2AB + B² ---- */
+  { tag:"HĐT 1 • Bình phương của một tổng", q:R`$(x+3)^2$ bằng:`, speak:"x cộng 3, tất cả bình phương, bằng bao nhiêu?",
+    options:[R`$x^2+6x+9$`, R`$x^2+9$`, R`$x^2+3x+9$`], solution:[R`$(x+3)^2=x^2+2\cdot x\cdot 3+3^2$`, R`$=x^2+6x+9$`] },
+  { tag:"HĐT 1 • Bình phương của một tổng", q:R`$(x+5)^2$ bằng:`, speak:"x cộng 5, tất cả bình phương, bằng bao nhiêu?",
+    options:[R`$x^2+10x+25$`, R`$x^2+5x+25$`, R`$x^2+25$`], solution:[R`$(x+5)^2=x^2+2\cdot x\cdot 5+5^2$`, R`$=x^2+10x+25$`] },
+  { tag:"HĐT 1 • Bình phương của một tổng", q:R`$(2x+1)^2$ bằng:`, speak:"2 x cộng 1, tất cả bình phương, bằng bao nhiêu?",
+    options:[R`$4x^2+4x+1$`, R`$4x^2+2x+1$`, R`$2x^2+4x+1$`], solution:[R`$(2x+1)^2=(2x)^2+2\cdot 2x\cdot 1+1^2$`, R`$=4x^2+4x+1$`] },
+  { tag:"HĐT 1 • Bình phương của một tổng", q:R`$(x+2y)^2$ bằng:`, speak:"x cộng 2 y, tất cả bình phương, bằng bao nhiêu?",
+    options:[R`$x^2+4xy+4y^2$`, R`$x^2+2xy+4y^2$`, R`$x^2+4xy+2y^2$`], solution:[R`$(x+2y)^2=x^2+2\cdot x\cdot 2y+(2y)^2$`, R`$=x^2+4xy+4y^2$`] },
+  { tag:"HĐT 1 • Viết thành bình phương", q:R`$x^2+8x+16$ bằng:`, speak:"x bình phương cộng 8 x cộng 16 bằng bao nhiêu?",
+    options:[R`$(x+4)^2$`, R`$(x+8)^2$`, R`$(x+16)^2$`], solution:[R`$x^2+8x+16=x^2+2\cdot x\cdot 4+4^2$`, R`$=(x+4)^2$`] },
+  { tag:"HĐT 1 • Tính nhanh", q:R`Tính nhanh: $101^2=\ ?$`, speak:"Tính nhanh 101 bình phương.",
+    options:[R`$10201$`, R`$10101$`, R`$10001$`], solution:[R`$101^2=(100+1)^2=100^2+2\cdot 100+1$`, R`$=10000+200+1=10201$`] },
+  { tag:"HĐT 1 • Tính nhanh", q:R`Tính nhanh: $51^2=\ ?$`, speak:"Tính nhanh 51 bình phương.",
+    options:[R`$2601$`, R`$2501$`, R`$2551$`], solution:[R`$51^2=(50+1)^2=50^2+2\cdot 50+1$`, R`$=2500+100+1=2601$`] },
+  /* ---- Hằng đẳng thức 2: (A − B)² = A² − 2AB + B² ---- */
+  { tag:"HĐT 2 • Bình phương của một hiệu", q:R`$(x-4)^2$ bằng:`, speak:"x trừ 4, tất cả bình phương, bằng bao nhiêu?",
+    options:[R`$x^2-8x+16$`, R`$x^2-16$`, R`$x^2-4x+16$`], solution:[R`$(x-4)^2=x^2-2\cdot x\cdot 4+4^2$`, R`$=x^2-8x+16$`] },
+  { tag:"HĐT 2 • Bình phương của một hiệu", q:R`$(2x-1)^2$ bằng:`, speak:"2 x trừ 1, tất cả bình phương, bằng bao nhiêu?",
+    options:[R`$4x^2-4x+1$`, R`$4x^2-2x+1$`, R`$2x^2-4x+1$`], solution:[R`$(2x-1)^2=(2x)^2-2\cdot 2x\cdot 1+1^2$`, R`$=4x^2-4x+1$`] },
+  { tag:"HĐT 2 • Bình phương của một hiệu", q:R`$(3x-2)^2$ bằng:`, speak:"3 x trừ 2, tất cả bình phương, bằng bao nhiêu?",
+    options:[R`$9x^2-12x+4$`, R`$9x^2-6x+4$`, R`$3x^2-12x+4$`], solution:[R`$(3x-2)^2=(3x)^2-2\cdot 3x\cdot 2+2^2$`, R`$=9x^2-12x+4$`] },
+  { tag:"HĐT 2 • Viết thành bình phương", q:R`$x^2-6x+9$ bằng:`, speak:"x bình phương trừ 6 x cộng 9 bằng bao nhiêu?",
+    options:[R`$(x-3)^2$`, R`$(x+3)^2$`, R`$(x-9)^2$`], solution:[R`$x^2-6x+9=x^2-2\cdot x\cdot 3+3^2$`, R`$=(x-3)^2$`] },
+  { tag:"HĐT 2 • Tính nhanh", q:R`Tính nhanh: $99^2=\ ?$`, speak:"Tính nhanh 99 bình phương.",
+    options:[R`$9801$`, R`$9701$`, R`$9981$`], solution:[R`$99^2=(100-1)^2=100^2-2\cdot 100+1$`, R`$=10000-200+1=9801$`] },
+  { tag:"HĐT 2 • Tính nhanh", q:R`Tính nhanh: $49^2=\ ?$`, speak:"Tính nhanh 49 bình phương.",
+    options:[R`$2401$`, R`$2301$`, R`$2501$`], solution:[R`$49^2=(50-1)^2=50^2-2\cdot 50+1$`, R`$=2500-100+1=2401$`] },
+  { tag:"HĐT 2 • Tính giá trị biểu thức", q:R`Giá trị của $x^2-4x+4$ tại $x=102$ là:`, speak:"Giá trị của x bình phương trừ 4 x cộng 4 tại x bằng 102 là bao nhiêu?",
+    options:[R`$10000$`, R`$10404$`, R`$9604$`], solution:[R`$x^2-4x+4=(x-2)^2$`, R`$=(102-2)^2=100^2=10000$`] },
+  /* ---- Hằng đẳng thức 3: A² − B² = (A − B)(A + B) ---- */
+  { tag:"HĐT 3 • Hiệu hai bình phương", q:R`$x^2-25$ bằng:`, speak:"x bình phương trừ 25 bằng bao nhiêu?",
+    options:[R`$(x-5)(x+5)$`, R`$(x-5)^2$`, R`$(x-25)(x+25)$`], solution:[R`$x^2-25=x^2-5^2$`, R`$=(x-5)(x+5)$`] },
+  { tag:"HĐT 3 • Hiệu hai bình phương", q:R`$4x^2-9$ bằng:`, speak:"4 x bình phương trừ 9 bằng bao nhiêu?",
+    options:[R`$(2x-3)(2x+3)$`, R`$(4x-3)(4x+3)$`, R`$(2x-9)(2x+9)$`], solution:[R`$4x^2-9=(2x)^2-3^2$`, R`$=(2x-3)(2x+3)$`] },
+  { tag:"HĐT 3 • Hiệu hai bình phương", q:R`$(x-1)(x+1)$ bằng:`, speak:"x trừ 1 nhân x cộng 1 bằng bao nhiêu?",
+    options:[R`$x^2-1$`, R`$x^2+1$`, R`$x^2-2x+1$`], solution:[R`$(x-1)(x+1)=x^2-1^2$`, R`$=x^2-1$`] },
+  { tag:"HĐT 3 • Hiệu hai bình phương", q:R`$(2x+y)(2x-y)$ bằng:`, speak:"2 x cộng y nhân 2 x trừ y bằng bao nhiêu?",
+    options:[R`$4x^2-y^2$`, R`$2x^2-y^2$`, R`$4x^2+y^2$`], solution:[R`$(2x+y)(2x-y)=(2x)^2-y^2$`, R`$=4x^2-y^2$`] },
+  { tag:"HĐT 3 • Tính nhanh", q:R`Tính nhanh: $52\cdot 48=\ ?$`, speak:"Tính nhanh 52 nhân 48.",
+    options:[R`$2496$`, R`$2500$`, R`$2504$`], solution:[R`$52\cdot 48=(50+2)(50-2)=50^2-2^2$`, R`$=2500-4=2496$`] },
+  { tag:"HĐT 3 • Tính nhanh", q:R`Tính nhanh: $103\cdot 97=\ ?$`, speak:"Tính nhanh 103 nhân 97.",
+    options:[R`$9991$`, R`$10009$`, R`$9909$`], solution:[R`$103\cdot 97=(100+3)(100-3)=100^2-3^2$`, R`$=10000-9=9991$`] }
 ];
+/* Độ khó cửa theo thứ tự cổng trong mỗi lượt (máy bốc ngẫu nhiên 1 kiểu trong mỗi nhóm)
+   gap: độ rộng cửa (px) – không nên dưới 140; breathe:[rộng nhất, hẹp nhất] cửa co giãn; move: cửa trượt lên xuống */
+const DOORS = [
+  [{gap:220}, {gap:195}],
+  [{gap:165}, {breathe:[240,150]}],
+  [{gap:175, move:35}, {breathe:[220,150], move:25}]
+];
+const PER_ROUND = 3;   // số câu mỗi lượt chơi
 /* ======================= HẾT PHẦN THẦY SỬA ======================= */
 </script>
 <style>
@@ -169,6 +192,12 @@ button{font-family:var(--ui);border:none;cursor:pointer}
 #corner button{width:84px;height:84px;border-radius:24px;font-size:44px;background:rgba(10,20,60,.6);color:#fff}
 #fx{position:absolute;inset:0;z-index:40;pointer-events:none}
 #pause{z-index:55}
+.guide{display:flex;gap:50px;align-items:center}
+.rules{display:flex;flex-direction:column;gap:12px;text-align:left;width:1200px}
+.rules>div{display:flex;align-items:center;gap:26px;background:rgba(255,255,255,.12);border-radius:28px;padding:5px 28px}
+.rules span{font-size:64px;flex:none}
+.rules p{font-size:45px;line-height:1.16;font-weight:600}
+.gdemo{width:360px;height:550px;flex:none}
 </style>
 </head>
 <body>
@@ -221,9 +250,39 @@ button{font-family:var(--ui);border:none;cursor:pointer}
     <div class="modes"><span>Số mạng:</span>
       <button class="chip on" data-lv="1">❤️ 1</button><button class="chip" data-lv="3">❤️ 3</button><button class="chip" data-lv="5">❤️ 5</button>
     </div>
-    <div class="small">Đọc câu hỏi • Bay vào cửa có <b>đáp án đúng</b> • Đâm cột, rơi xuống đất hay vào cửa sai là <b>chim rơi</b>!</div>
-    <div class="btns"><button class="btn" id="bStart">▶ BẮT ĐẦU</button></div>
+    <div class="small" id="tInfo"></div>
+    <div class="btns"><button class="btn alt" id="bGuide">📖 Luật chơi</button><button class="btn" id="bStart">▶ BẮT ĐẦU</button></div>
     <div class="board hidden" id="tBoard"></div>
+  </section>
+
+  <!-- LUẬT CHƠI -->
+  <section class="slide hidden" id="sGuide">
+    <div class="big-title pop" style="font-size:88px">📖 LUẬT CHƠI</div>
+    <div class="guide">
+      <div class="rules">
+        <div class="pop" style="animation-delay:.1s"><span>🎯</span><p>Mỗi lượt bay qua <b id="gN">3</b> cổng = <b>3 câu hỏi</b>, câu hỏi đổi mới sau mỗi lượt.</p></div>
+        <div class="pop" style="animation-delay:.25s"><span>👀</span><p>Đọc câu hỏi, nhớ <b>đáp án đúng</b> nằm ở cửa <b style="color:#ff8fab">A</b> trên, <b style="color:#8fb8ff">B</b> giữa hay <b style="color:#ffc861">C</b> dưới.</p></div>
+        <div class="pop" style="animation-delay:.4s"><span>👆</span><p>Nhấn <b>SPACE</b> hoặc <b>chạm màn hình</b>: chim vỗ cánh bay lên. Không nhấn: chim rơi xuống.</p></div>
+        <div class="pop" style="animation-delay:.55s"><span>💥</span><p>Đâm cột, rơi xuống đất, bay vào cửa sai: <b style="color:#ff8a9a">CHIM RƠI = THUA</b>.</p></div>
+        <div class="pop" style="animation-delay:.7s"><span>⚠️</span><p>Cửa có thể <b>hẹp</b>, <b>co giãn</b> hoặc <b>di chuyển</b>. Canh nhịp thật khéo!</p></div>
+        <div class="pop" style="animation-delay:.85s"><span>⭐</span><p>Đúng <b>+100</b> • Đúng liên tiếp <b>COMBO ×2</b> • Đồng xu 🪙 <b>+10</b></p></div>
+      </div>
+      <svg class="gdemo pop" viewBox="0 0 420 640" style="animation-delay:.3s">
+        <rect x="0" y="0" width="420" height="640" rx="30" fill="#9fe0ff"/>
+        <rect x="0" y="590" width="420" height="50" fill="#3fbf5f"/>
+        <g fill="#7c4dff"><rect x="300" y="0" width="70" height="40" rx="14"/><rect x="300" y="170" width="70" height="40" rx="14"/><rect x="300" y="380" width="70" height="40" rx="14"/><rect x="300" y="550" width="70" height="40" rx="14"/></g>
+        <g font-family="Baloo 2,Arial" font-weight="800" font-size="64" text-anchor="middle">
+          <rect x="200" y="65" width="90" height="80" rx="18" fill="#ef476f"/><text x="245" y="128" fill="#fff">A</text>
+          <rect x="200" y="255" width="90" height="80" rx="18" fill="#3a86ff"/><text x="245" y="318" fill="#fff">B</text>
+          <rect x="200" y="445" width="90" height="80" rx="18" fill="#f59e0b"/><text x="245" y="508" fill="#fff">C</text>
+        </g>
+        <path d="M60 320 Q160 240 330 105" stroke="#16c172" stroke-width="10" fill="none" stroke-dasharray="20 14"/>
+        <text x="345" y="120" font-size="64">✅</text>
+        <circle cx="60" cy="330" r="36" fill="#ffb02e" stroke="#c96a00" stroke-width="5"/><circle cx="74" cy="320" r="9" fill="#fff"/><circle cx="77" cy="321" r="5" fill="#16213e"/><path d="M92 330 L112 336 L92 342Z" fill="#ff4d4d"/>
+        <text x="330" y="320" font-size="54">❌</text><text x="330" y="510" font-size="54">❌</text>
+      </svg>
+    </div>
+    <div class="btns"><button class="btn" id="bGo">▶ VÀO CHƠI</button></div>
   </section>
 
   <!-- TRANG CÂU HỎI -->
@@ -262,7 +321,7 @@ button{font-family:var(--ui);border:none;cursor:pointer}
     <div class="sub" id="eScore"></div>
     <div class="btns"><input class="namein" id="eName" placeholder="Tên người chơi" maxlength="24"><button class="btn alt" id="bSave">💾 Lưu điểm</button></div>
     <div class="board hidden" id="eBoard"></div>
-    <div class="btns"><button class="btn" id="bAgain">↺ Chơi lại</button><button class="btn pink" id="bHome2">🏠 Màn hình chính</button></div>
+    <div class="btns"><button class="btn" id="bAgain">▶ Lượt mới – câu hỏi mới</button><button class="btn pink" id="bHome2">🏠 Màn hình chính</button></div>
   </section>
 
   <section class="slide hidden" id="pause"><div class="big-title">⏸ TẠM DỪNG</div><div class="sub">Nhấn P hoặc bấm nút để chơi tiếp</div><div class="btns"><button class="btn" id="bResume">▶ Chơi tiếp</button></div></section>
@@ -396,10 +455,11 @@ function scenery(dt, sp){
 }
 
 /* ---- Trạng thái ---- */
+let GATES = [], round = 0, seenGuide = false;
 let speed = 200, maxLives = 1, lives = 1, idx = 0, score = 0, combo = 0, results = [], mode = "title", paused = false;
 let bird = {y:540, vy:0, rot:0, started:false}, gate = null, coins = [], flyT = 0;
 const birdEl = $("#bird");
-const SLIDES = ["sTitle","sQ","count","sR","sF","sEnd"];
+const SLIDES = ["sTitle","sGuide","sQ","count","sR","sF","sEnd"];
 function showSlide(id){ SLIDES.forEach(s=>$("#"+s).classList.toggle("hidden", s!==id)); }
 function setHud(){
   $("#hScore").textContent = score;
@@ -412,12 +472,37 @@ function home(){
   mode = "title"; music(false); clearWorld();
   $("#tTitle").textContent = GAME.title; $("#tSub").innerHTML = M(GAME.subtitle); $("#tTeacher").textContent = GAME.teacher;
   document.title = GAME.title; $("#hud").classList.add("hidden"); birdEl.classList.add("hidden"); $("#hint").classList.add("hidden"); $("#warn").classList.add("hidden");
-  renderBoard($("#tBoard")); showSlide("sTitle");
+  $("#tInfo").innerHTML = infoText(); renderBoard($("#tBoard")); showSlide("sTitle");
 }
 document.querySelectorAll(".chip[data-sp]").forEach(c => c.onclick = e => { e.stopPropagation(); document.querySelectorAll(".chip[data-sp]").forEach(x=>x.classList.remove("on")); c.classList.add("on"); speed = +c.dataset.sp; tone(700,.08,"square",.08); });
 document.querySelectorAll(".chip[data-lv]").forEach(c => c.onclick = e => { e.stopPropagation(); document.querySelectorAll(".chip[data-lv]").forEach(x=>x.classList.remove("on")); c.classList.add("on"); maxLives = +c.dataset.lv; tone(700,.08,"square",.08); });
-function newGame(){ idx = 0; score = 0; combo = 0; results = []; lives = maxLives; setHud(); questionSlide(); }
-$("#bStart").onclick = e => { e.stopPropagation(); newGame(); };
+/* ---- Bốc câu hỏi cho mỗi lượt: lần lượt hết ngân hàng rồi mới lặp lại ---- */
+function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+let deck = [];
+try{ deck = JSON.parse(localStorage.getItem("canhchim-deck") || "[]").filter(i=>Number.isInteger(i) && i>=0 && i<BANK.length); }catch(e){ deck = []; }
+try{ round = +localStorage.getItem("canhchim-round") || 0; }catch(e){ round = 0; }
+function pickRound(){
+  const n = Math.min(PER_ROUND, BANK.length);
+  if (deck.length < n){
+    const recent = new Set(GATES.map(g=>g.id));
+    const fresh = shuffle(BANK.map((_,i)=>i).filter(i=>!deck.includes(i) && !recent.has(i)));
+    deck = deck.concat(fresh);
+    if (deck.length < n) deck = deck.concat(shuffle(BANK.map((_,i)=>i).filter(i=>!deck.includes(i))));
+  }
+  const ids = deck.splice(0, n); round++;
+  try{ localStorage.setItem("canhchim-deck", JSON.stringify(deck)); localStorage.setItem("canhchim-round", String(round)); }catch(e){}
+  GATES = ids.map((id,k)=>{
+    const q = BANK[id], order = shuffle([0,1,2]);
+    const lvl = DOORS[Math.min(k, DOORS.length-1)];
+    return {...q, id, options: order.map(o=>q.options[o]), answer: order.indexOf(0), door: lvl[Math.floor(Math.random()*lvl.length)]};
+  });
+}
+function newGame(){ pickRound(); idx = 0; score = 0; combo = 0; results = []; lives = maxLives; setHud(); questionSlide(); }
+function infoText(){ return `Ngân hàng <b>${BANK.length}</b> câu • Mỗi lượt <b>${PER_ROUND}</b> câu mới • Lượt tiếp theo: <b>${round+1}</b>`; }
+$("#bStart").onclick = e => { e.stopPropagation(); if (!seenGuide) return guide(); newGame(); };
+function guide(){ mode = "guide"; seenGuide = true; $("#gN").textContent = PER_ROUND; showSlide("sGuide"); tone(523,.15); tone(784,.2,"triangle",.15,.1); }
+$("#bGuide").onclick = e => { e.stopPropagation(); guide(); };
+$("#bGo").onclick = e => { e.stopPropagation(); newGame(); };
 
 /* ---- Trang câu hỏi (trình chiếu như PPT) ---- */
 function questionSlide(){
@@ -426,6 +511,7 @@ function questionSlide(){
   $("#qBadge").textContent = `CỔNG ${idx+1}/${GATES.length}`;
   $("#qTag").textContent = g.tag;
   $("#qText").innerHTML = M(g.q);
+  $("#qText").style.fontSize = g.q.replace(/\$|\\[a-z]+|[{}^]/g,"").length > 24 ? "92px" : "";   // câu dài: vẫn nằm gọn 1 dòng
   $("#qOpts").innerHTML = g.options.map((o,i)=>`<div class="opt pop" style="border-color:${LC[i]};animation-delay:${.15+i*.12}s"><span class="k" style="background:${LC[i]}">${KEYS[i]}</span><span class="t">${M(o)}</span><span class="lane">${LNAME[i]}</span></div>`).join("");
   showSlide("sQ"); tone(523,.15); tone(784,.2,"triangle",.15,.1);
 }
@@ -662,11 +748,12 @@ document.addEventListener("keydown", e => {
     e.preventDefault(); if (e.repeat) return;
     if (mode==="fly") flap();
     else if (mode==="title") $("#bStart").click();
+    else if (mode==="guide") $("#bGo").click();
     else if (mode==="q") $("#bFly").click();
     else if (mode==="r") $("#bNext").click();
     else if (mode==="f") $("#bFail").click();
   }
-  else if (k==="Enter"){ if (mode==="q") $("#bFly").click(); else if (mode==="r") $("#bNext").click(); else if (mode==="f") $("#bFail").click(); else if (mode==="title") $("#bStart").click(); }
+  else if (k==="Enter"){ if (mode==="q") $("#bFly").click(); else if (mode==="r") $("#bNext").click(); else if (mode==="f") $("#bFail").click(); else if (mode==="title") $("#bStart").click(); else if (mode==="guide") $("#bGo").click(); }
   else if (k==="p" || k==="P") togglePause();
   else if (k==="m" || k==="M") $("#bMute").click();
   else if (k==="f" || k==="F") $("#bFull").click();
