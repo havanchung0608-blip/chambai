@@ -43,9 +43,11 @@ Tính năng chung: đồng hồ vòng tròn có tiếng tích tắc 5 giây cu�
 ## 3b. Mẫu game hành động "Cánh chim qua cổng" (`assets/game-chim-bay-template.html`)
 Dùng khi thầy muốn game kiểu game điện tử hiện nay, học sinh **trực tiếp điều khiển nhân vật**: chim bay qua 5 cổng (hoặc nhiều hơn), mỗi cổng 1 câu, 3 cửa A–B–C, bay vào cửa đúng. Màn hình cố định 1920×1080 tự co giãn như trình chiếu PowerPoint; trang câu hỏi, trang kết quả, lời giải đều cỡ chữ 90–130 px.
 - Chỉ sửa `GAME` và mảng `GATES` (đúng 3 phương án, `answer` 0/1/2, `solution` 1–2 dòng ngắn, `speak` để đọc đề tiếng Việt).
+- Luật chơi: đâm cột, rơi xuống đất hoặc bay vào cửa sai là **chim rơi** (mất mạng; mặc định 1 mạng, chọn 3/5 ở màn hình đầu). Rơi đất/đâm cột thì bay lại cổng đó; vào cửa sai thì hiện đáp án, lời giải rồi sang cổng sau.
+- Độ khó cửa trong `door`: `gap` (rộng 220 – vừa 180 – hẹp 150), `breathe:[max,min]` cửa co giãn, `move` cửa trượt lên xuống. Tăng dần độ khó qua các cổng; **không cho cửa hẹp dưới 140 px** (chim nảy ~82 px mỗi lần vỗ cánh, hitbox cao 48 px).
 - Phương án phải ngắn (≤ 14 kí tự) để vừa biển cửa ở cỡ 88 px; lời giải mỗi dòng ≤ 32 kí tự.
 - Công thức hiển thị bằng bộ dựng sẵn trong file (không cần mạng): chỉ dùng `^`, `_`, `\cdot`, `\times`, `\le`, `\ge`, `\ne`, `\pm`, ngoặc, chữ, số.
-- Kiểm thử: lái chim tự động bằng Playwright (đọc `bird.y`, `laneTop(answer)`, nhấn Space khi chim thấp hơn cửa đích), chụp trang câu hỏi, màn bay, kết quả, kết thúc; đo phần tử không vượt 0–1080 px.
+- Kiểm thử: lái chim tự động bằng Playwright, bot chạy trong trang: `if (bird.y > openings(gate.t+0.15)[answer].mid + 38 && bird.vy > 0) flap()`; phải qua đủ các cổng ở tốc độ Nhanh, và thử đủ 3 kiểu thua, chụp trang câu hỏi, màn bay, kết quả, kết thúc; đo phần tử không vượt 0–1080 px.
 
 ## 4. Kiểm tra bắt buộc trước khi giao
 1. **Toán**: giải lại từng câu; câu có tính toán kiểm bằng Python (`python3 -c ...`). Kiểm `answer` của `mcq` đúng chỉ số (0=A), `tf` đúng true/false, phương án nhiễu không trùng đáp án đúng.

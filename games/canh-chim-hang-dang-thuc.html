@@ -11,6 +11,10 @@
    - Công thức viết giữa $...$ (mũ: x^2 ; nhân: \cdot). Dùng R`...` để gõ một dấu \.
    - options: đúng 3 phương án (cửa A trên, B giữa, C dưới); answer: 0=A, 1=B, 2=C
    - speak: câu đọc bằng giọng nói tiếng Việt (tuỳ chọn)
+   - door: độ khó của cửa
+       gap  : độ rộng cửa (px). Rộng 220 – Vừa 180 – Hẹp 150 (không nên dưới 140)
+       breathe: [rộng nhất, hẹp nhất] -> cửa co giãn liên tục
+       move : biên độ (px) -> các cửa trượt lên xuống
    ===================================================================== */
 const R = String.raw;
 const GAME = {
@@ -22,23 +26,28 @@ const GATES = [
   { tag:"Hằng đẳng thức 1 • Bình phương của một tổng",
     q:R`$(x+3)^2$ bằng:`, speak:"x cộng 3, tất cả bình phương, bằng bao nhiêu?",
     options:[R`$x^2+6x+9$`, R`$x^2+9$`, R`$x^2+3x+9$`], answer:0,
-    solution:[R`$(x+3)^2=x^2+2\cdot x\cdot 3+3^2$`, R`$=x^2+6x+9$`] },
+    solution:[R`$(x+3)^2=x^2+2\cdot x\cdot 3+3^2$`, R`$=x^2+6x+9$`],
+    door:{gap:220} },
   { tag:"Hằng đẳng thức 2 • Bình phương của một hiệu",
     q:R`$(2x-1)^2$ bằng:`, speak:"2 x trừ 1, tất cả bình phương, bằng bao nhiêu?",
     options:[R`$4x^2-2x+1$`, R`$4x^2-4x+1$`, R`$2x^2-4x+1$`], answer:1,
-    solution:[R`$(2x-1)^2=(2x)^2-2\cdot 2x\cdot 1+1^2$`, R`$=4x^2-4x+1$`] },
+    solution:[R`$(2x-1)^2=(2x)^2-2\cdot 2x\cdot 1+1^2$`, R`$=4x^2-4x+1$`],
+    door:{gap:170} },
   { tag:"Hằng đẳng thức 3 • Hiệu hai bình phương",
     q:R`$x^2-25$ bằng:`, speak:"x bình phương trừ 25 bằng bao nhiêu?",
     options:[R`$(x-5)^2$`, R`$(x-25)(x+25)$`, R`$(x-5)(x+5)$`], answer:2,
-    solution:[R`$x^2-25=x^2-5^2$`, R`$=(x-5)(x+5)$`] },
+    solution:[R`$x^2-25=x^2-5^2$`, R`$=(x-5)(x+5)$`],
+    door:{breathe:[240,150]} },
   { tag:"Vận dụng hằng đẳng thức 2 • Tính nhanh",
     q:R`Tính nhanh: $99^2=\ ?$`, speak:"Tính nhanh 99 bình phương.",
     options:[R`$9801$`, R`$9701$`, R`$9981$`], answer:0,
-    solution:[R`$99^2=(100-1)^2=100^2-2\cdot 100\cdot 1+1^2$`, R`$=10000-200+1=9801$`] },
+    solution:[R`$99^2=(100-1)^2=100^2-2\cdot 100\cdot 1+1^2$`, R`$=10000-200+1=9801$`],
+    door:{gap:175, move:35} },
   { tag:"Vận dụng hằng đẳng thức 3 • Tính nhanh",
     q:R`Tính nhanh: $52\cdot 48=\ ?$`, speak:"Tính nhanh 52 nhân 48.",
     options:[R`$2500$`, R`$2496$`, R`$2504$`], answer:1,
-    solution:[R`$52\cdot 48=(50+2)(50-2)=50^2-2^2$`, R`$=2500-4=2496$`] }
+    solution:[R`$52\cdot 48=(50+2)(50-2)=50^2-2^2$`, R`$=2500-4=2496$`],
+    door:{breathe:[220,150], move:25} }
 ];
 /* ======================= HẾT PHẦN THẦY SỬA ======================= */
 </script>
@@ -50,7 +59,7 @@ const GATES = [
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#0b1430;overflow:hidden}
 body{font-family:var(--ui);color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
-#wrap{position:fixed;inset:0;display:grid;place-items:center;background:#0b1430}
+#wrap{position:fixed;inset:0;background:#0b1430}
 #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;
   background:linear-gradient(#5ec8ff 0%,#9fe0ff 45%,#ffe8b8 100%);cursor:pointer}
 button{font-family:var(--ui);border:none;cursor:pointer}
@@ -65,54 +74,60 @@ button{font-family:var(--ui);border:none;cursor:pointer}
 /* ---- Cảnh nền ---- */
 .sun{position:absolute;right:220px;top:120px;width:200px;height:200px;border-radius:50%;
   background:radial-gradient(circle,#fff7c2 0,#ffd23f 55%,rgba(255,210,63,0) 72%)}
-.cloud{position:absolute;background:#fff;border-radius:100px;opacity:.9;filter:drop-shadow(0 8px 0 rgba(0,0,0,.05))}
+.cloud{position:absolute;background:#fff;border-radius:100px;opacity:.9}
 .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
 .cloud::before{width:55%;height:150%;left:15%;top:-70%}
 .cloud::after{width:40%;height:120%;left:50%;top:-45%}
 .sym{position:absolute;font-family:var(--math);font-style:italic;font-weight:700;color:rgba(255,255,255,.55);font-size:90px}
 #hills{position:absolute;left:0;bottom:80px;width:3840px;height:300px}
-#ground{position:absolute;left:0;right:0;bottom:0;height:80px;
+#ground{position:absolute;left:0;right:0;bottom:0;height:80px;z-index:12;
   background:repeating-linear-gradient(90deg,#3fbf5f 0 60px,#36ad54 60px 120px);border-top:10px solid #2a8f45}
 
 /* ---- Cổng ---- */
-.gate{position:absolute;top:0;height:1080px;width:0}
-.pillar{position:absolute;left:0;width:110px;border-radius:24px;
-  background:linear-gradient(90deg,#5b2bd1,#9b6bff 45%,#5b2bd1);box-shadow:0 0 30px rgba(155,107,255,.8),inset 0 0 0 6px rgba(255,255,255,.35)}
-.pillar::after{content:"";position:absolute;left:18px;top:10px;bottom:10px;width:14px;border-radius:10px;background:rgba(255,255,255,.45)}
-.portal{position:absolute;left:8px;width:94px;border-radius:30px;opacity:.55}
-.sign{position:absolute;right:10px;display:flex;align-items:center;gap:22px;padding:0 34px 0 22px;height:170px;border-radius:30px;
+.gate{position:absolute;left:0;top:0;height:1080px;width:0}
+.wall{position:absolute;left:0;width:110px;border-radius:22px;
+  background:linear-gradient(90deg,#5b2bd1,#9b6bff 45%,#5b2bd1);box-shadow:0 0 26px rgba(155,107,255,.8),inset 0 0 0 6px rgba(255,255,255,.35)}
+.wall::after{content:"";position:absolute;left:18px;top:12px;bottom:12px;width:14px;border-radius:10px;background:rgba(255,255,255,.45)}
+.portal{position:absolute;left:6px;width:98px;border-radius:20px;opacity:.5}
+.laser{position:absolute;left:-10px;width:130px;border-radius:12px;opacity:0;
+  background:repeating-linear-gradient(0deg,#ff2a4a 0 14px,#ffd1d8 14px 22px);box-shadow:0 0 40px #ff2a4a}
+.laser.on{opacity:1;animation:zap .12s 6 alternate}
+@keyframes zap{to{opacity:.4}}
+.sign{position:absolute;right:30px;display:flex;align-items:center;gap:20px;padding:0 30px 0 18px;height:150px;border-radius:28px;
   background:rgba(255,255,255,.93);border:8px solid;box-shadow:0 12px 0 rgba(0,0,0,.18);white-space:nowrap}
-.sign .k{flex:none;width:110px;height:110px;border-radius:24px;color:#fff;font-size:84px;font-weight:800;display:grid;place-items:center;line-height:1}
-.sign .t{font-size:88px;line-height:1}
-.sign.good{background:#d6ffe6;border-color:var(--ok)!important;animation:pulse .5s 3}
-.sign.bad{background:#ffe0e3;animation:shake .45s}
-@keyframes pulse{50%{transform:scale(1.08)}}
-@keyframes shake{20%,60%{transform:translateX(-18px)}40%,80%{transform:translateX(18px)}}
+.sign .k{flex:none;width:100px;height:100px;border-radius:22px;color:#fff;font-size:78px;font-weight:800;display:grid;place-items:center;line-height:1}
+.sign .t{font-size:84px;line-height:1}
+.sign.good{background:#d6ffe6;border-color:var(--ok)!important}
+.sign.bad{background:#ffe0e3}
 
 /* ---- Chim ---- */
-#bird{position:absolute;left:0;top:0;width:150px;height:130px;z-index:20;will-change:transform}
+#bird{position:absolute;left:0;top:0;width:130px;height:113px;z-index:20;will-change:transform}
 #bird .wing{transform-origin:62px 68px;animation:flap .32s infinite alternate ease-in-out}
 #bird.boost .wing{animation-duration:.09s}
+#bird.dead .wing{animation:none}
+#bird.dead{filter:saturate(.3) brightness(.85)}
 @keyframes flap{from{transform:rotate(-28deg)}to{transform:rotate(22deg)}}
 
 /* ---- HUD ---- */
 #hud{position:absolute;left:0;right:0;top:0;height:170px;display:flex;align-items:center;gap:24px;padding:0 30px;z-index:30;
-  background:linear-gradient(rgba(10,20,60,.82),rgba(10,20,60,.65));color:#fff}
+  background:linear-gradient(rgba(10,20,60,.86),rgba(10,20,60,.7));color:#fff}
 #hud .gno{flex:none;font-size:52px;font-weight:800;background:var(--gold);color:var(--ink);border-radius:26px;padding:6px 26px}
 #hud .hq{flex:1;font-size:86px;font-weight:800;line-height:1;white-space:nowrap;overflow:hidden}
-#hud .hq .fm{font-weight:700}
-#hud .sc{flex:none;text-align:right;line-height:1}
-#hud .sc b{font-size:72px;color:var(--gold)}
-#hud .sc div{font-size:40px;letter-spacing:4px}
-#combo{position:absolute;left:50%;top:210px;transform:translateX(-50%);font-size:90px;font-weight:800;color:#fff;
-  -webkit-text-stroke:5px #ff4d8d;paint-order:stroke;z-index:35;pointer-events:none;opacity:0;transition:opacity .3s}
-#hint{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);font-size:52px;font-weight:800;color:#fff;
-  background:rgba(10,20,60,.7);padding:8px 36px;border-radius:40px;z-index:35;pointer-events:none;animation:bob 1s infinite alternate}
+#hud .sc{flex:none;text-align:right;line-height:1.05}
+#hud .sc b{font-size:66px;color:var(--gold)}
+#hud .sc div{font-size:38px;letter-spacing:3px}
+#warn{flex:none;font-size:42px;font-weight:800;color:#fff;background:#ef233c;padding:4px 26px;border-radius:30px;animation:blink .5s infinite alternate}
+@keyframes blink{to{background:#ff7a8a}}
+#combo{position:absolute;left:50%;top:270px;transform:translateX(-50%);font-size:96px;font-weight:800;color:#fff;
+  -webkit-text-stroke:5px #ff4d8d;paint-order:stroke;z-index:35;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap}
+#hint{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);font-size:52px;font-weight:800;color:#fff;white-space:nowrap;
+  background:rgba(10,20,60,.75);padding:8px 36px;border-radius:40px;z-index:35;pointer-events:none;animation:bob 1s infinite alternate}
 @keyframes bob{to{transform:translate(-50%,-12px)}}
 
 /* ---- Trang chiếu (slide) ---- */
 .slide{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px 70px;
   background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.18),transparent 50%),linear-gradient(135deg,rgba(17,27,78,.96),rgba(76,29,149,.95));color:#fff;text-align:center;cursor:default}
+.slide.fail{background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.15),transparent 50%),linear-gradient(135deg,rgba(90,10,30,.95),rgba(40,10,60,.95))}
 .slide .pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1) both}
 @keyframes pop{from{transform:scale(.4);opacity:0}}
 .big-title{font-size:150px;font-weight:800;line-height:1;background:linear-gradient(90deg,#fff3a3,#ffd23f,#ff8fb1);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 8px 0 rgba(0,0,0,.35))}
@@ -126,24 +141,24 @@ button{font-family:var(--ui);border:none;cursor:pointer}
 .opt .k{flex:none;width:110px;height:110px;border-radius:26px;color:#fff;font-size:90px;font-weight:800;display:grid;place-items:center}
 .opt .t{font-size:100px;line-height:1.12}
 .opt .lane{margin-left:auto;font-size:40px;font-weight:800;opacity:.6}
-.opt.right{border-color:var(--ok)!important;background:#d6ffe6}
-.btns{display:flex;gap:30px;flex-wrap:wrap;justify-content:center}
+.btns{display:flex;gap:30px;flex-wrap:wrap;justify-content:center;align-items:center}
 .btn{font-size:62px;font-weight:800;padding:12px 56px;border-radius:40px;background:var(--gold);color:var(--ink);box-shadow:0 12px 0 #b8860b;transition:transform .15s}
 .btn:hover{transform:translateY(-4px)}
 .btn:active{transform:translateY(8px);box-shadow:0 4px 0 #b8860b}
 .btn.alt{background:#fff;box-shadow:0 12px 0 #9aa5c7}
 .btn.pink{background:#ff4d8d;color:#fff;box-shadow:0 12px 0 #a3134a}
-.res-ok{font-size:170px;font-weight:800;color:#5cff9d;filter:drop-shadow(0 8px 0 rgba(0,0,0,.35))}
-.res-no{font-size:150px;font-weight:800;color:#ff8a9a;filter:drop-shadow(0 8px 0 rgba(0,0,0,.35))}
-.ans{font-size:96px;font-weight:800;background:#fff;color:var(--ink);border-radius:34px;padding:10px 50px;border:8px solid var(--ok)}
-.sol{font-size:92px;line-height:1.3;background:rgba(255,255,255,.12);border-radius:34px;padding:18px 60px;text-align:left}
+.res-ok{font-size:170px;font-weight:800;color:#5cff9d;filter:drop-shadow(0 8px 0 rgba(0,0,0,.35));line-height:1.05}
+.res-no{font-size:150px;font-weight:800;color:#ff8a9a;filter:drop-shadow(0 8px 0 rgba(0,0,0,.35));line-height:1.05}
+.ans{font-size:92px;font-weight:800;background:#fff;color:var(--ink);border-radius:34px;padding:6px 50px;border:8px solid var(--ok)}
+.sol{font-size:88px;line-height:1.28;background:rgba(255,255,255,.12);border-radius:34px;padding:14px 60px;text-align:left}
 .sol div{animation:pop .5s both}
+.hearts{font-size:80px;letter-spacing:8px}
 .stars{font-size:120px;line-height:1.1;letter-spacing:10px}
 .stars span{display:inline-block;animation:pop .5s both}
 .stars .off{filter:grayscale(1) opacity(.35)}
 #count{font-size:420px;font-weight:800;color:#fff;-webkit-text-stroke:14px var(--ink);paint-order:stroke;background:none;pointer-events:none}
-.modes{display:flex;gap:24px;align-items:center;font-size:48px;font-weight:800}
-.chip{font-size:48px;font-weight:800;padding:8px 34px;border-radius:30px;background:rgba(255,255,255,.18);color:#fff;border:5px solid transparent}
+.modes{display:flex;gap:20px;align-items:center;font-size:46px;font-weight:800}
+.chip{font-size:46px;font-weight:800;padding:6px 30px;border-radius:30px;background:rgba(255,255,255,.18);color:#fff;border:5px solid transparent}
 .chip.on{background:#fff;color:var(--ink);border-color:var(--gold)}
 .board{font-size:40px;line-height:1.25;background:rgba(255,255,255,.12);border-radius:26px;padding:10px 40px;min-width:900px}
 .board div{display:flex;justify-content:space-between;gap:40px}
@@ -159,7 +174,6 @@ button{font-family:var(--ui);border:none;cursor:pointer}
 <body>
 <div id="wrap">
 <div id="stage">
-  <!-- cảnh nền -->
   <div class="sun"></div>
   <div id="far"></div>
   <svg id="hills" viewBox="0 0 3840 300" preserveAspectRatio="none">
@@ -181,7 +195,6 @@ button{font-family:var(--ui);border:none;cursor:pointer}
     <circle cx="98" cy="55" r="17" fill="#fff" stroke="#16213e" stroke-width="3"/>
     <circle cx="103" cy="56" r="8" fill="#16213e"/><circle cx="106" cy="52" r="3" fill="#fff"/>
     <path d="M118 66 L146 74 L118 84 Z" fill="#ff4d4d" stroke="#a31515" stroke-width="3"/>
-    <!-- mũ tốt nghiệp -->
     <path d="M52 22 L92 8 L132 22 L92 36 Z" fill="#16213e"/>
     <rect x="76" y="26" width="32" height="14" rx="4" fill="#16213e"/>
     <path d="M128 23 L130 46" stroke="#ffd23f" stroke-width="4"/><circle cx="130" cy="48" r="5" fill="#ffd23f"/>
@@ -190,10 +203,11 @@ button{font-family:var(--ui);border:none;cursor:pointer}
   <div id="hud" class="hidden">
     <div class="gno" id="hGate">CỔNG 1/5</div>
     <div class="hq" id="hQ"></div>
-    <div class="sc"><b id="hScore">0</b><div id="hStars">☆☆☆☆☆</div></div>
+    <div id="warn" class="hidden"></div>
+    <div class="sc"><b id="hScore">0</b><div id="hLives">❤️</div><div id="hStars">☆☆☆☆☆</div></div>
   </div>
   <div id="combo"></div>
-  <div id="hint" class="hidden">Nhấn SPACE / chạm màn hình để bay lên!</div>
+  <div id="hint" class="hidden">Nhấn SPACE / chạm màn hình để vỗ cánh!</div>
   <canvas id="fx" width="1920" height="1080"></canvas>
 
   <!-- MÀN HÌNH ĐẦU -->
@@ -201,10 +215,13 @@ button{font-family:var(--ui);border:none;cursor:pointer}
     <div class="big-title pop" id="tTitle"></div>
     <div class="sub pop" id="tSub" style="animation-delay:.15s"></div>
     <div class="small" id="tTeacher"></div>
-    <div class="modes"><span>Tốc độ bay:</span>
-      <button class="chip" data-sp="140">🐢 Chậm</button><button class="chip on" data-sp="190">🐦 Vừa</button><button class="chip" data-sp="250">🚀 Nhanh</button>
+    <div class="modes"><span>Tốc độ:</span>
+      <button class="chip" data-sp="150">🐢 Chậm</button><button class="chip on" data-sp="200">🐦 Vừa</button><button class="chip" data-sp="260">🚀 Nhanh</button>
     </div>
-    <div class="small">Bay qua <b>5 cổng</b> • Mỗi cổng có 3 cửa A – B – C • Bay vào cửa có <b>đáp án đúng</b>!</div>
+    <div class="modes"><span>Số mạng:</span>
+      <button class="chip on" data-lv="1">❤️ 1</button><button class="chip" data-lv="3">❤️ 3</button><button class="chip" data-lv="5">❤️ 5</button>
+    </div>
+    <div class="small">Đọc câu hỏi • Bay vào cửa có <b>đáp án đúng</b> • Đâm cột, rơi xuống đất hay vào cửa sai là <b>chim rơi</b>!</div>
     <div class="btns"><button class="btn" id="bStart">▶ BẮT ĐẦU</button></div>
     <div class="board hidden" id="tBoard"></div>
   </section>
@@ -220,17 +237,27 @@ button{font-family:var(--ui);border:none;cursor:pointer}
 
   <section class="slide hidden" id="count"></section>
 
-  <!-- TRANG KẾT QUẢ -->
+  <!-- TRANG ĐÚNG -->
   <section class="slide hidden" id="sR">
-    <div id="rHead" class="pop"></div>
+    <div class="res-ok pop">🎉 CHÍNH XÁC!</div>
     <div class="ans pop" id="rAns" style="animation-delay:.2s"></div>
     <div class="sol" id="rSol"></div>
     <div class="btns"><button class="btn" id="bNext">Cổng tiếp theo ▶</button></div>
   </section>
 
+  <!-- TRANG CHIM RƠI -->
+  <section class="slide fail hidden" id="sF">
+    <div class="res-no pop" id="fHead"></div>
+    <div class="sub" id="fWhy"></div>
+    <div class="hearts" id="fLives"></div>
+    <div class="ans pop hidden" id="fAns" style="animation-delay:.2s"></div>
+    <div class="sol hidden" id="fSol"></div>
+    <div class="btns"><button class="btn" id="bFail"></button></div>
+  </section>
+
   <!-- KẾT THÚC -->
   <section class="slide hidden" id="sEnd">
-    <div class="big-title pop" style="font-size:110px">🏆 VỀ ĐÍCH! 🏆</div>
+    <div class="big-title pop" id="eTitle" style="font-size:110px"></div>
     <div class="stars" id="eStars"></div>
     <div class="sub" id="eScore"></div>
     <div class="btns"><input class="namein" id="eName" placeholder="Tên người chơi" maxlength="24"><button class="btn alt" id="bSave">💾 Lưu điểm</button></div>
@@ -252,17 +279,19 @@ button{font-family:var(--ui);border:none;cursor:pointer}
 /* ============================ ENGINE ============================ */
 const $ = s => document.querySelector(s);
 const stage = $("#stage");
-const W = 1920, H = 1080, TOP = 190, BOT = 1000, BAR = 30;
-const LANE_H = (BOT - TOP - 2*BAR) / 3;                 // 250px mỗi cửa
-const laneTop = i => TOP + i*(LANE_H + BAR);
+const W = 1920, H = 1080, TOP = 190, BOT = 1000;
+const LANE = (BOT - TOP) / 3;                         // 270 px mỗi làn
+const laneMid = i => TOP + LANE*i + LANE/2;
 const KEYS = ["A","B","C"], LC = ["var(--A)","var(--B)","var(--C)"], LHEX = ["#ef476f","#3a86ff","#f59e0b"];
 const LNAME = ["cửa trên","cửa giữa","cửa dưới"];
-const BIRD_X = 330;
+const BIRD_X = 330, BR = 32, PW = 110;                 // vị trí chim, bán kính va chạm, bề dày cột
+const GRAV = 1400, FLAP = -480, MAXFALL = 780;   // mỗi lần vỗ cánh chim lên khoảng 80 px
 
 /* ---- Khung trình chiếu 16:9 co giãn như PowerPoint ---- */
+let SCALE = 1;
 function fit(){
-  const s = Math.min(innerWidth / W, innerHeight / H);
-  stage.style.transform = `translate(${-W*s/2}px,${-H*s/2}px) scale(${s})`;
+  SCALE = Math.min(innerWidth / W, innerHeight / H);
+  stage.style.transform = `translate(${-W*SCALE/2}px,${-H*SCALE/2}px) scale(${SCALE})`;
 }
 addEventListener("resize", fit); fit();
 
@@ -315,8 +344,11 @@ const SND = {
   beep(){ tone(660,.2,"square",.12); },
   go(){ tone(990,.35,"square",.14); },
   ok(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,.25,"triangle",.2,i*.08)); },
-  no(){ tone(260,.4,"sawtooth",.15,0,120); tone(200,.5,"sawtooth",.12,.2,90); },
-  win(){ [523,659,784,1047,784,1047,1319,1568].forEach((f,i)=>tone(f,.3,"triangle",.18,i*.13)); }
+  hit(){ tone(150,.25,"square",.2,0,60); tone(90,.4,"sawtooth",.18,.05,40); },
+  fall(){ tone(700,.8,"sine",.14,0,120); },
+  zap(){ for(let k=0;k<5;k++) tone(1200-k*150,.06,"sawtooth",.1,k*.05); },
+  win(){ [523,659,784,1047,784,1047,1319,1568].forEach((f,i)=>tone(f,.3,"triangle",.18,i*.13)); },
+  over(){ [392,370,349,330].forEach((f,i)=>tone(f,.35,"triangle",.16,i*.25)); }
 };
 function music(on){
   clearInterval(musicTimer); musicTimer = null;
@@ -354,7 +386,7 @@ function drawParts(){
 const far = $("#far"), clouds = [], syms = [];
 [[200,260,220,70],[800,330,300,90],[1400,240,240,75],[2100,380,280,85]].forEach(([x,y,w,h])=>{
   const d=document.createElement("div"); d.className="cloud"; d.style.cssText=`width:${w}px;height:${h}px;top:${y}px`; far.appendChild(d); clouds.push({el:d,x,w}); });
-["+","−","²","=","x","y","(",")"].forEach((s,i)=>{ const d=document.createElement("div"); d.className="sym"; d.textContent=s; d.style.top=(300+ (i%4)*140)+"px"; far.appendChild(d); syms.push({el:d,x:i*300+100}); });
+["+","−","²","=","x","y","(",")"].forEach((s,i)=>{ const d=document.createElement("div"); d.className="sym"; d.textContent=s; d.style.top=(300+(i%4)*140)+"px"; far.appendChild(d); syms.push({el:d,x:i*300+100}); });
 let hillX = 0, groundX = 0;
 function scenery(dt, sp){
   clouds.forEach(c=>{ c.x -= sp*.25*dt; if (c.x < -c.w-50) c.x = W+50; c.el.style.transform=`translateX(${c.x}px)`; });
@@ -364,21 +396,28 @@ function scenery(dt, sp){
 }
 
 /* ---- Trạng thái ---- */
-let speed = 190, idx = 0, score = 0, combo = 0, results = [], mode = "title", paused = false;
-let bird = {y:540, vy:0}, gate = null, coins = [], flyT = 0;
+let speed = 200, maxLives = 1, lives = 1, idx = 0, score = 0, combo = 0, results = [], mode = "title", paused = false;
+let bird = {y:540, vy:0, rot:0, started:false}, gate = null, coins = [], flyT = 0;
 const birdEl = $("#bird");
-function showSlide(id){ ["sTitle","sQ","count","sR","sEnd"].forEach(s=>$("#"+s).classList.toggle("hidden", s!==id)); }
-function setStars(){ $("#hStars").textContent = GATES.map((g,i)=> results[i]===true?"★":"☆").join(""); }
+const SLIDES = ["sTitle","sQ","count","sR","sF","sEnd"];
+function showSlide(id){ SLIDES.forEach(s=>$("#"+s).classList.toggle("hidden", s!==id)); }
+function setHud(){
+  $("#hScore").textContent = score;
+  $("#hStars").textContent = GATES.map((g,i)=> results[i]===true?"★":"☆").join("");
+  $("#hLives").textContent = "❤️".repeat(Math.max(0,lives)) + "🤍".repeat(Math.max(0,maxLives-lives));
+}
 
 /* ---- Màn hình đầu ---- */
 function home(){
   mode = "title"; music(false); clearWorld();
   $("#tTitle").textContent = GAME.title; $("#tSub").innerHTML = M(GAME.subtitle); $("#tTeacher").textContent = GAME.teacher;
-  document.title = GAME.title; $("#hud").classList.add("hidden"); birdEl.classList.add("hidden"); $("#hint").classList.add("hidden");
+  document.title = GAME.title; $("#hud").classList.add("hidden"); birdEl.classList.add("hidden"); $("#hint").classList.add("hidden"); $("#warn").classList.add("hidden");
   renderBoard($("#tBoard")); showSlide("sTitle");
 }
-document.querySelectorAll(".chip").forEach(c => c.onclick = e => { e.stopPropagation(); document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on")); c.classList.add("on"); speed = +c.dataset.sp; tone(700,.08,"square",.08); });
-$("#bStart").onclick = e => { e.stopPropagation(); idx = 0; score = 0; combo = 0; results = []; $("#hScore").textContent = 0; setStars(); questionSlide(); };
+document.querySelectorAll(".chip[data-sp]").forEach(c => c.onclick = e => { e.stopPropagation(); document.querySelectorAll(".chip[data-sp]").forEach(x=>x.classList.remove("on")); c.classList.add("on"); speed = +c.dataset.sp; tone(700,.08,"square",.08); });
+document.querySelectorAll(".chip[data-lv]").forEach(c => c.onclick = e => { e.stopPropagation(); document.querySelectorAll(".chip[data-lv]").forEach(x=>x.classList.remove("on")); c.classList.add("on"); maxLives = +c.dataset.lv; tone(700,.08,"square",.08); });
+function newGame(){ idx = 0; score = 0; combo = 0; results = []; lives = maxLives; setHud(); questionSlide(); }
+$("#bStart").onclick = e => { e.stopPropagation(); newGame(); };
 
 /* ---- Trang câu hỏi (trình chiếu như PPT) ---- */
 function questionSlide(){
@@ -398,12 +437,30 @@ $("#bFly").onclick = e => { e.stopPropagation(); countdown(); };
 function countdown(){
   mode = "count"; try{ speechSynthesis.cancel(); }catch(e){}
   setupFlight();
-  const c = $("#count"); showSlide("count"); let n = 3;
+  const c = $("#count"); showSlide("count"); c.classList.remove("hidden"); let n = 3;
   const step = () => {
+    if (mode!=="count") return;
     if (n > 0){ c.innerHTML = `<div class="pop">${n}</div>`; SND.beep(); n--; setTimeout(step, 700); }
     else { c.innerHTML = `<div class="pop" style="font-size:300px">BAY!</div>`; SND.go(); setTimeout(()=>{ c.classList.add("hidden"); mode = "fly"; music(true); }, 500); }
   };
   step();
+}
+
+/* ---- Cổng: độ rộng cửa & vị trí theo thời gian ---- */
+function doorGap(d, t){
+  if (d.breathe){ const [a,b] = d.breathe; return b + (a-b) * (0.5 + 0.5*Math.cos(t*2*Math.PI/2.4)); }
+  return d.gap || 200;
+}
+function doorShift(d, t){ return d.move ? d.move * Math.sin(t*2*Math.PI/2.8) : 0; }
+function openings(t){
+  const d = GATES[idx].door || {}, g = doorGap(d, t), sh = doorShift(d, t);
+  return [0,1,2].map(i=>{ const c = laneMid(i) + sh; return {top:c-g/2, bot:c+g/2, mid:c}; });
+}
+function doorLabel(d){
+  const w = [];
+  const g = d.breathe ? d.breathe[1] : (d.gap||200);
+  if (d.breathe) w.push("CỬA CO GIÃN"); if (d.move) w.push("CỬA DI CHUYỂN"); if (!d.breathe && g <= 175) w.push("CỬA HẸP");
+  return w.length ? "⚠ " + w.join(" + ") : "";
 }
 
 /* ---- Màn bay ---- */
@@ -411,92 +468,142 @@ function clearWorld(){ $("#world").innerHTML = ""; gate = null; coins = []; }
 function setupFlight(){
   clearWorld();
   const g = GATES[idx];
-  $("#hud").classList.remove("hidden"); $("#hGate").textContent = `CỔNG ${idx+1}/${GATES.length}`; $("#hQ").innerHTML = M(g.q);
-  birdEl.classList.remove("hidden"); bird = {y: laneTop(1) + LANE_H/2, vy:0}; flyT = 0;
+  $("#hud").classList.remove("hidden"); $("#hGate").textContent = `CỔNG ${idx+1}/${GATES.length}`; $("#hQ").innerHTML = M(g.q); setHud();
+  const wtxt = doorLabel(g.door || {}); $("#warn").textContent = wtxt; $("#warn").classList.toggle("hidden", !wtxt);
+  birdEl.classList.remove("hidden","dead"); bird = {y: laneMid(1), vy:0, rot:0, started:false}; flyT = 0;
   $("#hint").classList.remove("hidden");
-  // Cổng: 4 thanh trụ + 3 cửa + 3 biển đáp án
   const el = document.createElement("div"); el.className = "gate";
-  const bars = [[TOP-30, 40], [laneTop(1)-BAR, BAR], [laneTop(2)-BAR, BAR], [BOT-10, 90]];
-  let html = bars.map(([y,h])=>`<div class="pillar" style="top:${y}px;height:${h}px"></div>`).join("");
-  html += [0,1,2].map(i=>`<div class="portal" style="top:${laneTop(i)}px;height:${LANE_H}px;background:linear-gradient(90deg,transparent,${LHEX[i]},transparent)"></div>`).join("");
-  html += g.options.map((o,i)=>`<div class="sign" id="sign${i}" style="top:${laneTop(i)+(LANE_H-170)/2}px;border-color:${LC[i]}"><span class="k" style="background:${LC[i]}">${KEYS[i]}</span><span class="t">${M(o)}</span></div>`).join("");
+  let html = [0,1,2,3].map(i=>`<div class="wall" id="w${i}"></div>`).join("");
+  html += [0,1,2].map(i=>`<div class="portal" id="p${i}" style="background:linear-gradient(90deg,transparent,${LHEX[i]},transparent)"></div><div class="laser" id="l${i}"></div>`).join("");
+  html += g.options.map((o,i)=>`<div class="sign" id="sign${i}" style="border-color:${LC[i]}"><span class="k" style="background:${LC[i]}">${KEYS[i]}</span><span class="t">${M(o)}</span></div>`).join("");
   el.innerHTML = html; $("#world").appendChild(el);
-  gate = {el, x: W + 760, judged:false};
-  // Đồng xu trang trí trong từng cửa
+  gate = {el, x: W + 700, t:0, passed:false, lane:-1};
   for (let k=0;k<6;k++){
-    const c = document.createElement("div"); c.textContent = "🪙"; c.style.cssText = "position:absolute;font-size:70px;z-index:15";
-    const lane = k%3, x = W*0.55 + k*170;
-    $("#world").appendChild(c); coins.push({el:c, x, y: laneTop(lane)+LANE_H/2-40, got:false});
+    const c = document.createElement("div"); c.textContent = "🪙"; c.style.cssText = "position:absolute;left:0;top:0;font-size:64px;z-index:15";
+    $("#world").appendChild(c); coins.push({el:c, x: W*0.5 + k*190, y: laneMid(k%3)-36, got:false});
   }
-  placeWorld();
+  drawGate(); placeBird();
 }
-function placeWorld(){
-  if (gate) gate.el.style.transform = `translateX(${gate.x}px)`;
+function drawGate(){
+  if (!gate) return;
+  const o = openings(gate.t);
+  gate.el.style.transform = `translateX(${gate.x}px)`;
+  const segs = [[TOP-40, o[0].top], [o[0].bot, o[1].top], [o[1].bot, o[2].top], [o[2].bot, BOT+20]];
+  segs.forEach(([a,b],i)=>{ const w = $("#w"+i); w.style.top = a+"px"; w.style.height = Math.max(0,b-a)+"px"; });
+  o.forEach((p,i)=>{
+    const pr = $("#p"+i), la = $("#l"+i), sg = $("#sign"+i);
+    pr.style.top = p.top+"px"; pr.style.height = (p.bot-p.top)+"px";
+    la.style.top = p.top+"px"; la.style.height = (p.bot-p.top)+"px";
+    sg.style.top = (p.mid-75)+"px";
+  });
   coins.forEach(c=>{ c.el.style.transform = `translate(${c.x}px,${c.y}px)`; });
-  const rot = Math.max(-30, Math.min(50, bird.vy/12));
-  birdEl.style.transform = `translate(${BIRD_X-75}px,${bird.y-65}px) rotate(${rot}deg)`;
+}
+function placeBird(){
+  birdEl.style.transform = `translate(${BIRD_X-65}px,${bird.y-56}px) rotate(${bird.rot}deg)`;
 }
 function flap(){
   if (mode!=="fly" || paused) return;
-  bird.vy = -560; SND.flap(); $("#hint").classList.add("hidden");
+  bird.started = true; bird.vy = FLAP; SND.flap(); $("#hint").classList.add("hidden");
   birdEl.classList.add("boost"); clearTimeout(flap.t); flap.t = setTimeout(()=>birdEl.classList.remove("boost"), 200);
 }
 function updateFly(dt){
-  flyT += dt;
-  // Chim: trọng lực nhẹ, chạm trần/đất thì dừng lại (không thua)
-  const hover = flyT < 1.2;                          // 1,2 giây đầu: chim lơ lửng để học sinh làm quen
-  bird.vy += (hover ? 300 : 1350) * dt; bird.vy = Math.min(bird.vy, 700);
-  bird.y += bird.vy * dt;
-  if (bird.y < TOP + 55){ bird.y = TOP + 55; bird.vy = 0; }
-  if (bird.y > BOT - 55){ bird.y = BOT - 55; bird.vy = -180; }
-  gate.x -= speed * dt;
-  coins.forEach(c=>{ c.x -= speed*dt; if (!c.got && Math.abs(c.x+35-BIRD_X)<70 && Math.abs(c.y+40-bird.y)<85){ c.got = true; c.el.remove(); score += 10; $("#hScore").textContent = score; SND.coin(); burst(BIRD_X, bird.y, 12, ["#ffd23f","#fff3a3"], 8); } });
-  // Qua cổng: xác định cửa theo vị trí chim
-  if (!gate.judged && gate.x <= BIRD_X - 20){
-    gate.judged = true;
-    const lane = Math.max(0, Math.min(2, Math.floor((bird.y - TOP + BAR/2) / (LANE_H + BAR))));
-    judge(lane);
+  flyT += dt; gate.t += dt;
+  // Chim lơ lửng đến lần vỗ cánh đầu tiên (tối đa 2 giây), sau đó rơi tự do
+  if (!bird.started && flyT < 2){ bird.y = laneMid(1) + Math.sin(flyT*6)*14; bird.vy = 0; }
+  else { bird.started = true; bird.vy = Math.min(MAXFALL, bird.vy + GRAV*dt); bird.y += bird.vy*dt; }
+  bird.rot = Math.max(-28, Math.min(70, bird.vy/11));
+  if (bird.y - BR < TOP){ bird.y = TOP + BR; bird.vy = 0; }                 // chạm trần: dừng lại
+  gate.x -= speed*dt;
+  coins.forEach(c=>{ c.x -= speed*dt; if (!c.got && Math.abs(c.x+32-BIRD_X)<62 && Math.abs(c.y+36-bird.y)<70){ c.got = true; c.el.remove(); score += 10; setHud(); SND.coin(); burst(BIRD_X, bird.y, 12, ["#ffd23f","#fff3a3"], 8); } });
+  // Rơi xuống đất
+  if (bird.y + BR >= BOT){ bird.y = BOT - BR; return crash("ground"); }
+  // Va chạm cột cổng
+  const o = openings(gate.t);
+  if (BIRD_X + BR > gate.x + 8 && BIRD_X - BR < gate.x + PW - 8){
+    const lane = o.findIndex(p => bird.y - BR*0.75 >= p.top && bird.y + BR*0.75 <= p.bot);
+    if (lane < 0) return crash("wall");
+    if (!gate.passed){                                       // vừa vào cửa
+      gate.passed = true; gate.lane = lane;
+      if (lane !== GATES[idx].answer) return crash("wrong", lane);
+      success();
+    }
   }
-  if (gate.judged && gate.x < -300){ /* cổng đã đi qua */ }
-}
-function judge(lane){
-  const g = GATES[idx], ok = lane === g.answer;
-  results[idx] = ok; setStars();
-  const sign = $("#sign"+lane);
-  if (ok){
-    combo++; const add = 100 * (combo>=2 ? 2 : 1); score += add; $("#hScore").textContent = score;
-    sign.classList.add("good"); SND.ok();
-    burst(BIRD_X, bird.y, 120, ["#ffd23f","#16c172","#3a86ff","#ff4d8d","#fff"]);
-    const cb = $("#combo"); cb.textContent = combo>=2 ? `COMBO x${combo}! +${add}` : `+${add}`; cb.style.opacity = 1; setTimeout(()=>cb.style.opacity=0, 1200);
-  } else {
-    combo = 0; sign.classList.add("bad"); $("#sign"+g.answer).classList.add("good"); SND.no();
-    burst(BIRD_X, bird.y, 40, ["#ef233c","#555"], 10);
-    stage.animate([{transform:stage.style.transform+" translateX(0)"},{transform:stage.style.transform+" translateX(-20px)"},{transform:stage.style.transform+" translateX(20px)"},{transform:stage.style.transform}],{duration:350});
-  }
-  setTimeout(()=>resultSlide(ok, lane), 1500);
 }
 
-/* ---- Trang kết quả + lời giải ---- */
-function resultSlide(ok, lane){
+/* ---- Trả lời đúng ---- */
+function success(){
+  const g = GATES[idx];
+  results[idx] = true; combo++;
+  const add = 100 * (combo>=2 ? 2 : 1); score += add; setHud();
+  $("#sign"+g.answer).classList.add("good"); SND.ok();
+  burst(BIRD_X, bird.y, 120, ["#ffd23f","#16c172","#3a86ff","#ff4d8d","#fff"]);
+  const cb = $("#combo"); cb.textContent = combo>=2 ? `COMBO x${combo}! +${add}` : `TUYỆT! +${add}`; cb.style.opacity = 1; setTimeout(()=>cb.style.opacity=0, 1200);
+  mode = "pass";                                              // chim tiếp tục bay qua cổng
+  setTimeout(()=>{ if (mode==="pass") rightSlide(); }, 1300);
+}
+function rightSlide(){
   mode = "r"; music(false);
   const g = GATES[idx];
-  $("#rHead").innerHTML = ok ? `<div class="res-ok">🎉 CHÍNH XÁC!</div>` : `<div class="res-no">😅 Chưa đúng rồi!</div><div class="sub">Em bay vào cửa ${KEYS[lane]}</div>`;
   $("#rAns").innerHTML = `Đáp án: <span style="color:${LHEX[g.answer]}">${KEYS[g.answer]}.</span> ${M(g.options[g.answer])}`;
   $("#rSol").innerHTML = g.solution.map((s,i)=>`<div style="animation-delay:${.5+i*.6}s">${M(s)}</div>`).join("");
-  $("#bNext").textContent = idx < GATES.length-1 ? "Cổng tiếp theo ▶" : "🏆 Xem kết quả";
+  $("#bNext").textContent = idx < GATES.length-1 ? "Cổng tiếp theo ▶" : "🏆 Về đích!";
   showSlide("sR");
 }
-$("#bNext").onclick = e => { e.stopPropagation(); idx++; if (idx < GATES.length) questionSlide(); else endSlide(); };
+$("#bNext").onclick = e => { e.stopPropagation(); idx++; if (idx < GATES.length) questionSlide(); else endSlide(true); };
+
+/* ---- Chim rơi ---- */
+let crashInfo = null;
+function crash(why, lane){
+  mode = "crash"; music(false); combo = 0; lives--; setHud();
+  crashInfo = {why, lane};
+  if (why==="wrong"){ results[idx] = false; $("#l"+lane).classList.add("on"); $("#sign"+lane).classList.add("bad"); SND.zap(); }
+  SND.hit(); setTimeout(()=>SND.fall(), 150);
+  birdEl.classList.add("dead");
+  burst(BIRD_X, bird.y, 50, ["#ffffff","#ffd23f","#ff6b6b"], 12);
+  bird.vy = -420;
+  stage.animate([{transform:stage.style.transform+" translate(0,0)"},{transform:stage.style.transform+" translate(-24px,10px)"},{transform:stage.style.transform+" translate(24px,-10px)"},{transform:stage.style.transform}],{duration:380});
+}
+function updateCrash(dt){
+  bird.vy = Math.min(1100, bird.vy + 2000*dt); bird.y += bird.vy*dt; bird.rot += 540*dt;
+  if (bird.y + BR >= BOT){ bird.y = BOT - BR; if (!crashInfo.landed){ crashInfo.landed = true; burst(BIRD_X, BOT, 30, ["#7a5230","#55c271"], 8); setTimeout(failSlide, 900); } bird.rot = 160; }
+}
+function failSlide(){
+  mode = "f";
+  const g = GATES[idx], why = crashInfo.why, over = lives <= 0;
+  const reason = {ground:"Chim rơi xuống đất!", wall:"Chim đâm vào cột cổng!", wrong:`Cửa ${KEYS[crashInfo.lane]} là đáp án sai – cửa đã đóng sập!`}[why];
+  $("#fHead").textContent = over ? "💥 GAME OVER!" : "💥 CHIM RƠI RỒI!";
+  $("#fWhy").textContent = reason;
+  $("#fLives").textContent = maxLives > 1 ? ("❤️".repeat(Math.max(0,lives)) + "🤍".repeat(maxLives-Math.max(0,lives))) : "";
+  const showAns = why==="wrong";
+  $("#fAns").classList.toggle("hidden", !showAns); $("#fSol").classList.toggle("hidden", !showAns);
+  if (showAns){
+    $("#fAns").innerHTML = `Đáp án đúng: <span style="color:${LHEX[g.answer]}">${KEYS[g.answer]}.</span> ${M(g.options[g.answer])}`;
+    $("#fSol").innerHTML = g.solution.map((s,i)=>`<div style="animation-delay:${.5+i*.6}s">${M(s)}</div>`).join("");
+  }
+  const b = $("#bFail");
+  if (over) b.textContent = "🏁 Xem kết quả";
+  else if (why==="wrong") b.textContent = idx < GATES.length-1 ? "Cổng tiếp theo ▶" : "🏁 Xem kết quả";
+  else b.textContent = "🔁 Bay lại cổng này";
+  showSlide("sF"); SND.over();
+}
+$("#bFail").onclick = e => {
+  e.stopPropagation();
+  if (lives <= 0) return endSlide(false);
+  if (crashInfo.why==="wrong"){ idx++; if (idx < GATES.length) questionSlide(); else endSlide(true); }
+  else countdown();                                            // bay lại cổng này
+};
 
 /* ---- Kết thúc ---- */
-function endSlide(){
-  mode = "end"; clearWorld(); $("#hud").classList.add("hidden"); birdEl.classList.add("hidden");
+function endSlide(finished){
+  mode = "end"; music(false); clearWorld(); $("#hud").classList.add("hidden"); $("#warn").classList.add("hidden"); birdEl.classList.add("hidden");
   const n = results.filter(x=>x).length;
+  $("#eTitle").textContent = finished ? "🏆 VỀ ĐÍCH! 🏆" : "💥 GAME OVER 💥";
   $("#eStars").innerHTML = GATES.map((g,i)=>`<span class="${results[i]?'':'off'}" style="animation-delay:${i*.2}s">⭐</span>`).join("");
-  const msg = n===5 ? "Xuất sắc! Bậc thầy hằng đẳng thức!" : n>=3 ? "Rất tốt! Cố lên chút nữa nhé!" : "Ôn lại 3 hằng đẳng thức rồi bay lại nào!";
-  $("#eScore").innerHTML = `Đúng <b>${n}/${GATES.length}</b> cổng • <b style="color:var(--gold)">${score}</b> điểm<br>${msg}`;
+  const msg = n===GATES.length ? "Xuất sắc! Bậc thầy hằng đẳng thức!" : finished ? "Rất tốt! Cố thêm chút nữa nhé!" : `Dừng ở cổng ${idx+1}. Ôn lại hằng đẳng thức rồi bay lại nào!`;
+  $("#eScore").innerHTML = `Qua <b>${n}/${GATES.length}</b> cổng • <b style="color:var(--gold)">${score}</b> điểm<br>${msg}`;
   $("#eName").value = ""; $("#bSave").disabled = false; renderBoard($("#eBoard"));
-  showSlide("sEnd"); SND.win(); burst(960, 420, 200, ["#ffd23f","#16c172","#3a86ff","#ff4d8d","#fff"], 20);
+  showSlide("sEnd");
+  if (finished){ SND.win(); burst(960, 420, 200, ["#ffd23f","#16c172","#3a86ff","#ff4d8d","#fff"], 20); }
 }
 let board = [];
 try{ board = JSON.parse(localStorage.getItem("canhchim-hdt") || "[]"); }catch(e){ board = []; }
@@ -515,18 +622,22 @@ $("#bSave").onclick = e => {
   try{ localStorage.setItem("canhchim-hdt", JSON.stringify(board)); }catch(err){}
   renderBoard($("#eBoard")); $("#bSave").disabled = true; SND.coin();
 };
-$("#bAgain").onclick = e => { e.stopPropagation(); $("#bStart").onclick(e); };
+$("#bAgain").onclick = e => { e.stopPropagation(); newGame(); };
 $("#bHome2").onclick = e => { e.stopPropagation(); home(); };
 
 /* ---- Vòng lặp ---- */
 let last = performance.now();
 function loop(now){
-  const dt = Math.min(.05, (now - last)/1000); last = now;
+  const dt = Math.min(.04, (now - last)/1000); last = now;
   if (!paused){
-    scenery(dt, mode==="fly" ? speed : 60);
+    const moving = mode==="fly" || mode==="pass";
+    scenery(dt, moving ? speed : mode==="crash" ? 0 : 60);
     if (mode==="fly" && gate) updateFly(dt);
-    if (mode==="r" || mode==="fly"){ if (gate && gate.judged){ gate.x -= speed*dt; } }
-    placeWorld();
+    else if (mode==="pass" && gate){ gate.t += dt; gate.x -= speed*dt; bird.vy = Math.min(MAXFALL, bird.vy + GRAV*dt*0.3); bird.y = Math.max(TOP+BR, Math.min(BOT-BR, bird.y + bird.vy*dt*0.3)); bird.rot = 0; }
+    else if (mode==="crash") updateCrash(dt);
+    else if (mode==="count" && gate){ bird.y = laneMid(1) + Math.sin(now/170)*14; }
+    if (gate) drawGate();
+    placeBird();
     drawParts();
   }
   requestAnimationFrame(loop);
@@ -538,21 +649,24 @@ stage.addEventListener("pointerdown", e => { if (e.target.closest("button,input"
 function togglePause(){
   if (mode!=="fly" && !paused) return;
   paused = !paused; $("#pause").classList.toggle("hidden", !paused);
+  if (!paused) last = performance.now();
 }
 $("#bResume").onclick = e => { e.stopPropagation(); togglePause(); };
 $("#bPause").onclick = e => { e.stopPropagation(); togglePause(); };
 $("#bMute").onclick = e => { e.stopPropagation(); muted = !muted; $("#bMute").textContent = muted ? "🔇" : "🔊"; if (muted) music(false); else if (mode==="fly") music(true); };
 $("#bFull").onclick = e => { e.stopPropagation(); try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }catch(err){} };
 document.addEventListener("keydown", e => {
+  if (e.target.tagName==="INPUT") return;
   const k = e.key;
   if (k===" " || k==="ArrowUp" || k==="w" || k==="W"){
-    e.preventDefault();
+    e.preventDefault(); if (e.repeat) return;
     if (mode==="fly") flap();
     else if (mode==="title") $("#bStart").click();
     else if (mode==="q") $("#bFly").click();
     else if (mode==="r") $("#bNext").click();
+    else if (mode==="f") $("#bFail").click();
   }
-  else if (k==="Enter"){ if (mode==="q") $("#bFly").click(); else if (mode==="r") $("#bNext").click(); else if (mode==="title") $("#bStart").click(); }
+  else if (k==="Enter"){ if (mode==="q") $("#bFly").click(); else if (mode==="r") $("#bNext").click(); else if (mode==="f") $("#bFail").click(); else if (mode==="title") $("#bStart").click(); }
   else if (k==="p" || k==="P") togglePause();
   else if (k==="m" || k==="M") $("#bMute").click();
   else if (k==="f" || k==="F") $("#bFull").click();
