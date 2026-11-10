@@ -46,6 +46,7 @@ Dùng khi thầy muốn game kiểu game điện tử hiện nay, học sinh **t
 - Luật chơi: đâm cột, rơi xuống đất hoặc bay vào cửa sai là **chim rơi** (mất mạng; mặc định 1 mạng, chọn 3/5 ở màn hình đầu). Rơi đất/đâm cột thì bay lại cổng đó; vào cửa sai thì hiện đáp án, lời giải rồi sang cổng sau.
 - Độ khó cửa trong `DOORS`: `gap` (rộng 220 – vừa 180 – hẹp 150), `breathe:[max,min]` cửa co giãn, `move` cửa trượt lên xuống. Tăng dần độ khó qua các cổng; **không cho cửa hẹp dưới 140 px** (chim nảy ~82 px mỗi lần vỗ cánh, hitbox cao 48 px).
 - Phương án phải ngắn (≤ 14 kí tự) để vừa biển cửa ở cỡ 88 px; lời giải mỗi dòng ≤ 32 kí tự.
+- Âm thanh là bắt buộc trong mọi game: nhạc nền (bài nhẹ cho slide, bài sôi động khi chơi), hiệu ứng cho từng sự kiện (bấm nút, đúng/sai, va chạm, thắng/thua), nút bật/tắt nhạc và tắt toàn bộ, dòng nhắc "Bấm vào màn hình để bật âm thanh" (trình duyệt chặn âm thanh trước lần chạm đầu). Kiểm thử bằng AnalyserNode gắn vào đường master: mỗi hiệu ứng phải có mức > 0,05.
 - Công thức hiển thị bằng bộ dựng sẵn trong file (không cần mạng): chỉ dùng `^`, `_`, `\cdot`, `\times`, `\le`, `\ge`, `\ne`, `\pm`, ngoặc, chữ, số.
 - Kiểm thử: lái chim tự động bằng Playwright, bot chạy trong trang: `if (bird.y > openings(gate.t+0.15)[answer].mid + 38 && bird.vy > 0) flap()`; phải qua đủ các cổng ở tốc độ Nhanh, và thử đủ 3 kiểu thua, chụp trang câu hỏi, màn bay, kết quả, kết thúc; đo phần tử không vượt 0–1080 px.
 

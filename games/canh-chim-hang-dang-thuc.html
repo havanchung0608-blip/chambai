@@ -192,6 +192,7 @@ button{font-family:var(--ui);border:none;cursor:pointer}
 #corner button{width:84px;height:84px;border-radius:24px;font-size:44px;background:rgba(10,20,60,.6);color:#fff}
 #fx{position:absolute;inset:0;z-index:40;pointer-events:none}
 #pause{z-index:55}
+@keyframes blink2{to{opacity:.4}}
 .guide{display:flex;gap:50px;align-items:center}
 .rules{display:flex;flex-direction:column;gap:12px;text-align:left;width:1200px}
 .rules>div{display:flex;align-items:center;gap:26px;background:rgba(255,255,255,.12);border-radius:28px;padding:5px 28px}
@@ -251,6 +252,7 @@ button{font-family:var(--ui);border:none;cursor:pointer}
       <button class="chip on" data-lv="1">❤️ 1</button><button class="chip" data-lv="3">❤️ 3</button><button class="chip" data-lv="5">❤️ 5</button>
     </div>
     <div class="small" id="tInfo"></div>
+    <div class="small" id="tSound" style="color:var(--gold);animation:blink2 .8s infinite alternate">🔊 Bấm vào màn hình để bật nhạc và âm thanh</div>
     <div class="btns"><button class="btn alt" id="bGuide">📖 Luật chơi</button><button class="btn" id="bStart">▶ BẮT ĐẦU</button></div>
     <div class="board hidden" id="tBoard"></div>
   </section>
@@ -328,7 +330,8 @@ button{font-family:var(--ui);border:none;cursor:pointer}
 
   <div id="corner">
     <button id="bPause" title="Tạm dừng (P)">⏸</button>
-    <button id="bMute" title="Âm thanh (M)">🔊</button>
+    <button id="bMusic" title="Nhạc nền (N)">🎵</button>
+    <button id="bMute" title="Tắt/bật toàn bộ âm thanh (M)">🔊</button>
     <button id="bFull" title="Toàn màn hình (F)">⛶</button>
   </div>
 </div>
@@ -384,47 +387,121 @@ function tex(s){
 }
 const M = str => str.split(/(\$[^$]+\$)/g).map(p => /^\$[^$]+\$$/.test(p) ? `<span class="fm">${tex(p.slice(1,-1))}</span>` : p).join("");
 
-/* ---- Âm thanh Web Audio ---- */
-let AC = null, muted = false, musicTimer = null;
-function tone(f, d, type="triangle", v=.16, delay=0, slide=0){
-  if (muted) return;
+/* ---- Âm thanh Web Audio: nhạc nền + hiệu ứng (không cần file, không cần mạng) ---- */
+let AC = null, master = null, musicBus = null, sfxBus = null, NOISE = null;
+let muted = false, musicOn = true, sfxOn = true, track = null, stepI = 0, nextT = 0;
+function audio(){
   try{
-    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
-    if (AC.state==="suspended") AC.resume();
-    const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
-    o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t+d);
-    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t+d);
-    o.connect(g).connect(AC.destination); o.start(t); o.stop(t+d+.05);
+    if (!AC){
+      AC = new (window.AudioContext || window.webkitAudioContext)();
+      const comp = AC.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
+      master = AC.createGain(); master.gain.value = muted ? 0 : 1; master.connect(comp); comp.connect(AC.destination);
+      musicBus = AC.createGain(); musicBus.gain.value = musicOn ? .42 : 0; musicBus.connect(master);
+      sfxBus = AC.createGain(); sfxBus.gain.value = sfxOn ? 1 : 0; sfxBus.connect(master);
+      NOISE = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate);
+      const d = NOISE.getChannelData(0); for (let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+    }
+    if (AC.state === "suspended") AC.resume();
   }catch(e){}
+  return AC;
 }
+/* nốt nhạc: tần số f, thời điểm t (giây, tuyệt đối), dài d */
+function note(f, t, d, type="triangle", v=.2, bus=null, slide=0){
+  if (!AC) return;
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t+d);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t+.012); g.gain.exponentialRampToValueAtTime(.0001, t+d);
+  o.connect(g).connect(bus || sfxBus); o.start(t); o.stop(t+d+.05);
+}
+function noise(t, d, v=.3, freq=1000, ftype="bandpass", bus=null, q=1, attack=.005){
+  if (!AC) return;
+  const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+  s.buffer = NOISE; f.type = ftype; f.frequency.value = freq; f.Q.value = q;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t+attack); g.gain.exponentialRampToValueAtTime(.0001, t+d);
+  s.connect(f).connect(g).connect(bus || sfxBus); s.start(t, Math.random()); s.stop(t+d+.05);
+}
+const hz = m => 440 * Math.pow(2, (m-69)/12);           // số nốt MIDI -> tần số
+function tone(f, d, type="triangle", v=.16, delay=0, slide=0){ sfx(t=>note(f, t+delay, d, type, v, null, slide)); }
+function sfx(fn){ if (!audio() || !sfxOn || muted) return; try{ fn(AC.currentTime); }catch(e){} }
 const SND = {
-  flap(){ tone(420,.12,"sine",.12,0,820); },
-  coin(){ tone(988,.08,"square",.08); tone(1319,.18,"square",.08,.07); },
-  beep(){ tone(660,.2,"square",.12); },
-  go(){ tone(990,.35,"square",.14); },
-  ok(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,.25,"triangle",.2,i*.08)); },
-  hit(){ tone(150,.25,"square",.2,0,60); tone(90,.4,"sawtooth",.18,.05,40); },
-  fall(){ tone(700,.8,"sine",.14,0,120); },
-  zap(){ for(let k=0;k<5;k++) tone(1200-k*150,.06,"sawtooth",.1,k*.05); },
-  win(){ [523,659,784,1047,784,1047,1319,1568].forEach((f,i)=>tone(f,.3,"triangle",.18,i*.13)); },
-  over(){ [392,370,349,330].forEach((f,i)=>tone(f,.35,"triangle",.16,i*.25)); }
+  click(){ sfx(t=>{ note(880,t,.06,"square",.12); note(1320,t+.04,.06,"square",.08); }); },
+  flap(){ sfx(t=>{ noise(t,.16,.35,1800,"bandpass",null,.8); note(380,t,.13,"sine",.25,null,900); }); },
+  coin(){ sfx(t=>{ note(hz(88),t,.09,"square",.18); note(hz(93),t+.08,.28,"square",.18); }); },
+  beep(){ sfx(t=>{ note(hz(72),t,.22,"square",.25); note(hz(60),t,.22,"triangle",.3); }); },
+  go(){ sfx(t=>{ [72,76,79,84].forEach(m=>note(hz(m),t,.5,"square",.16)); noise(t,.4,.25,3000,"highpass"); }); },
+  warn(){ sfx(t=>{ for (let k=0;k<3;k++){ note(880,t+k*.36,.17,"sawtooth",.32,null,660); note(660,t+k*.36+.18,.17,"sawtooth",.32,null,880); } }); },
+  ok(){ sfx(t=>{ [72,76,79,84,88].forEach((m,i)=>note(hz(m),t+i*.07,.35,"square",.15)); note(hz(84),t+.4,.6,"triangle",.3); note(hz(88),t+.4,.6,"triangle",.25); }); },
+  cheer(){ sfx(t=>{ noise(t,1.6,.6,1100,"bandpass",null,.6,.25); noise(t+.1,1.4,.42,2400,"bandpass",null,.8,.3);
+          for (let k=0;k<5;k++){ const s=t+.1+Math.random()*.8; note(1800+Math.random()*700,s,.35,"sine",.06,null,2600+Math.random()*500); } }); },
+  combo(n){ sfx(t=>{ for (let k=0;k<Math.min(n,5)+2;k++) note(hz(76+k*2),t+k*.06,.18,"square",.12); }); },
+  whoosh(){ sfx(t=>{ noise(t,.5,.3,600,"bandpass",null,.5,.15); }); },
+  zap(){ sfx(t=>{ for (let k=0;k<6;k++) note(1400-k*170,t+k*.045,.07,"sawtooth",.16); noise(t,.35,.25,4000,"highpass"); }); },
+  sad(){ sfx(t=>{ [67,66,65].forEach((m,i)=>note(hz(m),t+.35+i*.38,.36,"sawtooth",.26)); note(hz(64),t+1.49,.9,"sawtooth",.26,null,hz(62)); }); },
+  hit(){ sfx(t=>{ note(160,t,.3,"sine",.7,null,45); noise(t,.25,.5,400,"lowpass"); }); },
+  fall(){ sfx(t=>{ note(1100,t+.1,1,"sine",.18,null,180); }); },
+  thud(){ sfx(t=>{ note(110,t,.35,"sine",.8,null,35); noise(t,.3,.45,250,"lowpass"); }); },
+  win(){ sfx(t=>{ [60,64,67,72,67,72,76,79,84].forEach((m,i)=>note(hz(m),t+i*.12,.3,"square",.14));
+          [72,76,79,84].forEach(m=>note(hz(m),t+1.1,1.2,"triangle",.18));
+          for (let k=0;k<60;k++) noise(t+.9+Math.random()*2.4,.05,.25,2200,"bandpass",null,1.2); }); },
+  over(){ sfx(t=>{ [67,63,60,55].forEach((m,i)=>note(hz(m),t+i*.32,.34,"triangle",.28)); note(hz(48),t+1.3,.9,"triangle",.3); }); }
 };
-function music(on){
-  clearInterval(musicTimer); musicTimer = null;
-  if (!on) return;
-  const seq = [392,494,587,494,440,523,659,523], bass=[196,220,262,247]; let k = 0;
-  musicTimer = setInterval(()=>{ if (paused) return; tone(seq[k%8],.18,"sine",.05); if (k%2===0) tone(bass[(k/2|0)%4],.3,"triangle",.05); k++; }, 260);
+/* Nhạc nền: bộ lặp 16 bước, hợp âm C – Am – F – G (nhạc tự sáng tác) */
+const CHORDS = [[60,64,67],[57,60,64],[53,57,60],[55,59,62]];
+const LEAD = [72,0,74,76, 0,79,76,0, 74,0,72,74, 76,0,0,0, 79,0,81,79, 76,0,74,0, 72,74,76,79, 81,0,79,0];
+const TRACKS = {
+  menu: { bpm: 100, play(i, t, sp){
+      const bar = (i>>4)%4, s = i%16, ch = CHORDS[bar];
+      if (s%8===0) note(hz(ch[0]-24), t, sp*7, "triangle", .5, musicBus);
+      if (s%2===0){ const arp = [0,1,2,1][(s/2)%4]; note(hz(ch[arp]+12), t, sp*2.2, "sine", .22, musicBus); }
+      if (s===0||s===6||s===10) note(hz(ch[2]+24), t, sp*3, "triangle", .1, musicBus);
+      if (s%4===2) noise(t, .05, .05, 8000, "highpass", musicBus);
+  }},
+  fly: { bpm: 148, play(i, t, sp){
+      const bar = (i>>4)%4, s = i%16, ch = CHORDS[bar];
+      if (s%4===0){ const g = AC.createGain(), o = AC.createOscillator(); o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(40,t+.14);
+                    g.gain.setValueAtTime(.9,t); g.gain.exponentialRampToValueAtTime(.001,t+.16); o.connect(g).connect(musicBus); o.start(t); o.stop(t+.2); }
+      if (s===4||s===12){ noise(t,.14,.4,1800,"highpass",musicBus); note(220,t,.08,"triangle",.2,musicBus); }
+      if (s%2===1) noise(t,.035,.12,8500,"highpass",musicBus);
+      if (s%2===0) note(hz(ch[0]-24 + (s%4===2?12:0)), t, sp*1.6, "square", .16, musicBus);
+      const m = LEAD[(i%32)]; if (m) note(hz(m), t, sp*1.8, "square", .1, musicBus);
+      if (s===0) [0,1,2].forEach(k=>note(hz(ch[k]), t, sp*14, "sine", .06, musicBus));
+  }}
+};
+function setMusic(name){ if (track === name) return; track = name; stepI = 0; if (AC) nextT = AC.currentTime + .06; }
+function music(on){ setMusic(on ? "fly" : "menu"); }        // giữ tương thích
+setInterval(()=>{
+  if (!AC || !track || AC.state !== "running") return;
+  const T = TRACKS[track], sp = 60 / T.bpm / 4;
+  if (nextT < AC.currentTime - .25) nextT = AC.currentTime + .05;
+  while (nextT < AC.currentTime + .12){
+    if (!paused && !muted && musicOn) { try{ T.play(stepI, nextT, sp); }catch(e){} }
+    stepI++; nextT += sp;
+  }
+}, 25);
+function setBuses(){
+  if (!AC) return;
+  const t = AC.currentTime;
+  master.gain.setTargetAtTime(muted ? 0 : 1, t, .03);
+  musicBus.gain.setTargetAtTime(musicOn ? .42 : 0, t, .05);
+  sfxBus.gain.setTargetAtTime(sfxOn ? 1 : 0, t, .03);
 }
+/* Mở khoá âm thanh ở lần chạm/bấm phím đầu tiên (trình duyệt bắt buộc) */
+function unlock(){ audio(); if (!track) setMusic("menu"); const h = $("#tSound"); if (h) h.classList.add("hidden"); }
+addEventListener("pointerdown", unlock, true); addEventListener("keydown", unlock, true);
+document.addEventListener("pointerdown", e => { if (e.target.closest && e.target.closest("button")) SND.click(); });
 
 /* ---- Giọng đọc tiếng Việt ---- */
+function viVoice(){ try{ return speechSynthesis.getVoices().find(v=>/^vi/i.test(v.lang)); }catch(e){ return null; } }
 function speak(text){
   try{
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text); u.lang = "vi-VN"; u.rate = .9;
-    const v = speechSynthesis.getVoices().find(v=>/vi/i.test(v.lang)); if (v) u.voice = v;
+    const v = viVoice(); if (v) u.voice = v;
     speechSynthesis.speak(u);
   }catch(e){}
 }
+/* Lời hô ngắn: chỉ đọc khi máy có giọng tiếng Việt và đang bật âm thanh */
+function shout(text){ if (muted || !sfxOn || !viVoice()) return; try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang="vi-VN"; u.voice = viVoice(); u.rate = 1.05; u.pitch = 1.2; speechSynthesis.speak(u); }catch(e){} }
 
 /* ---- Hạt hiệu ứng ---- */
 const cx = $("#fx").getContext("2d"); let parts = [];
@@ -469,7 +546,7 @@ function setHud(){
 
 /* ---- Màn hình đầu ---- */
 function home(){
-  mode = "title"; music(false); clearWorld();
+  mode = "title"; if (AC) setMusic("menu"); clearWorld();
   $("#tTitle").textContent = GAME.title; $("#tSub").innerHTML = M(GAME.subtitle); $("#tTeacher").textContent = GAME.teacher;
   document.title = GAME.title; $("#hud").classList.add("hidden"); birdEl.classList.add("hidden"); $("#hint").classList.add("hidden"); $("#warn").classList.add("hidden");
   $("#tInfo").innerHTML = infoText(); renderBoard($("#tBoard")); showSlide("sTitle");
@@ -527,7 +604,7 @@ function countdown(){
   const step = () => {
     if (mode!=="count") return;
     if (n > 0){ c.innerHTML = `<div class="pop">${n}</div>`; SND.beep(); n--; setTimeout(step, 700); }
-    else { c.innerHTML = `<div class="pop" style="font-size:300px">BAY!</div>`; SND.go(); setTimeout(()=>{ c.classList.add("hidden"); mode = "fly"; music(true); }, 500); }
+    else { c.innerHTML = `<div class="pop" style="font-size:300px">BAY!</div>`; SND.go(); setTimeout(()=>{ c.classList.add("hidden"); mode = "fly"; music(true); if (doorLabel(GATES[idx].door||{})) SND.warn(); }, 500); }
   };
   step();
 }
@@ -621,7 +698,8 @@ function success(){
   const g = GATES[idx];
   results[idx] = true; combo++;
   const add = 100 * (combo>=2 ? 2 : 1); score += add; setHud();
-  $("#sign"+g.answer).classList.add("good"); SND.ok();
+  $("#sign"+g.answer).classList.add("good"); SND.ok(); SND.cheer(); SND.whoosh(); if (combo>=2) SND.combo(combo);
+  shout(combo>=2 ? "Tuyệt vời!" : "Chính xác!");
   burst(BIRD_X, bird.y, 120, ["#ffd23f","#16c172","#3a86ff","#ff4d8d","#fff"]);
   const cb = $("#combo"); cb.textContent = combo>=2 ? `COMBO x${combo}! +${add}` : `TUYỆT! +${add}`; cb.style.opacity = 1; setTimeout(()=>cb.style.opacity=0, 1200);
   mode = "pass";                                              // chim tiếp tục bay qua cổng
@@ -640,9 +718,10 @@ $("#bNext").onclick = e => { e.stopPropagation(); idx++; if (idx < GATES.length)
 /* ---- Chim rơi ---- */
 let crashInfo = null;
 function crash(why, lane){
-  mode = "crash"; music(false); combo = 0; lives--; setHud();
+  mode = "crash"; setMusic(null); combo = 0; lives--; setHud();
   crashInfo = {why, lane};
-  if (why==="wrong"){ results[idx] = false; $("#l"+lane).classList.add("on"); $("#sign"+lane).classList.add("bad"); SND.zap(); }
+  if (why==="wrong"){ results[idx] = false; $("#l"+lane).classList.add("on"); $("#sign"+lane).classList.add("bad"); SND.zap(); SND.sad(); }
+  shout("Ôi! Chim rơi rồi!");
   SND.hit(); setTimeout(()=>SND.fall(), 150);
   birdEl.classList.add("dead");
   burst(BIRD_X, bird.y, 50, ["#ffffff","#ffd23f","#ff6b6b"], 12);
@@ -651,7 +730,7 @@ function crash(why, lane){
 }
 function updateCrash(dt){
   bird.vy = Math.min(1100, bird.vy + 2000*dt); bird.y += bird.vy*dt; bird.rot += 540*dt;
-  if (bird.y + BR >= BOT){ bird.y = BOT - BR; if (!crashInfo.landed){ crashInfo.landed = true; burst(BIRD_X, BOT, 30, ["#7a5230","#55c271"], 8); setTimeout(failSlide, 900); } bird.rot = 160; }
+  if (bird.y + BR >= BOT){ bird.y = BOT - BR; if (!crashInfo.landed){ crashInfo.landed = true; SND.thud(); burst(BIRD_X, BOT, 30, ["#7a5230","#55c271"], 8); setTimeout(failSlide, 900); } bird.rot = 160; }
 }
 function failSlide(){
   mode = "f";
@@ -670,7 +749,7 @@ function failSlide(){
   if (over) b.textContent = "🏁 Xem kết quả";
   else if (why==="wrong") b.textContent = idx < GATES.length-1 ? "Cổng tiếp theo ▶" : "🏁 Xem kết quả";
   else b.textContent = "🔁 Bay lại cổng này";
-  showSlide("sF"); SND.over();
+  showSlide("sF"); if (over) SND.over(); setTimeout(()=>{ if (mode==="f") setMusic("menu"); }, 1600);
 }
 $("#bFail").onclick = e => {
   e.stopPropagation();
@@ -681,7 +760,7 @@ $("#bFail").onclick = e => {
 
 /* ---- Kết thúc ---- */
 function endSlide(finished){
-  mode = "end"; music(false); clearWorld(); $("#hud").classList.add("hidden"); $("#warn").classList.add("hidden"); birdEl.classList.add("hidden");
+  mode = "end"; setMusic(null); setTimeout(()=>{ if (mode==="end") setMusic("menu"); }, 3500); clearWorld(); $("#hud").classList.add("hidden"); $("#warn").classList.add("hidden"); birdEl.classList.add("hidden");
   const n = results.filter(x=>x).length;
   $("#eTitle").textContent = finished ? "🏆 VỀ ĐÍCH! 🏆" : "💥 GAME OVER 💥";
   $("#eStars").innerHTML = GATES.map((g,i)=>`<span class="${results[i]?'':'off'}" style="animation-delay:${i*.2}s">⭐</span>`).join("");
@@ -689,7 +768,7 @@ function endSlide(finished){
   $("#eScore").innerHTML = `Qua <b>${n}/${GATES.length}</b> cổng • <b style="color:var(--gold)">${score}</b> điểm<br>${msg}`;
   $("#eName").value = ""; $("#bSave").disabled = false; renderBoard($("#eBoard"));
   showSlide("sEnd");
-  if (finished){ SND.win(); burst(960, 420, 200, ["#ffd23f","#16c172","#3a86ff","#ff4d8d","#fff"], 20); }
+  if (finished){ SND.win(); shout("Về đích! Xuất sắc!"); burst(960, 420, 200, ["#ffd23f","#16c172","#3a86ff","#ff4d8d","#fff"], 20); }
 }
 let board = [];
 try{ board = JSON.parse(localStorage.getItem("canhchim-hdt") || "[]"); }catch(e){ board = []; }
@@ -739,7 +818,8 @@ function togglePause(){
 }
 $("#bResume").onclick = e => { e.stopPropagation(); togglePause(); };
 $("#bPause").onclick = e => { e.stopPropagation(); togglePause(); };
-$("#bMute").onclick = e => { e.stopPropagation(); muted = !muted; $("#bMute").textContent = muted ? "🔇" : "🔊"; if (muted) music(false); else if (mode==="fly") music(true); };
+$("#bMute").onclick = e => { e.stopPropagation(); audio(); muted = !muted; $("#bMute").textContent = muted ? "🔇" : "🔊"; setBuses(); if (muted) try{ speechSynthesis.cancel(); }catch(err){} };
+$("#bMusic").onclick = e => { e.stopPropagation(); audio(); musicOn = !musicOn; $("#bMusic").style.opacity = musicOn ? 1 : .4; setBuses(); };
 $("#bFull").onclick = e => { e.stopPropagation(); try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }catch(err){} };
 document.addEventListener("keydown", e => {
   if (e.target.tagName==="INPUT") return;
@@ -756,6 +836,7 @@ document.addEventListener("keydown", e => {
   else if (k==="Enter"){ if (mode==="q") $("#bFly").click(); else if (mode==="r") $("#bNext").click(); else if (mode==="f") $("#bFail").click(); else if (mode==="title") $("#bStart").click(); else if (mode==="guide") $("#bGo").click(); }
   else if (k==="p" || k==="P") togglePause();
   else if (k==="m" || k==="M") $("#bMute").click();
+  else if (k==="n" || k==="N") $("#bMusic").click();
   else if (k==="f" || k==="F") $("#bFull").click();
 });
 home();
