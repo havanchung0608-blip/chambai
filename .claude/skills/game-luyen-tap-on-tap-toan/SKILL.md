@@ -40,6 +40,13 @@ Ba chế độ có sẵn (giáo viên chọn ở màn hình đầu):
 
 Tính năng chung: đồng hồ vòng tròn có tiếng tích tắc 5 giây cuối, tạm dừng, gợi ý (giảm điểm), hiện đáp án, lời giải từng bước, cộng/trừ điểm tay, âm thanh Web Audio + nút tắt tiếng, pháo giấy, bảng vàng bục 1–2–3, toàn màn hình, phím tắt (Space, 1–4, P, F, M, Esc). Có KaTeX qua CDN, **mất mạng vẫn hiển thị công thức** nhờ bộ hiển thị dự phòng.
 
+## 3b. Mẫu game hành động "Cánh chim qua cổng" (`assets/game-chim-bay-template.html`)
+Dùng khi thầy muốn game kiểu game điện tử hiện nay, học sinh **trực tiếp điều khiển nhân vật**: chim bay qua 5 cổng (hoặc nhiều hơn), mỗi cổng 1 câu, 3 cửa A–B–C, bay vào cửa đúng. Màn hình cố định 1920×1080 tự co giãn như trình chiếu PowerPoint; trang câu hỏi, trang kết quả, lời giải đều cỡ chữ 90–130 px.
+- Chỉ sửa `GAME` và mảng `GATES` (đúng 3 phương án, `answer` 0/1/2, `solution` 1–2 dòng ngắn, `speak` để đọc đề tiếng Việt).
+- Phương án phải ngắn (≤ 14 kí tự) để vừa biển cửa ở cỡ 88 px; lời giải mỗi dòng ≤ 32 kí tự.
+- Công thức hiển thị bằng bộ dựng sẵn trong file (không cần mạng): chỉ dùng `^`, `_`, `\cdot`, `\times`, `\le`, `\ge`, `\ne`, `\pm`, ngoặc, chữ, số.
+- Kiểm thử: lái chim tự động bằng Playwright (đọc `bird.y`, `laneTop(answer)`, nhấn Space khi chim thấp hơn cửa đích), chụp trang câu hỏi, màn bay, kết quả, kết thúc; đo phần tử không vượt 0–1080 px.
+
 ## 4. Kiểm tra bắt buộc trước khi giao
 1. **Toán**: giải lại từng câu; câu có tính toán kiểm bằng Python (`python3 -c ...`). Kiểm `answer` của `mcq` đúng chỉ số (0=A), `tf` đúng true/false, phương án nhiễu không trùng đáp án đúng.
 2. **Cú pháp**: mở bằng Playwright (Chromium đã cài sẵn), bắt `pageerror`; chạy hết 3 chế độ: mở ô, trả lời đúng/sai, giành quyền, lời giải, kết thúc ra bảng vàng. Mẫu kịch bản: `references/kiem-thu-playwright.cjs` (chạy `node references/kiem-thu-playwright.cjs <đường-dẫn-file.html>`).

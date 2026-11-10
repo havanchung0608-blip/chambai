@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cánh Chim Hằng Đẳng Thức</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<script>
+/* =====================================================================
+   PHẦN THẦY SỬA: 5 CỔNG = 5 CÂU HỎI
+   - Công thức viết giữa $...$ (mũ: x^2 ; nhân: \cdot). Dùng R`...` để gõ một dấu \.
+   - options: đúng 3 phương án (cửa A trên, B giữa, C dưới); answer: 0=A, 1=B, 2=C
+   - speak: câu đọc bằng giọng nói tiếng Việt (tuỳ chọn)
+   ===================================================================== */
+const R = String.raw;
+const GAME = {
+  title: "CÁNH CHIM HẰNG ĐẲNG THỨC",
+  subtitle: "Ôn tập hằng đẳng thức đáng nhớ số 1 – 2 – 3 • Toán 8",
+  teacher: "Thầy Hà Văn Chung"
+};
+const GATES = [
+  { tag:"Hằng đẳng thức 1 • Bình phương của một tổng",
+    q:R`$(x+3)^2$ bằng:`, speak:"x cộng 3, tất cả bình phương, bằng bao nhiêu?",
+    options:[R`$x^2+6x+9$`, R`$x^2+9$`, R`$x^2+3x+9$`], answer:0,
+    solution:[R`$(x+3)^2=x^2+2\cdot x\cdot 3+3^2$`, R`$=x^2+6x+9$`] },
+  { tag:"Hằng đẳng thức 2 • Bình phương của một hiệu",
+    q:R`$(2x-1)^2$ bằng:`, speak:"2 x trừ 1, tất cả bình phương, bằng bao nhiêu?",
+    options:[R`$4x^2-2x+1$`, R`$4x^2-4x+1$`, R`$2x^2-4x+1$`], answer:1,
+    solution:[R`$(2x-1)^2=(2x)^2-2\cdot 2x\cdot 1+1^2$`, R`$=4x^2-4x+1$`] },
+  { tag:"Hằng đẳng thức 3 • Hiệu hai bình phương",
+    q:R`$x^2-25$ bằng:`, speak:"x bình phương trừ 25 bằng bao nhiêu?",
+    options:[R`$(x-5)^2$`, R`$(x-25)(x+25)$`, R`$(x-5)(x+5)$`], answer:2,
+    solution:[R`$x^2-25=x^2-5^2$`, R`$=(x-5)(x+5)$`] },
+  { tag:"Vận dụng hằng đẳng thức 2 • Tính nhanh",
+    q:R`Tính nhanh: $99^2=\ ?$`, speak:"Tính nhanh 99 bình phương.",
+    options:[R`$9801$`, R`$9701$`, R`$9981$`], answer:0,
+    solution:[R`$99^2=(100-1)^2=100^2-2\cdot 100\cdot 1+1^2$`, R`$=10000-200+1=9801$`] },
+  { tag:"Vận dụng hằng đẳng thức 3 • Tính nhanh",
+    q:R`Tính nhanh: $52\cdot 48=\ ?$`, speak:"Tính nhanh 52 nhân 48.",
+    options:[R`$2500$`, R`$2496$`, R`$2504$`], answer:1,
+    solution:[R`$52\cdot 48=(50+2)(50-2)=50^2-2^2$`, R`$=2500-4=2496$`] }
+];
+/* ======================= HẾT PHẦN THẦY SỬA ======================= */
+</script>
+<style>
+:root{
+  --ui:'Baloo 2','Segoe UI',Arial,sans-serif; --math:'Times New Roman',Times,serif;
+  --A:#ef476f; --B:#3a86ff; --C:#f59e0b; --ink:#16213e; --gold:#ffd23f; --ok:#16c172; --no:#ef233c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0b1430;overflow:hidden}
+body{font-family:var(--ui);color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
+#wrap{position:fixed;inset:0;display:grid;place-items:center;background:#0b1430}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;
+  background:linear-gradient(#5ec8ff 0%,#9fe0ff 45%,#ffe8b8 100%);cursor:pointer}
+button{font-family:var(--ui);border:none;cursor:pointer}
+.hidden{display:none!important}
+
+/* ---- Công thức ---- */
+.fm{font-family:var(--math);white-space:nowrap;font-weight:600}
+.fm i{font-style:italic;padding-right:.04em}
+.fm sup{font-size:.62em;vertical-align:.75em;line-height:0;font-style:normal}
+.fm sub{font-size:.62em;vertical-align:-.3em;line-height:0}
+
+/* ---- Cảnh nền ---- */
+.sun{position:absolute;right:220px;top:120px;width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,#fff7c2 0,#ffd23f 55%,rgba(255,210,63,0) 72%)}
+.cloud{position:absolute;background:#fff;border-radius:100px;opacity:.9;filter:drop-shadow(0 8px 0 rgba(0,0,0,.05))}
+.cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cloud::before{width:55%;height:150%;left:15%;top:-70%}
+.cloud::after{width:40%;height:120%;left:50%;top:-45%}
+.sym{position:absolute;font-family:var(--math);font-style:italic;font-weight:700;color:rgba(255,255,255,.55);font-size:90px}
+#hills{position:absolute;left:0;bottom:80px;width:3840px;height:300px}
+#ground{position:absolute;left:0;right:0;bottom:0;height:80px;
+  background:repeating-linear-gradient(90deg,#3fbf5f 0 60px,#36ad54 60px 120px);border-top:10px solid #2a8f45}
+
+/* ---- Cổng ---- */
+.gate{position:absolute;top:0;height:1080px;width:0}
+.pillar{position:absolute;left:0;width:110px;border-radius:24px;
+  background:linear-gradient(90deg,#5b2bd1,#9b6bff 45%,#5b2bd1);box-shadow:0 0 30px rgba(155,107,255,.8),inset 0 0 0 6px rgba(255,255,255,.35)}
+.pillar::after{content:"";position:absolute;left:18px;top:10px;bottom:10px;width:14px;border-radius:10px;background:rgba(255,255,255,.45)}
+.portal{position:absolute;left:8px;width:94px;border-radius:30px;opacity:.55}
+.sign{position:absolute;right:10px;display:flex;align-items:center;gap:22px;padding:0 34px 0 22px;height:170px;border-radius:30px;
+  background:rgba(255,255,255,.93);border:8px solid;box-shadow:0 12px 0 rgba(0,0,0,.18);white-space:nowrap}
+.sign .k{flex:none;width:110px;height:110px;border-radius:24px;color:#fff;font-size:84px;font-weight:800;display:grid;place-items:center;line-height:1}
+.sign .t{font-size:88px;line-height:1}
+.sign.good{background:#d6ffe6;border-color:var(--ok)!important;animation:pulse .5s 3}
+.sign.bad{background:#ffe0e3;animation:shake .45s}
+@keyframes pulse{50%{transform:scale(1.08)}}
+@keyframes shake{20%,60%{transform:translateX(-18px)}40%,80%{transform:translateX(18px)}}
+
+/* ---- Chim ---- */
+#bird{position:absolute;left:0;top:0;width:150px;height:130px;z-index:20;will-change:transform}
+#bird .wing{transform-origin:62px 68px;animation:flap .32s infinite alternate ease-in-out}
+#bird.boost .wing{animation-duration:.09s}
+@keyframes flap{from{transform:rotate(-28deg)}to{transform:rotate(22deg)}}
+
+/* ---- HUD ---- */
+#hud{position:absolute;left:0;right:0;top:0;height:170px;display:flex;align-items:center;gap:24px;padding:0 30px;z-index:30;
+  background:linear-gradient(rgba(10,20,60,.82),rgba(10,20,60,.65));color:#fff}
+#hud .gno{flex:none;font-size:52px;font-weight:800;background:var(--gold);color:var(--ink);border-radius:26px;padding:6px 26px}
+#hud .hq{flex:1;font-size:86px;font-weight:800;line-height:1;white-space:nowrap;overflow:hidden}
+#hud .hq .fm{font-weight:700}
+#hud .sc{flex:none;text-align:right;line-height:1}
+#hud .sc b{font-size:72px;color:var(--gold)}
+#hud .sc div{font-size:40px;letter-spacing:4px}
+#combo{position:absolute;left:50%;top:210px;transform:translateX(-50%);font-size:90px;font-weight:800;color:#fff;
+  -webkit-text-stroke:5px #ff4d8d;paint-order:stroke;z-index:35;pointer-events:none;opacity:0;transition:opacity .3s}
+#hint{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);font-size:52px;font-weight:800;color:#fff;
+  background:rgba(10,20,60,.7);padding:8px 36px;border-radius:40px;z-index:35;pointer-events:none;animation:bob 1s infinite alternate}
+@keyframes bob{to{transform:translate(-50%,-12px)}}
+
+/* ---- Trang chiếu (slide) ---- */
+.slide{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px 70px;
+  background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.18),transparent 50%),linear-gradient(135deg,rgba(17,27,78,.96),rgba(76,29,149,.95));color:#fff;text-align:center;cursor:default}
+.slide .pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+.big-title{font-size:150px;font-weight:800;line-height:1;background:linear-gradient(90deg,#fff3a3,#ffd23f,#ff8fb1);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 8px 0 rgba(0,0,0,.35))}
+.sub{font-size:58px;font-weight:600}
+.small{font-size:40px;opacity:.85}
+.badge{font-size:54px;font-weight:800;background:var(--gold);color:var(--ink);border-radius:40px;padding:4px 40px}
+.tag{font-size:50px;font-weight:600;color:#c9d6ff}
+.qbig{font-size:120px;font-weight:800;line-height:1.1}
+.opts{display:flex;flex-direction:column;gap:18px;width:1560px}
+.opt{display:flex;align-items:center;gap:36px;background:#fff;color:var(--ink);border-radius:34px;padding:6px 40px;box-shadow:0 10px 0 rgba(0,0,0,.25);border:8px solid}
+.opt .k{flex:none;width:110px;height:110px;border-radius:26px;color:#fff;font-size:90px;font-weight:800;display:grid;place-items:center}
+.opt .t{font-size:100px;line-height:1.12}
+.opt .lane{margin-left:auto;font-size:40px;font-weight:800;opacity:.6}
+.opt.right{border-color:var(--ok)!important;background:#d6ffe6}
+.btns{display:flex;gap:30px;flex-wrap:wrap;justify-content:center}
+.btn{font-size:62px;font-weight:800;padding:12px 56px;border-radius:40px;background:var(--gold);color:var(--ink);box-shadow:0 12px 0 #b8860b;transition:transform .15s}
+.btn:hover{transform:translateY(-4px)}
+.btn:active{transform:translateY(8px);box-shadow:0 4px 0 #b8860b}
+.btn.alt{background:#fff;box-shadow:0 12px 0 #9aa5c7}
+.btn.pink{background:#ff4d8d;color:#fff;box-shadow:0 12px 0 #a3134a}
+.res-ok{font-size:170px;font-weight:800;color:#5cff9d;filter:drop-shadow(0 8px 0 rgba(0,0,0,.35))}
+.res-no{font-size:150px;font-weight:800;color:#ff8a9a;filter:drop-shadow(0 8px 0 rgba(0,0,0,.35))}
+.ans{font-size:96px;font-weight:800;background:#fff;color:var(--ink);border-radius:34px;padding:10px 50px;border:8px solid var(--ok)}
+.sol{font-size:92px;line-height:1.3;background:rgba(255,255,255,.12);border-radius:34px;padding:18px 60px;text-align:left}
+.sol div{animation:pop .5s both}
+.stars{font-size:120px;line-height:1.1;letter-spacing:10px}
+.stars span{display:inline-block;animation:pop .5s both}
+.stars .off{filter:grayscale(1) opacity(.35)}
+#count{font-size:420px;font-weight:800;color:#fff;-webkit-text-stroke:14px var(--ink);paint-order:stroke;background:none;pointer-events:none}
+.modes{display:flex;gap:24px;align-items:center;font-size:48px;font-weight:800}
+.chip{font-size:48px;font-weight:800;padding:8px 34px;border-radius:30px;background:rgba(255,255,255,.18);color:#fff;border:5px solid transparent}
+.chip.on{background:#fff;color:var(--ink);border-color:var(--gold)}
+.board{font-size:40px;line-height:1.25;background:rgba(255,255,255,.12);border-radius:26px;padding:10px 40px;min-width:900px}
+.board div{display:flex;justify-content:space-between;gap:40px}
+.namein{font-family:var(--ui);font-size:56px;font-weight:800;padding:8px 26px;border-radius:24px;border:6px solid var(--gold);width:640px;text-align:center}
+
+/* ---- Nút góc ---- */
+#corner{position:absolute;right:20px;bottom:20px;display:flex;gap:14px;z-index:60}
+#corner button{width:84px;height:84px;border-radius:24px;font-size:44px;background:rgba(10,20,60,.6);color:#fff}
+#fx{position:absolute;inset:0;z-index:40;pointer-events:none}
+#pause{z-index:55}
+</style>
+</head>
+<body>
+<div id="wrap">
+<div id="stage">
+  <!-- cảnh nền -->
+  <div class="sun"></div>
+  <div id="far"></div>
+  <svg id="hills" viewBox="0 0 3840 300" preserveAspectRatio="none">
+    <path d="M0 300 L0 180 Q240 40 480 170 T960 160 T1440 150 T1920 180 T2400 40 T2880 170 T3360 160 T3840 180 L3840 300Z" fill="#7bd389"/>
+    <path d="M0 300 L0 240 Q320 140 640 230 T1280 220 T1920 240 T2560 140 T3200 230 T3840 240 L3840 300Z" fill="#55c271"/>
+  </svg>
+  <div id="ground"></div>
+  <div id="world"></div>
+
+  <svg id="bird" viewBox="0 0 150 130" class="hidden">
+    <defs>
+      <radialGradient id="gb" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#ff9f1c"/></radialGradient>
+    </defs>
+    <path d="M18 70 L0 58 L4 80 Z" fill="#ff6b6b"/>
+    <ellipse cx="72" cy="72" rx="54" ry="48" fill="url(#gb)" stroke="#c96a00" stroke-width="4"/>
+    <ellipse cx="80" cy="88" rx="32" ry="24" fill="#fff4d6"/>
+    <text x="80" y="99" font-family="Times New Roman" font-style="italic" font-weight="700" font-size="30" text-anchor="middle" fill="#c96a00">x²</text>
+    <g class="wing"><path d="M62 68 Q20 50 26 92 Q48 92 62 74 Z" fill="#ff7b00" stroke="#c96a00" stroke-width="4"/></g>
+    <circle cx="98" cy="55" r="17" fill="#fff" stroke="#16213e" stroke-width="3"/>
+    <circle cx="103" cy="56" r="8" fill="#16213e"/><circle cx="106" cy="52" r="3" fill="#fff"/>
+    <path d="M118 66 L146 74 L118 84 Z" fill="#ff4d4d" stroke="#a31515" stroke-width="3"/>
+    <!-- mũ tốt nghiệp -->
+    <path d="M52 22 L92 8 L132 22 L92 36 Z" fill="#16213e"/>
+    <rect x="76" y="26" width="32" height="14" rx="4" fill="#16213e"/>
+    <path d="M128 23 L130 46" stroke="#ffd23f" stroke-width="4"/><circle cx="130" cy="48" r="5" fill="#ffd23f"/>
+  </svg>
+
+  <div id="hud" class="hidden">
+    <div class="gno" id="hGate">CỔNG 1/5</div>
+    <div class="hq" id="hQ"></div>
+    <div class="sc"><b id="hScore">0</b><div id="hStars">☆☆☆☆☆</div></div>
+  </div>
+  <div id="combo"></div>
+  <div id="hint" class="hidden">Nhấn SPACE / chạm màn hình để bay lên!</div>
+  <canvas id="fx" width="1920" height="1080"></canvas>
+
+  <!-- MÀN HÌNH ĐẦU -->
+  <section class="slide" id="sTitle">
+    <div class="big-title pop" id="tTitle"></div>
+    <div class="sub pop" id="tSub" style="animation-delay:.15s"></div>
+    <div class="small" id="tTeacher"></div>
+    <div class="modes"><span>Tốc độ bay:</span>
+      <button class="chip" data-sp="140">🐢 Chậm</button><button class="chip on" data-sp="190">🐦 Vừa</button><button class="chip" data-sp="250">🚀 Nhanh</button>
+    </div>
+    <div class="small">Bay qua <b>5 cổng</b> • Mỗi cổng có 3 cửa A – B – C • Bay vào cửa có <b>đáp án đúng</b>!</div>
+    <div class="btns"><button class="btn" id="bStart">▶ BẮT ĐẦU</button></div>
+    <div class="board hidden" id="tBoard"></div>
+  </section>
+
+  <!-- TRANG CÂU HỎI -->
+  <section class="slide hidden" id="sQ">
+    <div class="badge pop" id="qBadge"></div>
+    <div class="tag" id="qTag"></div>
+    <div class="qbig pop" id="qText"></div>
+    <div class="opts" id="qOpts"></div>
+    <div class="btns"><button class="btn alt" id="bSpeak">🔈 Đọc đề</button><button class="btn" id="bFly">🐦 BAY THÔI!</button></div>
+  </section>
+
+  <section class="slide hidden" id="count"></section>
+
+  <!-- TRANG KẾT QUẢ -->
+  <section class="slide hidden" id="sR">
+    <div id="rHead" class="pop"></div>
+    <div class="ans pop" id="rAns" style="animation-delay:.2s"></div>
+    <div class="sol" id="rSol"></div>
+    <div class="btns"><button class="btn" id="bNext">Cổng tiếp theo ▶</button></div>
+  </section>
+
+  <!-- KẾT THÚC -->
+  <section class="slide hidden" id="sEnd">
+    <div class="big-title pop" style="font-size:110px">🏆 VỀ ĐÍCH! 🏆</div>
+    <div class="stars" id="eStars"></div>
+    <div class="sub" id="eScore"></div>
+    <div class="btns"><input class="namein" id="eName" placeholder="Tên người chơi" maxlength="24"><button class="btn alt" id="bSave">💾 Lưu điểm</button></div>
+    <div class="board hidden" id="eBoard"></div>
+    <div class="btns"><button class="btn" id="bAgain">↺ Chơi lại</button><button class="btn pink" id="bHome2">🏠 Màn hình chính</button></div>
+  </section>
+
+  <section class="slide hidden" id="pause"><div class="big-title">⏸ TẠM DỪNG</div><div class="sub">Nhấn P hoặc bấm nút để chơi tiếp</div><div class="btns"><button class="btn" id="bResume">▶ Chơi tiếp</button></div></section>
+
+  <div id="corner">
+    <button id="bPause" title="Tạm dừng (P)">⏸</button>
+    <button id="bMute" title="Âm thanh (M)">🔊</button>
+    <button id="bFull" title="Toàn màn hình (F)">⛶</button>
+  </div>
+</div>
+</div>
+
+<script>
+/* ============================ ENGINE ============================ */
+const $ = s => document.querySelector(s);
+const stage = $("#stage");
+const W = 1920, H = 1080, TOP = 190, BOT = 1000, BAR = 30;
+const LANE_H = (BOT - TOP - 2*BAR) / 3;                 // 250px mỗi cửa
+const laneTop = i => TOP + i*(LANE_H + BAR);
+const KEYS = ["A","B","C"], LC = ["var(--A)","var(--B)","var(--C)"], LHEX = ["#ef476f","#3a86ff","#f59e0b"];
+const LNAME = ["cửa trên","cửa giữa","cửa dưới"];
+const BIRD_X = 330;
+
+/* ---- Khung trình chiếu 16:9 co giãn như PowerPoint ---- */
+function fit(){
+  const s = Math.min(innerWidth / W, innerHeight / H);
+  stage.style.transform = `translate(${-W*s/2}px,${-H*s/2}px) scale(${s})`;
+}
+addEventListener("resize", fit); fit();
+
+/* ---- Hiển thị công thức (không cần mạng, không phụ thuộc thư viện) ---- */
+const SYM = {cdot:"·",times:"×",le:"≤",ge:"≥",ne:"≠",pm:"±",square:"□",Rightarrow:"⇒",pi:"π"};
+function tex(s){
+  let i = 0;
+  const esc = c => c==="<"?"&lt;":c===">"?"&gt;":c==="&"?"&amp;":c;
+  function group(){
+    while (s[i]===" ") i++;
+    if (s[i]==="{"){ let d=1, j=++i; while (j<s.length && d){ if (s[j]==="{") d++; else if (s[j]==="}") d--; j++; } const g=s.slice(i,j-1); i=j; return g; }
+    if (s[i]==="\\"){ let j=i+1; while (j<s.length && /[a-zA-Z]/.test(s[j])) j++; if (j===i+1) j++; const g=s.slice(i,j); i=j; return g; }
+    return s[i++] || "";
+  }
+  let out = "";
+  while (i < s.length){
+    const c = s[i];
+    if (c==="\\"){
+      let j=i+1; while (j<s.length && /[a-zA-Z]/.test(s[j])) j++;
+      const name = j===i+1 ? s[j++] : s.slice(i+1,j); i=j;
+      if (name===" "||name===","||name===";") out+=" ";
+      else if (name in SYM) out+=" "+SYM[name]+" ";
+      else out+=esc(name);
+    } else if (c==="^"||c==="_"){ i++; const g=tex(group()); out+= c==="^"?`<sup>${g}</sup>`:`<sub>${g}</sub>`; }
+    else if (c==="{"||c==="}"||c===" "){ i++; }
+    else if (/[a-zA-Z]/.test(c)){ out+=`<i>${c}</i>`; i++; }
+    else if ("=+-".includes(c)){ out+=" "+(c==="-"?"−":c)+" "; i++; }
+    else { out+=esc(c); i++; }
+  }
+  return out;
+}
+const M = str => str.split(/(\$[^$]+\$)/g).map(p => /^\$[^$]+\$$/.test(p) ? `<span class="fm">${tex(p.slice(1,-1))}</span>` : p).join("");
+
+/* ---- Âm thanh Web Audio ---- */
+let AC = null, muted = false, musicTimer = null;
+function tone(f, d, type="triangle", v=.16, delay=0, slide=0){
+  if (muted) return;
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state==="suspended") AC.resume();
+    const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t+d);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t+d);
+    o.connect(g).connect(AC.destination); o.start(t); o.stop(t+d+.05);
+  }catch(e){}
+}
+const SND = {
+  flap(){ tone(420,.12,"sine",.12,0,820); },
+  coin(){ tone(988,.08,"square",.08); tone(1319,.18,"square",.08,.07); },
+  beep(){ tone(660,.2,"square",.12); },
+  go(){ tone(990,.35,"square",.14); },
+  ok(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,.25,"triangle",.2,i*.08)); },
+  no(){ tone(260,.4,"sawtooth",.15,0,120); tone(200,.5,"sawtooth",.12,.2,90); },
+  win(){ [523,659,784,1047,784,1047,1319,1568].forEach((f,i)=>tone(f,.3,"triangle",.18,i*.13)); }
+};
+function music(on){
+  clearInterval(musicTimer); musicTimer = null;
+  if (!on) return;
+  const seq = [392,494,587,494,440,523,659,523], bass=[196,220,262,247]; let k = 0;
+  musicTimer = setInterval(()=>{ if (paused) return; tone(seq[k%8],.18,"sine",.05); if (k%2===0) tone(bass[(k/2|0)%4],.3,"triangle",.05); k++; }, 260);
+}
+
+/* ---- Giọng đọc tiếng Việt ---- */
+function speak(text){
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = "vi-VN"; u.rate = .9;
+    const v = speechSynthesis.getVoices().find(v=>/vi/i.test(v.lang)); if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---- Hạt hiệu ứng ---- */
+const cx = $("#fx").getContext("2d"); let parts = [];
+function burst(x, y, n, cols, speed=14){
+  for (let k=0;k<n;k++){ const a=Math.random()*Math.PI*2, v=Math.random()*speed+3;
+    parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-4,r:Math.random()*14+6,c:cols[k%cols.length],life:60+Math.random()*40,rot:Math.random()*6,star:Math.random()<.4}); }
+}
+function drawParts(){
+  cx.clearRect(0,0,W,H);
+  parts.forEach(p=>{ p.vy+=.4; p.x+=p.vx; p.y+=p.vy; p.rot+=.15; p.life--;
+    cx.save(); cx.translate(p.x,p.y); cx.rotate(p.rot); cx.globalAlpha=Math.min(1,p.life/30); cx.fillStyle=p.c;
+    if (p.star){ cx.font=`${p.r*3}px serif`; cx.fillText("★",-p.r,p.r); } else cx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);
+    cx.restore(); });
+  parts = parts.filter(p=>p.life>0 && p.y<H+50);
+}
+
+/* ---- Cảnh nền chuyển động ---- */
+const far = $("#far"), clouds = [], syms = [];
+[[200,260,220,70],[800,330,300,90],[1400,240,240,75],[2100,380,280,85]].forEach(([x,y,w,h])=>{
+  const d=document.createElement("div"); d.className="cloud"; d.style.cssText=`width:${w}px;height:${h}px;top:${y}px`; far.appendChild(d); clouds.push({el:d,x,w}); });
+["+","−","²","=","x","y","(",")"].forEach((s,i)=>{ const d=document.createElement("div"); d.className="sym"; d.textContent=s; d.style.top=(300+ (i%4)*140)+"px"; far.appendChild(d); syms.push({el:d,x:i*300+100}); });
+let hillX = 0, groundX = 0;
+function scenery(dt, sp){
+  clouds.forEach(c=>{ c.x -= sp*.25*dt; if (c.x < -c.w-50) c.x = W+50; c.el.style.transform=`translateX(${c.x}px)`; });
+  syms.forEach(s=>{ s.x -= sp*.4*dt; if (s.x < -100) s.x = W+100; s.el.style.transform=`translateX(${s.x}px)`; });
+  hillX = (hillX - sp*.5*dt) % 1920; $("#hills").style.transform=`translateX(${hillX}px)`;
+  groundX = (groundX - sp*dt) % 120; $("#ground").style.backgroundPosition=`${groundX}px 0`;
+}
+
+/* ---- Trạng thái ---- */
+let speed = 190, idx = 0, score = 0, combo = 0, results = [], mode = "title", paused = false;
+let bird = {y:540, vy:0}, gate = null, coins = [], flyT = 0;
+const birdEl = $("#bird");
+function showSlide(id){ ["sTitle","sQ","count","sR","sEnd"].forEach(s=>$("#"+s).classList.toggle("hidden", s!==id)); }
+function setStars(){ $("#hStars").textContent = GATES.map((g,i)=> results[i]===true?"★":"☆").join(""); }
+
+/* ---- Màn hình đầu ---- */
+function home(){
+  mode = "title"; music(false); clearWorld();
+  $("#tTitle").textContent = GAME.title; $("#tSub").innerHTML = M(GAME.subtitle); $("#tTeacher").textContent = GAME.teacher;
+  document.title = GAME.title; $("#hud").classList.add("hidden"); birdEl.classList.add("hidden"); $("#hint").classList.add("hidden");
+  renderBoard($("#tBoard")); showSlide("sTitle");
+}
+document.querySelectorAll(".chip").forEach(c => c.onclick = e => { e.stopPropagation(); document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on")); c.classList.add("on"); speed = +c.dataset.sp; tone(700,.08,"square",.08); });
+$("#bStart").onclick = e => { e.stopPropagation(); idx = 0; score = 0; combo = 0; results = []; $("#hScore").textContent = 0; setStars(); questionSlide(); };
+
+/* ---- Trang câu hỏi (trình chiếu như PPT) ---- */
+function questionSlide(){
+  mode = "q"; music(false); clearWorld();
+  const g = GATES[idx];
+  $("#qBadge").textContent = `CỔNG ${idx+1}/${GATES.length}`;
+  $("#qTag").textContent = g.tag;
+  $("#qText").innerHTML = M(g.q);
+  $("#qOpts").innerHTML = g.options.map((o,i)=>`<div class="opt pop" style="border-color:${LC[i]};animation-delay:${.15+i*.12}s"><span class="k" style="background:${LC[i]}">${KEYS[i]}</span><span class="t">${M(o)}</span><span class="lane">${LNAME[i]}</span></div>`).join("");
+  showSlide("sQ"); tone(523,.15); tone(784,.2,"triangle",.15,.1);
+}
+$("#bSpeak").onclick = e => { e.stopPropagation(); const g = GATES[idx]; speak(`Cổng ${idx+1}. ${g.speak || ""} A: ${plain(g.options[0])}. B: ${plain(g.options[1])}. C: ${plain(g.options[2])}.`); };
+function plain(s){ return s.replace(/\$/g,"").replace(/\^2/g," bình phương").replace(/\\cdot/g," nhân ").replace(/-/g," trừ ").replace(/\+/g," cộng "); }
+$("#bFly").onclick = e => { e.stopPropagation(); countdown(); };
+
+/* ---- Đếm ngược 3-2-1 ---- */
+function countdown(){
+  mode = "count"; try{ speechSynthesis.cancel(); }catch(e){}
+  setupFlight();
+  const c = $("#count"); showSlide("count"); let n = 3;
+  const step = () => {
+    if (n > 0){ c.innerHTML = `<div class="pop">${n}</div>`; SND.beep(); n--; setTimeout(step, 700); }
+    else { c.innerHTML = `<div class="pop" style="font-size:300px">BAY!</div>`; SND.go(); setTimeout(()=>{ c.classList.add("hidden"); mode = "fly"; music(true); }, 500); }
+  };
+  step();
+}
+
+/* ---- Màn bay ---- */
+function clearWorld(){ $("#world").innerHTML = ""; gate = null; coins = []; }
+function setupFlight(){
+  clearWorld();
+  const g = GATES[idx];
+  $("#hud").classList.remove("hidden"); $("#hGate").textContent = `CỔNG ${idx+1}/${GATES.length}`; $("#hQ").innerHTML = M(g.q);
+  birdEl.classList.remove("hidden"); bird = {y: laneTop(1) + LANE_H/2, vy:0}; flyT = 0;
+  $("#hint").classList.remove("hidden");
+  // Cổng: 4 thanh trụ + 3 cửa + 3 biển đáp án
+  const el = document.createElement("div"); el.className = "gate";
+  const bars = [[TOP-30, 40], [laneTop(1)-BAR, BAR], [laneTop(2)-BAR, BAR], [BOT-10, 90]];
+  let html = bars.map(([y,h])=>`<div class="pillar" style="top:${y}px;height:${h}px"></div>`).join("");
+  html += [0,1,2].map(i=>`<div class="portal" style="top:${laneTop(i)}px;height:${LANE_H}px;background:linear-gradient(90deg,transparent,${LHEX[i]},transparent)"></div>`).join("");
+  html += g.options.map((o,i)=>`<div class="sign" id="sign${i}" style="top:${laneTop(i)+(LANE_H-170)/2}px;border-color:${LC[i]}"><span class="k" style="background:${LC[i]}">${KEYS[i]}</span><span class="t">${M(o)}</span></div>`).join("");
+  el.innerHTML = html; $("#world").appendChild(el);
+  gate = {el, x: W + 760, judged:false};
+  // Đồng xu trang trí trong từng cửa
+  for (let k=0;k<6;k++){
+    const c = document.createElement("div"); c.textContent = "🪙"; c.style.cssText = "position:absolute;font-size:70px;z-index:15";
+    const lane = k%3, x = W*0.55 + k*170;
+    $("#world").appendChild(c); coins.push({el:c, x, y: laneTop(lane)+LANE_H/2-40, got:false});
+  }
+  placeWorld();
+}
+function placeWorld(){
+  if (gate) gate.el.style.transform = `translateX(${gate.x}px)`;
+  coins.forEach(c=>{ c.el.style.transform = `translate(${c.x}px,${c.y}px)`; });
+  const rot = Math.max(-30, Math.min(50, bird.vy/12));
+  birdEl.style.transform = `translate(${BIRD_X-75}px,${bird.y-65}px) rotate(${rot}deg)`;
+}
+function flap(){
+  if (mode!=="fly" || paused) return;
+  bird.vy = -560; SND.flap(); $("#hint").classList.add("hidden");
+  birdEl.classList.add("boost"); clearTimeout(flap.t); flap.t = setTimeout(()=>birdEl.classList.remove("boost"), 200);
+}
+function updateFly(dt){
+  flyT += dt;
+  // Chim: trọng lực nhẹ, chạm trần/đất thì dừng lại (không thua)
+  const hover = flyT < 1.2;                          // 1,2 giây đầu: chim lơ lửng để học sinh làm quen
+  bird.vy += (hover ? 300 : 1350) * dt; bird.vy = Math.min(bird.vy, 700);
+  bird.y += bird.vy * dt;
+  if (bird.y < TOP + 55){ bird.y = TOP + 55; bird.vy = 0; }
+  if (bird.y > BOT - 55){ bird.y = BOT - 55; bird.vy = -180; }
+  gate.x -= speed * dt;
+  coins.forEach(c=>{ c.x -= speed*dt; if (!c.got && Math.abs(c.x+35-BIRD_X)<70 && Math.abs(c.y+40-bird.y)<85){ c.got = true; c.el.remove(); score += 10; $("#hScore").textContent = score; SND.coin(); burst(BIRD_X, bird.y, 12, ["#ffd23f","#fff3a3"], 8); } });
+  // Qua cổng: xác định cửa theo vị trí chim
+  if (!gate.judged && gate.x <= BIRD_X - 20){
+    gate.judged = true;
+    const lane = Math.max(0, Math.min(2, Math.floor((bird.y - TOP + BAR/2) / (LANE_H + BAR))));
+    judge(lane);
+  }
+  if (gate.judged && gate.x < -300){ /* cổng đã đi qua */ }
+}
+function judge(lane){
+  const g = GATES[idx], ok = lane === g.answer;
+  results[idx] = ok; setStars();
+  const sign = $("#sign"+lane);
+  if (ok){
+    combo++; const add = 100 * (combo>=2 ? 2 : 1); score += add; $("#hScore").textContent = score;
+    sign.classList.add("good"); SND.ok();
+    burst(BIRD_X, bird.y, 120, ["#ffd23f","#16c172","#3a86ff","#ff4d8d","#fff"]);
+    const cb = $("#combo"); cb.textContent = combo>=2 ? `COMBO x${combo}! +${add}` : `+${add}`; cb.style.opacity = 1; setTimeout(()=>cb.style.opacity=0, 1200);
+  } else {
+    combo = 0; sign.classList.add("bad"); $("#sign"+g.answer).classList.add("good"); SND.no();
+    burst(BIRD_X, bird.y, 40, ["#ef233c","#555"], 10);
+    stage.animate([{transform:stage.style.transform+" translateX(0)"},{transform:stage.style.transform+" translateX(-20px)"},{transform:stage.style.transform+" translateX(20px)"},{transform:stage.style.transform}],{duration:350});
+  }
+  setTimeout(()=>resultSlide(ok, lane), 1500);
+}
+
+/* ---- Trang kết quả + lời giải ---- */
+function resultSlide(ok, lane){
+  mode = "r"; music(false);
+  const g = GATES[idx];
+  $("#rHead").innerHTML = ok ? `<div class="res-ok">🎉 CHÍNH XÁC!</div>` : `<div class="res-no">😅 Chưa đúng rồi!</div><div class="sub">Em bay vào cửa ${KEYS[lane]}</div>`;
+  $("#rAns").innerHTML = `Đáp án: <span style="color:${LHEX[g.answer]}">${KEYS[g.answer]}.</span> ${M(g.options[g.answer])}`;
+  $("#rSol").innerHTML = g.solution.map((s,i)=>`<div style="animation-delay:${.5+i*.6}s">${M(s)}</div>`).join("");
+  $("#bNext").textContent = idx < GATES.length-1 ? "Cổng tiếp theo ▶" : "🏆 Xem kết quả";
+  showSlide("sR");
+}
+$("#bNext").onclick = e => { e.stopPropagation(); idx++; if (idx < GATES.length) questionSlide(); else endSlide(); };
+
+/* ---- Kết thúc ---- */
+function endSlide(){
+  mode = "end"; clearWorld(); $("#hud").classList.add("hidden"); birdEl.classList.add("hidden");
+  const n = results.filter(x=>x).length;
+  $("#eStars").innerHTML = GATES.map((g,i)=>`<span class="${results[i]?'':'off'}" style="animation-delay:${i*.2}s">⭐</span>`).join("");
+  const msg = n===5 ? "Xuất sắc! Bậc thầy hằng đẳng thức!" : n>=3 ? "Rất tốt! Cố lên chút nữa nhé!" : "Ôn lại 3 hằng đẳng thức rồi bay lại nào!";
+  $("#eScore").innerHTML = `Đúng <b>${n}/${GATES.length}</b> cổng • <b style="color:var(--gold)">${score}</b> điểm<br>${msg}`;
+  $("#eName").value = ""; $("#bSave").disabled = false; renderBoard($("#eBoard"));
+  showSlide("sEnd"); SND.win(); burst(960, 420, 200, ["#ffd23f","#16c172","#3a86ff","#ff4d8d","#fff"], 20);
+}
+let board = [];
+try{ board = JSON.parse(localStorage.getItem("canhchim-hdt") || "[]"); }catch(e){ board = []; }
+function renderBoard(el){
+  if (!board.length){ el.classList.add("hidden"); return; }
+  el.classList.remove("hidden");
+  el.innerHTML = `<div style="justify-content:center"><b>🏅 BẢNG XẾP HẠNG</b></div>` +
+    board.slice(0,5).map((b,i)=>`<div><span>${["🥇","🥈","🥉","4.","5."][i]} ${b.name}</span><b>${b.stars}⭐ • ${b.score}</b></div>`).join("");
+}
+$("#eName").onclick = e => e.stopPropagation();
+$("#eName").onkeydown = e => { e.stopPropagation(); if (e.key==="Enter") $("#bSave").click(); };
+$("#bSave").onclick = e => {
+  e.stopPropagation(); const name = $("#eName").value.trim() || "Người chơi";
+  board.push({name: name.replace(/[<>&]/g,""), score, stars: results.filter(x=>x).length});
+  board.sort((a,b)=>b.score-a.score); board = board.slice(0,10);
+  try{ localStorage.setItem("canhchim-hdt", JSON.stringify(board)); }catch(err){}
+  renderBoard($("#eBoard")); $("#bSave").disabled = true; SND.coin();
+};
+$("#bAgain").onclick = e => { e.stopPropagation(); $("#bStart").onclick(e); };
+$("#bHome2").onclick = e => { e.stopPropagation(); home(); };
+
+/* ---- Vòng lặp ---- */
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(.05, (now - last)/1000); last = now;
+  if (!paused){
+    scenery(dt, mode==="fly" ? speed : 60);
+    if (mode==="fly" && gate) updateFly(dt);
+    if (mode==="r" || mode==="fly"){ if (gate && gate.judged){ gate.x -= speed*dt; } }
+    placeWorld();
+    drawParts();
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---- Điều khiển ---- */
+stage.addEventListener("pointerdown", e => { if (e.target.closest("button,input")) return; flap(); });
+function togglePause(){
+  if (mode!=="fly" && !paused) return;
+  paused = !paused; $("#pause").classList.toggle("hidden", !paused);
+}
+$("#bResume").onclick = e => { e.stopPropagation(); togglePause(); };
+$("#bPause").onclick = e => { e.stopPropagation(); togglePause(); };
+$("#bMute").onclick = e => { e.stopPropagation(); muted = !muted; $("#bMute").textContent = muted ? "🔇" : "🔊"; if (muted) music(false); else if (mode==="fly") music(true); };
+$("#bFull").onclick = e => { e.stopPropagation(); try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }catch(err){} };
+document.addEventListener("keydown", e => {
+  const k = e.key;
+  if (k===" " || k==="ArrowUp" || k==="w" || k==="W"){
+    e.preventDefault();
+    if (mode==="fly") flap();
+    else if (mode==="title") $("#bStart").click();
+    else if (mode==="q") $("#bFly").click();
+    else if (mode==="r") $("#bNext").click();
+  }
+  else if (k==="Enter"){ if (mode==="q") $("#bFly").click(); else if (mode==="r") $("#bNext").click(); else if (mode==="title") $("#bStart").click(); }
+  else if (k==="p" || k==="P") togglePause();
+  else if (k==="m" || k==="M") $("#bMute").click();
+  else if (k==="f" || k==="F") $("#bFull").click();
+});
+home();
+</script>
+</body>
+</html>
