@@ -241,7 +241,6 @@ button{font-family:var(--ui);border:none;cursor:pointer}
   <div id="hud" class="hidden">
     <div class="gno" id="hGate">CỔNG 1/5</div>
     <div class="hq" id="hQ"></div>
-    <div id="warn" class="hidden"></div>
     <div class="sc"><b id="hScore">0</b><div id="hLives">❤️</div><div id="hStars">☆☆☆☆☆</div></div>
   </div>
   <div id="combo"></div>
@@ -591,7 +590,7 @@ function setHud(){
 function home(){
   mode = "title"; if (AC) setMusic("menu"); clearWorld();
   $("#tTitle").textContent = GAME.title; $("#tSub").innerHTML = M(GAME.subtitle); $("#tTeacher").textContent = GAME.teacher;
-  document.title = GAME.title; $("#hud").classList.add("hidden"); birdEl.classList.add("hidden"); $("#hint").classList.add("hidden"); $("#warn").classList.add("hidden");
+  document.title = GAME.title; $("#hud").classList.add("hidden"); birdEl.classList.add("hidden"); $("#hint").classList.add("hidden");
   $("#tInfo").innerHTML = infoText(); renderBoard($("#tBoard")); showSlide("sTitle");
 }
 function syncSpeed(){ document.querySelectorAll(".chip[data-sp]").forEach(x=>x.classList.toggle("on", +x.dataset.sp === speed)); }
@@ -684,7 +683,7 @@ function setupFlight(){
 function buildGate(x){
   const g = GATES[idx];
   $("#hud").classList.remove("hidden"); $("#hGate").textContent = `CỔNG ${idx+1}/${GATES.length}`; $("#hQ").innerHTML = M(g.q); setHud();
-  const wtxt = doorLabel(g.door || {}); $("#warn").textContent = wtxt; $("#warn").classList.toggle("hidden", !wtxt);
+    // không hiện chữ cảnh báo để không che câu hỏi (chỉ giữ tiếng còi)
   const el = document.createElement("div"); el.className = "gate";
   let html = [0,1,2,3].map(i=>`<div class="wall"></div>`).join("");
   html += [0,1,2].map(i=>`<div class="portal" style="background:linear-gradient(90deg,transparent,${LHEX[i]},transparent)"></div><div class="laser"></div>`).join("");
@@ -846,7 +845,7 @@ $("#bFail").onclick = e => {
 
 /* ---- Kết thúc ---- */
 function endSlide(finished){
-  mode = "end"; setMusic(null); setTimeout(()=>{ if (mode==="end") setMusic("menu"); }, 3500); clearWorld(); $("#hud").classList.add("hidden"); $("#warn").classList.add("hidden"); birdEl.classList.add("hidden");
+  mode = "end"; setMusic(null); setTimeout(()=>{ if (mode==="end") setMusic("menu"); }, 3500); clearWorld(); $("#hud").classList.add("hidden"); birdEl.classList.add("hidden");
   const n = results.filter(x=>x).length;
   $("#eTitle").textContent = lives > 0 ? "🏁 HẾT LƯỢT" : "💥 GAME OVER 💥";
   $("#eStars").innerHTML = GATES.map((g,i)=>`<span class="${results[i]?'':'off'}" style="animation-delay:${i*.2}s">⭐</span>`).join("");
