@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cánh Chim Hằng Đẳng Thức</title>
+<title>Cánh Chim Căn Thức</title>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
 <script>
 /* =====================================================================
@@ -15,54 +15,55 @@
    ===================================================================== */
 const R = String.raw;
 const GAME = {
-  title: "CÁNH CHIM HẰNG ĐẲNG THỨC",
-  subtitle: "Ôn tập hằng đẳng thức đáng nhớ số 1 – 2 – 3 • Toán 8",
+  title: "CÁNH CHIM CĂN THỨC",
+  subtitle: "Ôn tập Chương III: Căn bậc hai và căn bậc ba • Toán 9",
   teacher: "Thầy Hà Văn Chung"
 };
 const BANK = [
-  /* ---- Hằng đẳng thức 1: (A + B)² = A² + 2AB + B² ---- */
-  { tag:"HĐT 1 • Bình phương của một tổng", q:R`$(x+3)^2$ bằng:`, speak:"x cộng 3, tất cả bình phương, bằng bao nhiêu?",
-    options:[R`$x^2+6x+9$`, R`$x^2+9$`, R`$x^2+3x+9$`], solution:[R`$(x+3)^2=x^2+2\cdot x\cdot 3+3^2$`, R`$=x^2+6x+9$`] },
-  { tag:"HĐT 1 • Bình phương của một tổng", q:R`$(x+5)^2$ bằng:`, speak:"x cộng 5, tất cả bình phương, bằng bao nhiêu?",
-    options:[R`$x^2+10x+25$`, R`$x^2+5x+25$`, R`$x^2+25$`], solution:[R`$(x+5)^2=x^2+2\cdot x\cdot 5+5^2$`, R`$=x^2+10x+25$`] },
-  { tag:"HĐT 1 • Bình phương của một tổng", q:R`$(2x+1)^2$ bằng:`, speak:"2 x cộng 1, tất cả bình phương, bằng bao nhiêu?",
-    options:[R`$4x^2+4x+1$`, R`$4x^2+2x+1$`, R`$2x^2+4x+1$`], solution:[R`$(2x+1)^2=(2x)^2+2\cdot 2x\cdot 1+1^2$`, R`$=4x^2+4x+1$`] },
-  { tag:"HĐT 1 • Bình phương của một tổng", q:R`$(x+2y)^2$ bằng:`, speak:"x cộng 2 y, tất cả bình phương, bằng bao nhiêu?",
-    options:[R`$x^2+4xy+4y^2$`, R`$x^2+2xy+4y^2$`, R`$x^2+4xy+2y^2$`], solution:[R`$(x+2y)^2=x^2+2\cdot x\cdot 2y+(2y)^2$`, R`$=x^2+4xy+4y^2$`] },
-  { tag:"HĐT 1 • Viết thành bình phương", q:R`$x^2+8x+16$ bằng:`, speak:"x bình phương cộng 8 x cộng 16 bằng bao nhiêu?",
-    options:[R`$(x+4)^2$`, R`$(x+8)^2$`, R`$(x+16)^2$`], solution:[R`$x^2+8x+16=x^2+2\cdot x\cdot 4+4^2$`, R`$=(x+4)^2$`] },
-  { tag:"HĐT 1 • Tính nhanh", q:R`Tính nhanh: $101^2=\ ?$`, speak:"Tính nhanh 101 bình phương.",
-    options:[R`$10201$`, R`$10101$`, R`$10001$`], solution:[R`$101^2=(100+1)^2=100^2+2\cdot 100+1$`, R`$=10000+200+1=10201$`] },
-  { tag:"HĐT 1 • Tính nhanh", q:R`Tính nhanh: $51^2=\ ?$`, speak:"Tính nhanh 51 bình phương.",
-    options:[R`$2601$`, R`$2501$`, R`$2551$`], solution:[R`$51^2=(50+1)^2=50^2+2\cdot 50+1$`, R`$=2500+100+1=2601$`] },
-  /* ---- Hằng đẳng thức 2: (A − B)² = A² − 2AB + B² ---- */
-  { tag:"HĐT 2 • Bình phương của một hiệu", q:R`$(x-4)^2$ bằng:`, speak:"x trừ 4, tất cả bình phương, bằng bao nhiêu?",
-    options:[R`$x^2-8x+16$`, R`$x^2-16$`, R`$x^2-4x+16$`], solution:[R`$(x-4)^2=x^2-2\cdot x\cdot 4+4^2$`, R`$=x^2-8x+16$`] },
-  { tag:"HĐT 2 • Bình phương của một hiệu", q:R`$(2x-1)^2$ bằng:`, speak:"2 x trừ 1, tất cả bình phương, bằng bao nhiêu?",
-    options:[R`$4x^2-4x+1$`, R`$4x^2-2x+1$`, R`$2x^2-4x+1$`], solution:[R`$(2x-1)^2=(2x)^2-2\cdot 2x\cdot 1+1^2$`, R`$=4x^2-4x+1$`] },
-  { tag:"HĐT 2 • Bình phương của một hiệu", q:R`$(3x-2)^2$ bằng:`, speak:"3 x trừ 2, tất cả bình phương, bằng bao nhiêu?",
-    options:[R`$9x^2-12x+4$`, R`$9x^2-6x+4$`, R`$3x^2-12x+4$`], solution:[R`$(3x-2)^2=(3x)^2-2\cdot 3x\cdot 2+2^2$`, R`$=9x^2-12x+4$`] },
-  { tag:"HĐT 2 • Viết thành bình phương", q:R`$x^2-6x+9$ bằng:`, speak:"x bình phương trừ 6 x cộng 9 bằng bao nhiêu?",
-    options:[R`$(x-3)^2$`, R`$(x+3)^2$`, R`$(x-9)^2$`], solution:[R`$x^2-6x+9=x^2-2\cdot x\cdot 3+3^2$`, R`$=(x-3)^2$`] },
-  { tag:"HĐT 2 • Tính nhanh", q:R`Tính nhanh: $99^2=\ ?$`, speak:"Tính nhanh 99 bình phương.",
-    options:[R`$9801$`, R`$9701$`, R`$9981$`], solution:[R`$99^2=(100-1)^2=100^2-2\cdot 100+1$`, R`$=10000-200+1=9801$`] },
-  { tag:"HĐT 2 • Tính nhanh", q:R`Tính nhanh: $49^2=\ ?$`, speak:"Tính nhanh 49 bình phương.",
-    options:[R`$2401$`, R`$2301$`, R`$2501$`], solution:[R`$49^2=(50-1)^2=50^2-2\cdot 50+1$`, R`$=2500-100+1=2401$`] },
-  { tag:"HĐT 2 • Tính giá trị biểu thức", q:R`Giá trị của $x^2-4x+4$ tại $x=102$ là:`, speak:"Giá trị của x bình phương trừ 4 x cộng 4 tại x bằng 102 là bao nhiêu?",
-    options:[R`$10000$`, R`$10404$`, R`$9604$`], solution:[R`$x^2-4x+4=(x-2)^2$`, R`$=(102-2)^2=100^2=10000$`] },
-  /* ---- Hằng đẳng thức 3: A² − B² = (A − B)(A + B) ---- */
-  { tag:"HĐT 3 • Hiệu hai bình phương", q:R`$x^2-25$ bằng:`, speak:"x bình phương trừ 25 bằng bao nhiêu?",
-    options:[R`$(x-5)(x+5)$`, R`$(x-5)^2$`, R`$(x-25)(x+25)$`], solution:[R`$x^2-25=x^2-5^2$`, R`$=(x-5)(x+5)$`] },
-  { tag:"HĐT 3 • Hiệu hai bình phương", q:R`$4x^2-9$ bằng:`, speak:"4 x bình phương trừ 9 bằng bao nhiêu?",
-    options:[R`$(2x-3)(2x+3)$`, R`$(4x-3)(4x+3)$`, R`$(2x-9)(2x+9)$`], solution:[R`$4x^2-9=(2x)^2-3^2$`, R`$=(2x-3)(2x+3)$`] },
-  { tag:"HĐT 3 • Hiệu hai bình phương", q:R`$(x-1)(x+1)$ bằng:`, speak:"x trừ 1 nhân x cộng 1 bằng bao nhiêu?",
-    options:[R`$x^2-1$`, R`$x^2+1$`, R`$x^2-2x+1$`], solution:[R`$(x-1)(x+1)=x^2-1^2$`, R`$=x^2-1$`] },
-  { tag:"HĐT 3 • Hiệu hai bình phương", q:R`$(2x+y)(2x-y)$ bằng:`, speak:"2 x cộng y nhân 2 x trừ y bằng bao nhiêu?",
-    options:[R`$4x^2-y^2$`, R`$2x^2-y^2$`, R`$4x^2+y^2$`], solution:[R`$(2x+y)(2x-y)=(2x)^2-y^2$`, R`$=4x^2-y^2$`] },
-  { tag:"HĐT 3 • Tính nhanh", q:R`Tính nhanh: $52\cdot 48=\ ?$`, speak:"Tính nhanh 52 nhân 48.",
-    options:[R`$2496$`, R`$2500$`, R`$2504$`], solution:[R`$52\cdot 48=(50+2)(50-2)=50^2-2^2$`, R`$=2500-4=2496$`] },
-  { tag:"HĐT 3 • Tính nhanh", q:R`Tính nhanh: $103\cdot 97=\ ?$`, speak:"Tính nhanh 103 nhân 97.",
-    options:[R`$9991$`, R`$10009$`, R`$9909$`], solution:[R`$103\cdot 97=(100+3)(100-3)=100^2-3^2$`, R`$=10000-9=9991$`] }
+  /* ---- Bài 7. Căn bậc hai và căn thức bậc hai ---- */
+  { tag:"Bài 7 • Căn bậc hai", q:R`Căn bậc hai số học của $49$ là:`, speak:"Căn bậc hai số học của 49 là số nào?",
+    options:[R`$7$`, R`$-7$`, R`$7$ và $-7$`], solution:[R`$7\ge 0$ và $7^2=49$ nên $\sqrt{49}=7$.`] },
+  { tag:"Bài 7 • Căn bậc hai", q:R`Các căn bậc hai của $16$ là:`, speak:"Các căn bậc hai của 16 là những số nào?",
+    options:[R`$4$ và $-4$`, R`$4$`, R`$-4$`], solution:[R`$4^2=16$ và $(-4)^2=16$.`, R`Số dương có đúng hai căn bậc hai: $4$ và $-4$.`] },
+  { tag:"Bài 7 • Căn thức bậc hai", q:R`$\sqrt{x-3}$ xác định khi:`, speak:"Căn của x trừ 3 xác định khi nào?",
+    options:[R`$x\ge 3$`, R`$x>3$`, R`$x\le 3$`], solution:[R`$\sqrt{x-3}$ xác định khi $x-3\ge 0$,`, R`tức là $x\ge 3$.`] },
+  { tag:"Bài 7 • Căn thức bậc hai", q:R`$\sqrt{(-5)^2}$ bằng:`, speak:"Căn của âm 5 tất cả bình phương bằng bao nhiêu?",
+    options:[R`$5$`, R`$-5$`, R`$25$`], solution:[R`$\sqrt{(-5)^2}=|-5|=5$.`] },
+  { tag:"Bài 7 • Căn thức bậc hai", q:R`$\sqrt{(1-\sqrt{2})^2}$ bằng:`, speak:"Căn của 1 trừ căn 2, tất cả bình phương, bằng bao nhiêu?",
+    options:[R`$\sqrt{2}-1$`, R`$1-\sqrt{2}$`, R`$1+\sqrt{2}$`], solution:[R`$\sqrt{(1-\sqrt{2})^2}=|1-\sqrt{2}|$`, R`Vì $1<\sqrt{2}$ nên $|1-\sqrt{2}|=\sqrt{2}-1$.`] },
+  { tag:"Bài 7 • So sánh căn bậc hai", q:R`So sánh $5$ và $\sqrt{24}$:`, speak:"So sánh 5 và căn 24.",
+    options:[R`$5>\sqrt{24}$`, R`$5<\sqrt{24}$`, R`$5=\sqrt{24}$`], solution:[R`$5=\sqrt{25}$ và $25>24$`, R`nên $\sqrt{25}>\sqrt{24}$, tức là $5>\sqrt{24}$.`] },
+  { tag:"Bài 7 • Căn thức bậc hai", q:R`Với $x<0$, $\sqrt{x^2}$ bằng:`, speak:"Với x nhỏ hơn 0, căn của x bình phương bằng bao nhiêu?",
+    options:[R`$-x$`, R`$x$`, R`$x^2$`], solution:[R`$\sqrt{x^2}=|x|$`, R`Vì $x<0$ nên $|x|=-x$.`] },
+  /* ---- Bài 8. Khai căn bậc hai với phép nhân và phép chia ---- */
+  { tag:"Bài 8 • Căn với phép nhân", q:R`Tính: $\sqrt{2}\cdot\sqrt{8}=\ ?$`, speak:"Tính căn 2 nhân căn 8.",
+    options:[R`$4$`, R`$16$`, R`$\sqrt{10}$`], solution:[R`$\sqrt{2}\cdot\sqrt{8}=\sqrt{2\cdot 8}=\sqrt{16}=4$`] },
+  { tag:"Bài 8 • Căn với phép chia", q:R`Tính: $\sqrt{50}:\sqrt{2}=\ ?$`, speak:"Tính căn 50 chia căn 2.",
+    options:[R`$5$`, R`$25$`, R`$\sqrt{48}$`], solution:[R`$\sqrt{50}:\sqrt{2}=\sqrt{50:2}=\sqrt{25}=5$`] },
+  { tag:"Bài 8 • Căn với phép nhân", q:R`Tính: $\sqrt{9\cdot 25}=\ ?$`, speak:"Tính căn của 9 nhân 25.",
+    options:[R`$15$`, R`$8$`, R`$225$`], solution:[R`$\sqrt{9\cdot 25}=\sqrt{9}\cdot\sqrt{25}=3\cdot 5=15$`] },
+  { tag:"Bài 8 • Căn với phép chia", q:R`Tính: $\sqrt{0,36}=\ ?$`, speak:"Tính căn của 0 phẩy 36.",
+    options:[R`$0,6$`, R`$0,06$`, R`$6$`], solution:[R`$0,6\ge 0$ và $0,6^2=0,36$`, R`nên $\sqrt{0,36}=0,6$.`] },
+  /* ---- Bài 9. Biến đổi đơn giản và rút gọn biểu thức chứa căn thức bậc hai ---- */
+  { tag:"Bài 9 • Đưa thừa số ra ngoài dấu căn", q:R`$\sqrt{12}$ bằng:`, speak:"Căn 12 bằng bao nhiêu?",
+    options:[R`$2\sqrt{3}$`, R`$3\sqrt{2}$`, R`$4\sqrt{3}$`], solution:[R`$\sqrt{12}=\sqrt{2^2\cdot 3}=2\sqrt{3}$`] },
+  { tag:"Bài 9 • Đưa thừa số ra ngoài dấu căn", q:R`$\sqrt{18}$ bằng:`, speak:"Căn 18 bằng bao nhiêu?",
+    options:[R`$3\sqrt{2}$`, R`$2\sqrt{3}$`, R`$9\sqrt{2}$`], solution:[R`$\sqrt{18}=\sqrt{3^2\cdot 2}=3\sqrt{2}$`] },
+  { tag:"Bài 9 • Đưa thừa số vào trong dấu căn", q:R`$3\sqrt{2}$ bằng:`, speak:"3 căn 2 bằng bao nhiêu?",
+    options:[R`$\sqrt{18}$`, R`$\sqrt{6}$`, R`$\sqrt{12}$`], solution:[R`$3\sqrt{2}=\sqrt{3^2\cdot 2}=\sqrt{18}$`] },
+  { tag:"Bài 9 • Rút gọn biểu thức", q:R`$\sqrt{8}+\sqrt{2}$ bằng:`, speak:"Căn 8 cộng căn 2 bằng bao nhiêu?",
+    options:[R`$3\sqrt{2}$`, R`$\sqrt{10}$`, R`$4\sqrt{2}$`], solution:[R`$\sqrt{8}=2\sqrt{2}$`, R`nên $\sqrt{8}+\sqrt{2}=2\sqrt{2}+\sqrt{2}=3\sqrt{2}$`] },
+  { tag:"Bài 9 • Rút gọn biểu thức", q:R`$2\sqrt{3}+\sqrt{27}$ bằng:`, speak:"2 căn 3 cộng căn 27 bằng bao nhiêu?",
+    options:[R`$5\sqrt{3}$`, R`$\sqrt{30}$`, R`$6\sqrt{3}$`], solution:[R`$\sqrt{27}=\sqrt{3^2\cdot 3}=3\sqrt{3}$`, R`nên $2\sqrt{3}+3\sqrt{3}=5\sqrt{3}$`] },
+  { tag:"Bài 9 • Trục căn thức ở mẫu", q:R`Trục căn thức ở mẫu: $\dfrac{6}{\sqrt{3}}=\ ?$`, speak:"Trục căn thức ở mẫu của 6 phần căn 3.",
+    options:[R`$2\sqrt{3}$`, R`$6\sqrt{3}$`, R`$3\sqrt{2}$`], solution:[R`$\dfrac{6}{\sqrt{3}}=\dfrac{6\sqrt{3}}{3}=2\sqrt{3}$`] },
+  { tag:"Bài 9 • Trục căn thức ở mẫu", q:R`Trục căn thức ở mẫu: $\dfrac{1}{\sqrt{2}-1}=\ ?$`, speak:"Trục căn thức ở mẫu của 1 phần căn 2 trừ 1.",
+    options:[R`$\sqrt{2}+1$`, R`$\sqrt{2}-1$`, R`$1-\sqrt{2}$`], solution:[R`$\dfrac{1}{\sqrt{2}-1}=\dfrac{\sqrt{2}+1}{(\sqrt{2}-1)(\sqrt{2}+1)}$`, R`$=\dfrac{\sqrt{2}+1}{2-1}=\sqrt{2}+1$`] },
+  /* ---- Bài 10. Căn bậc ba và căn thức bậc ba ---- */
+  { tag:"Bài 10 • Căn bậc ba", q:R`$\sqrt[3]{-27}$ bằng:`, speak:"Căn bậc ba của âm 27 bằng bao nhiêu?",
+    options:[R`$-3$`, R`$3$`, R`Không xác định`], solution:[R`$(-3)^3=-27$ nên $\sqrt[3]{-27}=-3$.`, R`Mọi số thực đều có đúng một căn bậc ba.`] },
+  { tag:"Bài 10 • Căn bậc ba", q:R`Tính: $\sqrt[3]{8}+\sqrt[3]{-1}=\ ?$`, speak:"Tính căn bậc ba của 8 cộng căn bậc ba của âm 1.",
+    options:[R`$1$`, R`$3$`, R`$-1$`], solution:[R`$\sqrt[3]{8}=2$ và $\sqrt[3]{-1}=-1$`, R`nên tổng bằng $2+(-1)=1$.`] }
 ];
 /* Độ khó cửa theo thứ tự cổng trong mỗi lượt (máy bốc ngẫu nhiên 1 kiểu trong mỗi nhóm)
    gap: độ rộng cửa (px) – không nên dưới 140; breathe:[rộng nhất, hẹp nhất] cửa co giãn; move: cửa trượt lên xuống */
@@ -93,6 +94,16 @@ button{font-family:var(--ui);border:none;cursor:pointer}
 .fm i{font-style:italic;padding-right:.04em}
 .fm sup{font-size:.62em;vertical-align:.75em;line-height:0;font-style:normal}
 .fm sub{font-size:.62em;vertical-align:-.3em;line-height:0}
+/* dấu căn: kí hiệu √ + gạch ngang phủ biểu thức dưới căn */
+.sq{display:inline-flex;align-items:stretch;white-space:nowrap;vertical-align:baseline;margin:0 .03em;position:relative}
+.sq .rs{width:.52em;flex:none;overflow:visible;margin-top:.03em}
+.sq .rs path{fill:none;stroke:currentColor;stroke-width:.06em;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.sq .rc{border-top:.06em solid currentColor;padding:.12em .05em 0 .05em;line-height:1;margin-top:.03em}
+.sq .ri{font-size:.48em;position:absolute;left:-.12em;top:.32em;font-style:normal;line-height:1}
+.sq:has(.ri){margin-left:.32em}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.78em;margin:0 .06em;line-height:1.05}
+.fr>span{padding:0 .12em}
+.fr>span:first-child{border-bottom:.07em solid currentColor;padding-bottom:.04em}
 
 /* ---- Cảnh nền ---- */
 .sun{position:absolute;right:220px;top:120px;width:200px;height:200px;border-radius:50%;
@@ -135,7 +146,7 @@ button{font-family:var(--ui);border:none;cursor:pointer}
 #hud{position:absolute;left:0;right:0;top:0;height:170px;display:flex;align-items:center;gap:24px;padding:0 30px;z-index:30;
   background:linear-gradient(rgba(10,20,60,.86),rgba(10,20,60,.7));color:#fff}
 #hud .gno{flex:none;font-size:52px;font-weight:800;background:var(--gold);color:var(--ink);border-radius:26px;padding:6px 26px}
-#hud .hq{flex:1;font-size:86px;font-weight:800;line-height:1;white-space:nowrap;overflow:hidden}
+#hud .hq{flex:1;font-size:86px;font-weight:800;line-height:1.05;white-space:nowrap;overflow:hidden;max-height:166px}
 #hud .sc{flex:none;text-align:right;line-height:1.05}
 #hud .sc b{font-size:66px;color:var(--gold)}
 #hud .sc div{font-size:38px;letter-spacing:3px}
@@ -392,7 +403,7 @@ function fit(){
 addEventListener("resize", fit); fit();
 
 /* ---- Hiển thị công thức (không cần mạng, không phụ thuộc thư viện) ---- */
-const SYM = {cdot:"·",times:"×",le:"≤",ge:"≥",ne:"≠",pm:"±",square:"□",Rightarrow:"⇒",pi:"π"};
+const SYM = {cdot:"·",times:"×",le:"≤",ge:"≥",ne:"≠",pm:"±",square:"□",Rightarrow:"⇒",pi:"π",lt:"<",gt:">"};
 function tex(s){
   let i = 0;
   const esc = c => c==="<"?"&lt;":c===">"?"&gt;":c==="&"?"&amp;":c;
@@ -408,13 +419,22 @@ function tex(s){
     if (c==="\\"){
       let j=i+1; while (j<s.length && /[a-zA-Z]/.test(s[j])) j++;
       const name = j===i+1 ? s[j++] : s.slice(i+1,j); i=j;
-      if (name===" "||name===","||name===";") out+=" ";
+      if (name==="sqrt"){                                         // căn bậc hai / căn bậc n
+        let idx = ""; if (s[i]==="["){ const k = s.indexOf("]", i); idx = s.slice(i+1, k); i = k+1; }
+        out += `<span class="sq">${idx?`<span class="ri">${tex(idx)}</span>`:""}<svg class="rs" viewBox="0 0 10 20" preserveAspectRatio="none"><path d="M0.6 12.6 L2.8 11.3 L5.3 19.2 L9.7 0.35 L10 0.35"/></svg><span class="rc">${tex(group())}</span></span>`;
+      }
+      else if (name==="frac"||name==="dfrac"){ const a = tex(group()), b = tex(group()); out += `<span class="fr"><span>${a}</span><span>${b}</span></span>`; }
+      else if (name==="big"||name==="left"||name==="right") { }
+      else if (name===" "||name===","||name===";") out+=" ";
       else if (name in SYM) out+=" "+SYM[name]+" ";
       else out+=esc(name);
     } else if (c==="^"||c==="_"){ i++; const g=tex(group()); out+= c==="^"?`<sup>${g}</sup>`:`<sub>${g}</sub>`; }
     else if (c==="{"||c==="}"||c===" "){ i++; }
     else if (/[a-zA-Z]/.test(c)){ out+=`<i>${c}</i>`; i++; }
-    else if ("=+-".includes(c)){ out+=" "+(c==="-"?"−":c)+" "; i++; }
+    else if ("=+-<>".includes(c)){
+      const lastCh = out.replace(/<[^>]*>/g,"").slice(-1);
+      const unary = c==="-" && (lastCh==="" || lastCh==="(" || lastCh===" " || lastCh==="[");   // dấu trừ đứng đầu: viết liền
+      out += unary ? "−" : " "+(c==="-"?"−":esc(c))+" "; i++; }
     else { out+=esc(c); i++; }
   }
   return out;
@@ -601,8 +621,8 @@ document.querySelectorAll(".chip[data-lv]").forEach(c => c.onclick = e => { e.st
 /* ---- Bốc câu hỏi cho mỗi lượt: lần lượt hết ngân hàng rồi mới lặp lại ---- */
 function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 let deck = [];
-try{ deck = JSON.parse(localStorage.getItem("canhchim-deck") || "[]").filter(i=>Number.isInteger(i) && i>=0 && i<BANK.length); }catch(e){ deck = []; }
-try{ round = +localStorage.getItem("canhchim-round") || 0; }catch(e){ round = 0; }
+try{ deck = JSON.parse(localStorage.getItem("canhchim-can-deck") || "[]").filter(i=>Number.isInteger(i) && i>=0 && i<BANK.length); }catch(e){ deck = []; }
+try{ round = +localStorage.getItem("canhchim-can-round") || 0; }catch(e){ round = 0; }
 function pickRound(){
   const n = Math.min(PER_ROUND, BANK.length);
   if (deck.length < n){
@@ -612,7 +632,7 @@ function pickRound(){
     if (deck.length < n) deck = deck.concat(shuffle(BANK.map((_,i)=>i).filter(i=>!deck.includes(i))));
   }
   const ids = deck.splice(0, n); round++;
-  try{ localStorage.setItem("canhchim-deck", JSON.stringify(deck)); localStorage.setItem("canhchim-round", String(round)); }catch(e){}
+  try{ localStorage.setItem("canhchim-can-deck", JSON.stringify(deck)); localStorage.setItem("canhchim-can-round", String(round)); }catch(e){}
   GATES = ids.map((id,k)=>{
     const q = BANK[id], order = shuffle([0,1,2]);
     const lvl = DOORS[Math.min(k, DOORS.length-1)];
@@ -635,10 +655,25 @@ function questionSlide(){
   $("#qText").innerHTML = M(g.q);
   $("#qText").style.fontSize = g.q.replace(/\$|\\[a-z]+|[{}^]/g,"").length > 24 ? "92px" : "";   // câu dài: vẫn nằm gọn 1 dòng
   $("#qOpts").innerHTML = g.options.map((o,i)=>`<div class="opt pop" style="border-color:${LC[i]};animation-delay:${.15+i*.12}s"><span class="k" style="background:${LC[i]}">${KEYS[i]}</span><span class="t">${M(o)}</span><span class="lane">${LNAME[i]}</span></div>`).join("");
-  showSlide("sQ"); tone(523,.15); tone(784,.2,"triangle",.15,.1);
+  showSlide("sQ"); fitQ(); tone(523,.15); tone(784,.2,"triangle",.15,.1);
+}
+/* Tự thu nhỏ chữ khi công thức cao (căn lồng căn, phân số) để slide luôn nằm gọn 1080 px */
+function fitQ(){
+  const sl = $("#sQ"), qt = $("#qText"), ts = [...document.querySelectorAll("#qOpts .t")];
+  ts.forEach(t=>t.style.fontSize = "");
+  let fq = parseFloat(getComputedStyle(qt).fontSize), fo = 100;
+  for (let k=0; k<14; k++){
+    const h = [...sl.children].reduce((a,c)=>a + c.offsetHeight, 0) + 18*(sl.children.length-1) + 60;
+    if (h <= 1080) break;
+    fq *= .93; fo *= .95; qt.style.fontSize = fq + "px"; ts.forEach(t=>t.style.fontSize = fo + "px");
+  }
+}
+function fitHud(){
+  const hq = $("#hQ"); hq.style.fontSize = ""; let f = 86;
+  for (let k=0; k<10 && (hq.scrollHeight > 160 || hq.scrollWidth > hq.clientWidth + 1); k++){ f *= .92; hq.style.fontSize = f + "px"; }
 }
 $("#bSpeak").onclick = e => { e.stopPropagation(); const g = GATES[idx]; speak(`Cổng ${idx+1}. ${g.speak || ""} A: ${plain(g.options[0])}. B: ${plain(g.options[1])}. C: ${plain(g.options[2])}.`); };
-function plain(s){ return s.replace(/\$/g,"").replace(/\^2/g," bình phương").replace(/\\cdot/g," nhân ").replace(/-/g," trừ ").replace(/\+/g," cộng "); }
+function plain(s){ return s.replace(/\\sqrt\[3\]\{([^}]*)\}/g," căn bậc ba của $1 ").replace(/\\sqrt\{([^}]*)\}/g," căn $1 ").replace(/\$/g,"").replace(/\^2/g," bình phương").replace(/\\cdot/g," nhân ").replace(/-/g," trừ ").replace(/\+/g," cộng "); }
 $("#bFly").onclick = e => { e.stopPropagation(); countdown(); };
 
 /* ---- Đếm ngược 3-2-1 ---- */
@@ -683,7 +718,7 @@ function setupFlight(){
 }
 function buildGate(x){
   const g = GATES[idx];
-  $("#hud").classList.remove("hidden"); $("#hGate").textContent = `CỔNG ${idx+1}/${GATES.length}`; $("#hQ").innerHTML = M(g.q); setHud();
+  $("#hud").classList.remove("hidden"); $("#hGate").textContent = `CỔNG ${idx+1}/${GATES.length}`; $("#hQ").innerHTML = M(g.q); fitHud(); setHud();
   const wtxt = doorLabel(g.door || {}); $("#warn").textContent = wtxt; $("#warn").classList.toggle("hidden", !wtxt);
   const el = document.createElement("div"); el.className = "gate";
   let html = [0,1,2,3].map(i=>`<div class="wall"></div>`).join("");
@@ -796,7 +831,7 @@ $("#bWSave").onclick = e => {
   e.stopPropagation(); const name = $("#wName").value.trim() || "Người chơi";
   board.push({name: name.replace(/[<>&]/g,""), score, stars: results.filter(x=>x).length});
   board.sort((a,b)=>b.score-a.score); board = board.slice(0,10);
-  try{ localStorage.setItem("canhchim-hdt", JSON.stringify(board)); }catch(err){}
+  try{ localStorage.setItem("canhchim-can", JSON.stringify(board)); }catch(err){}
   $("#bWSave").disabled = true; $("#bWSave").textContent = "✅ Đã lưu"; SND.coin();
 };
 $("#bNext").onclick = e => { e.stopPropagation(); idx++; if (idx < GATES.length) questionSlide(); else endSlide(true); };
@@ -850,14 +885,14 @@ function endSlide(finished){
   const n = results.filter(x=>x).length;
   $("#eTitle").textContent = lives > 0 ? "🏁 HẾT LƯỢT" : "💥 GAME OVER 💥";
   $("#eStars").innerHTML = GATES.map((g,i)=>`<span class="${results[i]?'':'off'}" style="animation-delay:${i*.2}s">⭐</span>`).join("");
-  const msg = lives > 0 ? "Chưa bay qua hết các cổng. Thử lượt mới nào!" : `Dừng ở cổng ${Math.min(idx+1, GATES.length)}. Ôn lại hằng đẳng thức rồi bay lại nào!`;
+  const msg = lives > 0 ? "Chưa bay qua hết các cổng. Thử lượt mới nào!" : `Dừng ở cổng ${Math.min(idx+1, GATES.length)}. Ôn lại căn thức rồi bay lại nào!`;
   $("#eScore").innerHTML = `Qua <b>${n}/${GATES.length}</b> cổng • <b style="color:var(--gold)">${score}</b> điểm<br>${msg}`;
   $("#eName").value = ""; $("#bSave").disabled = false; renderBoard($("#eBoard"), 3);
   showSlide("sEnd");
   if (finished){ SND.win(); shout("Về đích! Xuất sắc!"); burst(960, 420, 200, ["#ffd23f","#16c172","#3a86ff","#ff4d8d","#fff"], 20); }
 }
 let board = [];
-try{ board = JSON.parse(localStorage.getItem("canhchim-hdt") || "[]"); }catch(e){ board = []; }
+try{ board = JSON.parse(localStorage.getItem("canhchim-can") || "[]"); }catch(e){ board = []; }
 function renderBoard(el, n=5){
   if (!board.length){ el.classList.add("hidden"); return; }
   el.classList.remove("hidden");
@@ -870,7 +905,7 @@ $("#bSave").onclick = e => {
   e.stopPropagation(); const name = $("#eName").value.trim() || "Người chơi";
   board.push({name: name.replace(/[<>&]/g,""), score, stars: results.filter(x=>x).length});
   board.sort((a,b)=>b.score-a.score); board = board.slice(0,10);
-  try{ localStorage.setItem("canhchim-hdt", JSON.stringify(board)); }catch(err){}
+  try{ localStorage.setItem("canhchim-can", JSON.stringify(board)); }catch(err){}
   renderBoard($("#eBoard"), 3); $("#bSave").disabled = true; SND.coin();
 };
 $("#bAgain").onclick = e => { e.stopPropagation(); newGame(); };
