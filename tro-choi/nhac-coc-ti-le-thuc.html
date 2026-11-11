@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Nhấc Cốc May Mắn – Tỉ lệ thức</title>
 <style>
 :root{
@@ -10,9 +10,9 @@
   --cream:#fbf3e4; --gold:#ffd166; --green:#35c98a; --green2:#1f8a5c; --blue:#4aa3ff; --text:#fff8ee;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden;background:#0d0908;font-family:"Times New Roman",Times,serif;color:var(--text)}
+html,body{width:100%;height:100%;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:#0d0908;font-family:"Times New Roman",Times,serif;color:var(--text)}
 #viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0d0908}
-#stage{position:relative;width:1920px;height:1080px;transform-origin:center center;overflow:hidden;
+#stage{position:relative;width:1920px;height:1080px;flex:none;transform-origin:center center;overflow:hidden;
   background:
     radial-gradient(ellipse at 50% 45%, rgba(255,200,120,.16), transparent 60%),
     repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 2px, transparent 2px 480px),
@@ -43,7 +43,7 @@ button{font-family:inherit;cursor:pointer;border:none}
 .setup-right{flex:1;display:flex;flex-direction:column;gap:18px;justify-content:center}
 .setup-right label{font-size:34px;font-weight:700}
 #names{width:100%;height:470px;font-family:inherit;font-size:32px;line-height:1.35;padding:18px 24px;border-radius:20px;border:3px solid #a06a40;background:#fff8ec;color:#3a1e10;resize:none}
-.row{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .opt{font-size:30px;display:flex;align-items:center;gap:12px}
 .opt select{font-size:30px;font-family:inherit;padding:6px 12px;border-radius:12px}
 .opt input[type=checkbox]{width:32px;height:32px}
@@ -84,29 +84,30 @@ button{font-family:inherit;cursor:pointer;border:none}
 #revealMsg{position:absolute;left:40px;top:34px;font-size:40px;font-weight:700;background:rgba(10,6,6,.8);padding:14px 34px;border-radius:40px;border:2px solid rgba(255,255,255,.15)}
 #revealBtns{position:absolute;left:0;right:0;bottom:40px;display:flex;justify-content:center;gap:26px;opacity:0;transition:opacity .5s;pointer-events:none}
 #revealBtns.on{opacity:1;pointer-events:auto}
-#fx{position:absolute;inset:0;pointer-events:none;z-index:4}
+#fx{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4}
 
 /* ---------- Màn câu hỏi ---------- */
+#quiz.show{display:flex;flex-direction:column;gap:24px;padding:34px 70px 30px}
 #quiz{z-index:30;background:linear-gradient(160deg,#21324d,#141d30 60%,#101626)}
-#quiz .head{position:absolute;left:50px;right:50px;top:34px;display:flex;align-items:center;gap:26px}
+#quiz .head{display:flex;flex-wrap:wrap;align-items:center;gap:26px}
 .who{font-size:40px;font-weight:700;background:linear-gradient(90deg,#2f9e5e,#41b873);padding:12px 34px;border-radius:40px}
 .lvl{font-size:32px;background:rgba(255,255,255,.12);padding:10px 26px;border-radius:30px}
 .qn{font-size:32px;color:#bcd3ff}
 #timer{margin-left:auto;position:relative;width:130px;height:130px}
 #timer svg{width:130px;height:130px;transform:rotate(-90deg)}
 #timer span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:700}
-#qbox{position:absolute;left:70px;right:70px;top:190px;min-height:230px;background:#fffaf0;color:#1d2433;border-radius:30px;padding:34px 50px;font-size:46px;line-height:1.6;box-shadow:0 14px 40px rgba(0,0,0,.45);display:flex;align-items:center}
-#opts{position:absolute;left:70px;right:70px;top:460px;display:grid;grid-template-columns:1fr 1fr;gap:26px}
+#qbox{flex:none;min-height:210px;background:#fffaf0;color:#1d2433;border-radius:30px;padding:34px 50px;font-size:46px;line-height:1.6;box-shadow:0 14px 40px rgba(0,0,0,.45);display:flex;align-items:center}
+#opts{display:grid;grid-template-columns:1fr 1fr;gap:26px}
 .op{display:flex;align-items:center;gap:24px;min-height:132px;background:#2a3b5c;border:4px solid #4d6597;border-radius:26px;padding:14px 28px;font-size:44px;color:#fff;text-align:left;transition:transform .12s, background .3s, border-color .3s}
 .op:hover{transform:translateY(-3px);border-color:#8fb4ff}
 .op .k{flex:0 0 76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:700;background:#ffd166;color:#4a2a00}
 .op.right{background:#1f9e66;border-color:#7ff0bd}
 .op.wrong{background:#b8262a;border-color:#ff9a9a}
 .op.dim{opacity:.45}
-#sol{position:absolute;left:70px;right:70px;top:780px;height:150px;background:rgba(255,255,255,.08);border:2px dashed rgba(255,255,255,.3);border-radius:22px;padding:14px 34px;font-size:36px;line-height:1.45;display:none;overflow:auto}
+#sol{flex:0 1 auto;min-height:0;background:rgba(255,255,255,.08);border:2px dashed rgba(255,255,255,.3);border-radius:22px;padding:14px 34px;font-size:36px;line-height:1.45;display:none;overflow:auto}
 #sol b{color:var(--gold)}
-#quiz .foot{position:absolute;left:0;right:0;bottom:30px;display:flex;justify-content:center;gap:24px}
-#verdict{position:absolute;left:50%;top:420px;transform:translate(-50%,-50%) scale(0);font-size:120px;font-weight:700;padding:10px 60px;border-radius:40px;white-space:nowrap;box-shadow:0 20px 50px rgba(0,0,0,.5);transition:transform .35s cubic-bezier(.3,1.6,.5,1);pointer-events:none;z-index:4}
+#quiz .foot{margin-top:auto;display:flex;flex-wrap:wrap;justify-content:center;gap:24px}
+#verdict{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%) scale(0);font-size:120px;font-weight:700;padding:10px 60px;border-radius:40px;white-space:nowrap;box-shadow:0 20px 50px rgba(0,0,0,.5);transition:transform .35s cubic-bezier(.3,1.6,.5,1);pointer-events:none;z-index:4}
 #verdict.on{transform:translate(-50%,-50%) scale(1)}
 
 /* phân số */
@@ -122,6 +123,55 @@ button{font-family:inherit;cursor:pointer;border:none}
 #scoreboard.show{display:block}
 #scoreboard h3{font-size:38px;color:var(--gold);margin-bottom:10px}
 #scoreboard .li{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+
+/* ---------- ĐIỆN THOẠI DỌC (tự bật khi màn hình đứng) ---------- */
+#stage.portrait{width:1080px;height:1920px}
+#stage.portrait #setup.show{flex-direction:column;gap:30px;padding:140px 56px 50px}
+#stage.portrait .setup-left{flex:none}
+#stage.portrait .setup-left h1{font-size:120px}
+#stage.portrait .setup-left h2{font-size:56px;margin:10px 0 20px}
+#stage.portrait .howto{font-size:36px;padding:20px 28px}
+#stage.portrait .howto span{display:none}
+#stage.portrait .setup-right{flex:1;justify-content:flex-start;gap:20px}
+#stage.portrait .setup-right label{font-size:40px}
+#stage.portrait #names{height:auto;flex:1;min-height:420px;font-size:46px}
+#stage.portrait .opt,#stage.portrait #nameCount,#stage.portrait .opt select{font-size:38px}
+#stage.portrait .opt input[type=checkbox]{width:44px;height:44px}
+#stage.portrait .btn{font-size:40px;padding:22px 30px}
+#stage.portrait #btnStart{flex:1 1 100%}
+#stage.portrait #tools{top:24px;bottom:auto;right:24px}
+#stage.portrait .ic{width:90px;height:90px;font-size:42px}
+#stage.portrait #topbar{top:130px;height:auto;flex-direction:column;align-items:stretch;gap:12px}
+#stage.portrait #topbar .sp{display:none}
+#stage.portrait #status{font-size:40px;text-align:center}
+#stage.portrait #scorePill{font-size:34px;text-align:center}
+#stage.portrait #board{top:330px;bottom:330px;left:16px;right:16px}
+#stage.portrait #controls{left:30px;right:30px;bottom:40px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+#stage.portrait #controls .btn{font-size:42px;padding:28px 10px}
+#stage.portrait .cup .tag{font-size:30px}
+#stage.portrait #scoreboard{top:330px;left:50px;right:50px;width:auto;max-height:1200px;font-size:44px}
+#stage.portrait #scoreboard h3{font-size:50px}
+#stage.portrait #revealMsg{left:40px;right:40px;top:140px;font-size:50px;text-align:center}
+#stage.portrait #bigCup{top:620px}
+#stage.portrait #ticket{top:960px;width:900px;height:280px}
+#stage.portrait .tk .hd{height:70px;line-height:70px;font-size:44px}
+#stage.portrait .tk .bd{height:210px}
+#stage.portrait .tk .nm{font-size:100px}
+#stage.portrait #revealBtns{bottom:120px;flex-direction:column;align-items:center}
+#stage.portrait #revealBtns .btn{font-size:50px;padding:30px 60px;min-width:640px}
+#stage.portrait #quiz.show{padding:140px 40px 50px;gap:30px}
+#stage.portrait .who{font-size:48px}
+#stage.portrait .lvl,#stage.portrait .qn{font-size:38px}
+#stage.portrait #timer{position:absolute;left:40px;top:20px;width:110px;height:110px;margin:0}
+#stage.portrait #timer svg{width:110px;height:110px}
+#stage.portrait #timer span{font-size:46px}
+#stage.portrait #qbox{font-size:56px;padding:34px 40px;min-height:280px}
+#stage.portrait #opts{grid-template-columns:1fr;gap:24px}
+#stage.portrait .op{font-size:54px;min-height:150px}
+#stage.portrait .op .k{flex-basis:90px;height:90px;font-size:48px}
+#stage.portrait #sol{font-size:44px}
+#stage.portrait #quiz .foot .btn{font-size:46px;padding:28px 40px;flex:1}
+#stage.portrait #verdict{font-size:100px}
 </style>
 </head>
 <body>
@@ -142,7 +192,7 @@ button{font-family:inherit;cursor:pointer;border:none}
     </div>
     <div class="setup-right">
       <label for="names">Danh sách học sinh (mỗi dòng một tên):</label>
-      <textarea id="names" spellcheck="false"></textarea>
+      <textarea id="names" spellcheck="false" placeholder="Dán hoặc gõ tên học sinh vào đây, mỗi dòng một tên.&#10;Có thể dán thẳng cột tên từ Excel."></textarea>
       <div class="row">
         <span id="nameCount"></span>
         <label class="opt">Thời gian: <select id="secs"><option value="20">20 giây</option><option value="30" selected>30 giây</option><option value="45">45 giây</option><option value="60">60 giây</option><option value="0">Không giới hạn</option></select></label>
@@ -152,7 +202,10 @@ button{font-family:inherit;cursor:pointer;border:none}
       </div>
       <div class="row">
         <button class="btn green" id="btnStart">▶ Đặt tên vào cốc</button>
+        <button class="btn ghost" id="btnFile">📂 Mở file .txt/.csv</button>
+        <button class="btn ghost" id="btnClear">🗑 Xóa</button>
         <button class="btn ghost" id="btnSample">Tên mẫu</button>
+        <input type="file" id="fileIn" accept=".txt,.csv,text/plain,text/csv" hidden>
       </div>
     </div>
   </div>
@@ -280,8 +333,14 @@ function esc(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const store = { get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}} };
 
 /* Co giãn sân khấu 16:9 */
-function fit(){ const s=Math.min(innerWidth/1920, innerHeight/1080); $('#stage').style.transform=`scale(${s})`; }
-addEventListener('resize', fit); fit();
+let PORTRAIT=null, SW=1920, SH=1080;
+function fit(){
+  const vw=innerWidth, vh=innerHeight, por = vh > vw*1.05;   // màn hình đứng -> giao diện dọc
+  if(por!==PORTRAIT){ PORTRAIT=por; $('#stage').classList.toggle('portrait',por); SW=por?1080:1920; SH=por?1920:1080;
+    const cv=$('#fx'); cv.width=SW; cv.height=SH; relayout(); }
+  const s=Math.min(vw/SW, vh/SH); $('#stage').style.transform=`scale(${s})`;
+}
+addEventListener('resize', fit); addEventListener('orientationchange', ()=>setTimeout(fit,200));
 
 /* ===================== ÂM THANH (Web Audio) ===================== */
 let AC=null, master=null, muted=false;
@@ -345,21 +404,27 @@ let students=[], cups=[], slots=[], busy=false, current=null;
 let qOrder=[], qIdx=0, asked=0, scores={}, answered=false, timerId=null;
 const SAMPLE=['Lan Chi','Minh Anh','Gia Bảo','Khánh Linh','Đức Huy','Ngọc Hân','Tuấn Kiệt','Bảo Ngọc','Quang Vinh','Thảo My','Hoàng Nam','Phương Thảo'];
 $('#names').value = store.get('nhaccoc_names') || SAMPLE.join('\n');
-function countNames(){ const n=$('#names').value.split('\n').map(s=>s.trim()).filter(Boolean).length; $('#nameCount').textContent=`Số học sinh: ${n}`; }
+function parseNames(txt){ return txt.split(/\r?\n|;/).map(s=>s.split('\t').map(x=>x.trim()).filter(Boolean).sort((a,b)=>b.length-a.length)[0]||'')
+  .map(s=>s.replace(/^\s*\d+\s*[.)\-:]?\s+/,'').replace(/^["']|["']$/g,'').trim()).filter(s=>s && !/^(stt|họ và tên|họ tên|tên)$/i.test(s)); }
+function countNames(){ const n=parseNames($('#names').value).length; $('#nameCount').textContent=`Số học sinh: ${n}`; }
 $('#names').oninput=countNames; countNames();
 $('#btnSample').onclick=()=>{ $('#names').value=SAMPLE.join('\n'); countNames(); };
+$('#btnClear').onclick=()=>{ $('#names').value=''; countNames(); $('#names').focus(); };
+$('#btnFile').onclick=()=>$('#fileIn').click();
+$('#fileIn').onchange=e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=()=>{ const t=String(r.result).replace(/,/g,'\t'); $('#names').value=parseNames(t).join('\n'); countNames(); }; r.readAsText(f,'utf-8'); e.target.value=''; };
 
-function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('show', s.id===id)); }
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('show', s.id===id)); if(id==='table') relayout(); }
 
 $('#btnStart').onclick=()=>{
-  const list=$('#names').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const list=parseNames($('#names').value); $('#names').value=list.join('\n');
   if(list.length<1){ alert('Thầy/cô hãy nhập ít nhất 1 tên học sinh.'); return; }
   if(list.length>60){ alert('Tối đa 60 học sinh.'); return; }
   store.set('nhaccoc_names', list.join('\n'));
   audio(); SFX.click();
   students=list; scores={}; list.forEach(n=>scores[n]=scores[n]||0);
   qOrder=shuffleArr([...CAU_HOI.keys()]); qIdx=0; asked=0;
-  buildBoard(); show('table'); updatePill();
+  show('table'); buildBoard(); updatePill();
   setStatus('Các bạn đã nằm dưới cốc! Bấm “Xáo cốc”.');
   setTimeout(()=>shuffleCups(), 600);
 };
@@ -367,8 +432,8 @@ $('#btnHome').onclick=()=>{ if(busy) return; show('setup'); };
 
 /* ===================== BÀN CỐC ===================== */
 function layout(n){
-  const W=1860, H=820; let best={cols:1,w:0};
-  for(let c=1;c<=n;c++){ const r=Math.ceil(n/c); const w=Math.min(W/c*0.86, H/r/1.1*0.92, 250); if(w>best.w) best={cols:c,w}; }
+  const bd=$('#board'), W=bd.offsetWidth||1860, H=bd.offsetHeight||820; let best={cols:1,w:0};
+  for(let c=1;c<=n;c++){ const r=Math.ceil(n/c); const w=Math.min(W/c*0.86, H/r/1.1*0.92, PORTRAIT?300:250); if(w>best.w) best={cols:c,w}; }
   const r=Math.ceil(n/best.cols), cw=W/best.cols, rh=H/r, w=best.w, h=w*1.1; const out=[];
   for(let i=0;i<n;i++){ const row=Math.floor(i/best.cols), col=i%best.cols; const inRow=Math.min(best.cols, n-row*best.cols);
     const off=(W-inRow*cw)/2; out.push({x:off+col*cw+(cw-w)/2, y:row*rh+(rh-h)/2, w, h}); }
@@ -383,6 +448,7 @@ function buildBoard(){
   cups.forEach(c=>c.el.querySelector('.tag').textContent=c.name);
   place();
 }
+function relayout(){ if(!cups.length||!$('#table').classList.contains('show')) return; slots=layout(cups.length); place(); }
 function place(){ cups.forEach(c=>{ const s=slots[c.slot]; Object.assign(c.el.style,{left:s.x+'px',top:s.y+'px',width:s.w+'px',height:s.h+'px'}); }); }
 function setStatus(t){ $('#status').textContent=t; }
 function updatePill(){ const left=cups.filter(c=>!c.opened).length; $('#scorePill').textContent=`Còn ${left} cốc · Đã hỏi ${asked} câu`; }
@@ -418,7 +484,7 @@ $('#btnPick').onclick=()=>{ audio(); pickRandom(); };
 /* ===================== NHẤC CỐC ===================== */
 let fxParts=[], fxRun=false;
 function burst(x,y,n=60){ for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2, s=2+Math.random()*7; fxParts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-3,life:60+rnd(50),r:2+Math.random()*4,c:['#ffd166','#fff3b0','#ffb347','#ffffff'][rnd(4)]}); } if(!fxRun){fxRun=true; requestAnimationFrame(fxLoop);} }
-function fxLoop(){ const cv=$('#fx'), g=cv.getContext('2d'); g.clearRect(0,0,1920,1080);
+function fxLoop(){ const cv=$('#fx'), g=cv.getContext('2d'); g.clearRect(0,0,cv.width,cv.height);
   fxParts=fxParts.filter(p=>p.life>0); fxParts.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=.12; p.vx*=.98; p.life--; g.globalAlpha=Math.min(1,p.life/40); g.fillStyle=p.c; g.beginPath(); g.arc(p.x,p.y,p.r,0,7); g.fill(); });
   g.globalAlpha=1; if(fxParts.length) requestAnimationFrame(fxLoop); else fxRun=false; }
 
@@ -437,9 +503,10 @@ async function openCup(c){
   $('#ticket').classList.add('on');
   // nhấc từ từ, nghiêng như ảnh mẫu
   const lift=anim(bc,[{transform:'translateY(0) rotate(0)'},{transform:'translateY(-60px) rotate(8deg)',offset:.35},{transform:'translateY(-360px) rotate(16deg)'}],2200,'cubic-bezier(.45,0,.35,1)');
-  for(let i=0;i<8;i++){ setTimeout(()=>burst(960-250+Math.random()*140, 820+Math.random()*40, 14), 500+i*180); }
+  const tk=$('#ticket'), cx=SW/2, ty=tk.offsetTop;
+  for(let i=0;i<8;i++){ setTimeout(()=>burst(cx-tk.offsetWidth*0.4+Math.random()*140, ty+180+Math.random()*40, 14), 500+i*180); }
   await lift;
-  SFX.reveal(); burst(960,760,140);
+  SFX.reveal(); burst(cx,ty+120,140);
   $('#revealMsg').innerHTML=`🎉 Xin chúc mừng <b style="color:#ffd166">${esc(c.name)}</b>!`;
   say('Xin mời bạn '+c.name);
   c.opened = $('#remove').checked; if(c.opened) c.el.classList.add('opened');
@@ -504,6 +571,7 @@ addEventListener('keydown',e=>{
   else if(scr==='table'&&k===' '){ e.preventDefault(); pickRandom(); }
   else if(scr==='setup'&&k===' '){ e.preventDefault(); $('#btnStart').click(); }
 });
+fit();
 </script>
 </body>
 </html>
