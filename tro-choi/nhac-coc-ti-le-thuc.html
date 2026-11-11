@@ -186,7 +186,7 @@ button{font-family:inherit;cursor:pointer;border:none}
       <div class="howto">
         <b>Bước 1:</b> Nhập tên học sinh, mỗi tên giấu dưới một chiếc cốc.<br>
         <b>Bước 2:</b> Xáo cốc rồi nhấc ngẫu nhiên một cốc để lộ vé tên.<br>
-        <b>Bước 3:</b> Học sinh có tên trả lời câu hỏi tỉ lệ thức.<br>
+        <b>Bước 3:</b> Học sinh có tên trả lời câu hỏi. Mỗi ván gồm <b>4 câu</b> từ dễ đến khó.<br>
         <span style="font-size:27px;opacity:.85">Phím tắt: Space – bước tiếp · A/B/C/D – chọn đáp án · F – toàn màn hình · M – tắt tiếng</span>
       </div>
     </div>
@@ -271,7 +271,10 @@ button{font-family:inherit;cursor:pointer;border:none}
    - Phân số viết dạng {{tử|mẫu}}, ví dụ {{2|3}} hiển thị là 2/3 xếp chồng.
    - a: 4 phương án A, B, C, D;  dung: chỉ số đáp án đúng (0 = A, 1 = B, 2 = C, 3 = D).
    - giai: lời giải ngắn hiện khi bấm "Hiện đáp án".
+   - SO_CAU: số câu hỏi của một ván chơi. Mỗi ván lấy ngẫu nhiên 1 câu Nhận biết,
+     1 câu Thông hiểu, 1 câu Vận dụng, 1 câu Vận dụng cao (từ dễ đến khó).
    ===================================================================== */
+const SO_CAU = 4;
 const CAU_HOI = [
   {muc:'Nhận biết', q:'Tỉ lệ thức là gì?',
    a:['Đẳng thức của hai tỉ số {{a|b}} = {{c|d}}','Tổng của hai tỉ số','Tích của hai phân số','Hiệu của hai tỉ số'], dung:0,
@@ -401,7 +404,7 @@ function cupSVG(num){
 
 /* ===================== TRẠNG THÁI ===================== */
 let students=[], cups=[], slots=[], busy=false, current=null;
-let qOrder=[], qIdx=0, asked=0, scores={}, answered=false, timerId=null;
+let qOrder=[], qIdx=0, asked=0, ended=false, scores={}, answered=false, timerId=null;
 const SAMPLE=['Lan Chi','Minh Anh','Gia Bảo','Khánh Linh','Đức Huy','Ngọc Hân','Tuấn Kiệt','Bảo Ngọc','Quang Vinh','Thảo My','Hoàng Nam','Phương Thảo'];
 $('#names').value = store.get('nhaccoc_names') || SAMPLE.join('\n');
 function parseNames(txt){ return txt.split(/\r?\n|;/).map(s=>s.split('\t').map(x=>x.trim()).filter(Boolean).sort((a,b)=>b.length-a.length)[0]||'')
@@ -423,12 +426,19 @@ $('#btnStart').onclick=()=>{
   store.set('nhaccoc_names', list.join('\n'));
   audio(); SFX.click();
   students=list; scores={}; list.forEach(n=>scores[n]=scores[n]||0);
-  qOrder=shuffleArr([...CAU_HOI.keys()]); qIdx=0; asked=0;
+  qOrder=chonCau(); qIdx=0; asked=0; ended=false; $('#scoreboard').classList.remove('show');
   show('table'); buildBoard(); updatePill();
   setStatus('Các bạn đã nằm dưới cốc! Bấm “Xáo cốc”.');
   setTimeout(()=>shuffleCups(), 600);
 };
 $('#btnHome').onclick=()=>{ if(busy) return; show('setup'); };
+/* Chọn SO_CAU câu: lần lượt mỗi mức độ một câu, từ dễ đến khó */
+function chonCau(){
+  const MUC=['Nhận biết','Thông hiểu','Vận dụng','Vận dụng cao'], out=[];
+  for(let i=0;i<SO_CAU;i++){ const m=MUC[i%MUC.length]; const pool=[...CAU_HOI.keys()].filter(k=>CAU_HOI[k].muc===m&&!out.includes(k));
+    const rest=[...CAU_HOI.keys()].filter(k=>!out.includes(k)); const from=pool.length?pool:rest; if(from.length) out.push(from[rnd(from.length)]); }
+  return out;
+}
 
 /* ===================== BÀN CỐC ===================== */
 function layout(n){
@@ -442,7 +452,7 @@ function layout(n){
 function buildBoard(){
   const b=$('#board'); b.innerHTML=''; slots=layout(students.length);
   cups=students.map((name,i)=>{ const el=document.createElement('div'); el.className='cup'; el.innerHTML=cupSVG(i+1)+`<div class="tag">${esc(name)}</div>`;
-    const c={el,name,num:i+1,slot:i,opened:false}; el.onclick=()=>{ if(!busy&&!c.opened) openCup(c); }; b.appendChild(el); return c; });
+    const c={el,name,num:i+1,slot:i,opened:false}; el.onclick=()=>{ if(!busy&&!ended&&!c.opened) openCup(c); }; b.appendChild(el); return c; });
   // gán tên ngẫu nhiên dưới các cốc
   const names=shuffleArr([...students]); cups.forEach((c,i)=>c.name=names[i]);
   cups.forEach(c=>c.el.querySelector('.tag').textContent=c.name);
@@ -451,8 +461,8 @@ function buildBoard(){
 function relayout(){ if(!cups.length||!$('#table').classList.contains('show')) return; slots=layout(cups.length); place(); }
 function place(){ cups.forEach(c=>{ const s=slots[c.slot]; Object.assign(c.el.style,{left:s.x+'px',top:s.y+'px',width:s.w+'px',height:s.h+'px'}); }); }
 function setStatus(t){ $('#status').textContent=t; }
-function updatePill(){ const left=cups.filter(c=>!c.opened).length; $('#scorePill').textContent=`Còn ${left} cốc · Đã hỏi ${asked} câu`; }
-function lock(v){ busy=v; ['#btnShuffle','#btnPick','#btnHome'].forEach(s=>$(s).disabled=v); }
+function updatePill(){ $('#scorePill').textContent=`Câu hỏi: ${asked}/${qOrder.length}`; }
+function lock(v){ busy=v; ['#btnShuffle','#btnPick','#btnHome'].forEach(s=>$(s).disabled=v||(ended&&s!=='#btnHome')); }
 
 async function shuffleCups(){
   if(busy) return; const live=cups.filter(c=>!c.opened); if(live.length<2){ return; }
@@ -468,7 +478,7 @@ async function shuffleCups(){
 $('#btnShuffle').onclick=()=>{ audio(); shuffleCups(); };
 
 async function pickRandom(){
-  if(busy) return; const live=cups.filter(c=>!c.opened);
+  if(busy||ended) return; const live=cups.filter(c=>!c.opened);
   if(!live.length){ setStatus('Đã mở hết cốc! Bấm “Sửa danh sách” để chơi lại.'); return; }
   lock(true); setStatus('Cốc nào sẽ được chọn đây...?');
   const target=live[rnd(live.length)]; const steps=18+rnd(live.length);
@@ -518,9 +528,9 @@ $('#btnToQuiz').onclick=()=>{ SFX.click(); startQuestion(); };
 
 /* ===================== CÂU HỎI ===================== */
 function startQuestion(){
-  if(qIdx>=qOrder.length){ qOrder=shuffleArr([...CAU_HOI.keys()]); qIdx=0; }
   const q=CAU_HOI[qOrder[qIdx++]]; asked++; answered=false;
-  $('#qWho').textContent='👤 '+current.name; $('#qLvl').textContent=q.muc; $('#qNum').textContent=`Câu ${asked}`;
+  $('#qWho').textContent='👤 '+current.name; $('#qLvl').textContent=q.muc; $('#qNum').textContent=`Câu ${asked}/${qOrder.length}`;
+  $('#btnNext').textContent = asked>=qOrder.length ? '🏁 Kết thúc – Xem bảng điểm' : '▶ Tiếp tục nhấc cốc';
   $('#qText').innerHTML=fmt(q.q);
   const box=$('#opts'); box.innerHTML='';
   q.a.forEach((t,i)=>{ const b=document.createElement('button'); b.className='op'; b.innerHTML=`<span class="k">${'ABCD'[i]}</span><span>${fmt(t)}</span>`; b.onclick=()=>choose(i); box.appendChild(b); });
@@ -552,6 +562,8 @@ function revealAnswer(){
 }
 $('#btnAns').onclick=()=>{ SFX.click(); revealAnswer(); };
 $('#btnNext').onclick=()=>{ clearInterval(timerId); SFX.click(); show('table');
+  if(asked>=qOrder.length){ ended=true; lock(false); renderScores(); $('#scoreboard').classList.add('show');
+    setStatus('🏁 Hoàn thành '+qOrder.length+' câu hỏi! Bấm “Sửa danh sách” để chơi ván mới.'); SFX.reveal(); say('Trò chơi kết thúc. Chúc mừng các bạn'); return; }
   const left=cups.filter(c=>!c.opened).length;
   setStatus(left? 'Bấm “Xáo cốc” hoặc “Nhấc cốc ngẫu nhiên” cho lượt tiếp theo.' : 'Đã mở hết cốc! Xem “Bảng điểm” 🏆'); };
 
