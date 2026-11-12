@@ -71,8 +71,58 @@ button{font-family:inherit;cursor:pointer;border:none}
 #reveal{background:rgba(8,5,4,.72);z-index:20}
 #reveal.show{display:block}
 #spot{position:absolute;left:50%;top:50%;width:1100px;height:900px;transform:translate(-50%,-50%);background:radial-gradient(ellipse at 50% 62%,rgba(255,210,140,.35),transparent 62%)}
-#ticket{position:absolute;left:50%;top:640px;width:640px;height:230px;transform:translateX(-50%) scale(.9);opacity:.0;transition:opacity .8s, transform .8s}
-#ticket.on{opacity:1;transform:translateX(-50%) scale(1)}
+#ticket{position:absolute;left:50%;top:640px;width:640px;height:230px;transform:translateX(-50%);opacity:0;z-index:1}
+/* ---- Hộp quà bí mật ---- */
+#gift{position:absolute;left:50%;top:500px;width:520px;height:440px;margin-left:-260px;z-index:2;cursor:pointer;transform-origin:50% 100%}
+#gift .gbody{position:absolute;left:0;right:0;bottom:0;height:300px;border-radius:16px;z-index:2;
+  background:repeating-linear-gradient(90deg,rgba(0,0,0,.035) 0 3px,transparent 3px 14px),linear-gradient(180deg,#d6a468,#b07a40);
+  border:6px solid #5b3a1a;box-shadow:inset 0 -26px 0 rgba(0,0,0,.12),0 30px 40px rgba(0,0,0,.5)}
+#gift .gbody::before{content:"";position:absolute;left:50%;top:0;height:120px;width:90px;margin-left:-45px;background:rgba(240,225,180,.75);border-bottom:3px dashed rgba(91,58,26,.35)}
+.flap{position:absolute;top:80px;width:50%;height:64px;z-index:3;background:linear-gradient(180deg,#e2b47a,#c58f52);border:6px solid #5b3a1a}
+.flap.l{left:0;border-radius:14px 0 0 0;transform-origin:0 100%}
+.flap.r{right:0;border-radius:0 14px 0 0;transform-origin:100% 100%}
+.flap.l::after{content:"";position:absolute;right:-6px;top:-6px;bottom:-6px;width:45px;background:rgba(240,225,180,.8)}
+.flap.r::after{content:"";position:absolute;left:-6px;top:-6px;bottom:-6px;width:45px;background:rgba(240,225,180,.8)}
+.peek{position:absolute;left:50%;top:118px;width:230px;height:100px;margin-left:-115px;border-radius:50%;background:radial-gradient(ellipse,#120803 55%,#2a1608);box-shadow:inset 0 8px 0 rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;gap:22px;transition:opacity .2s}
+.eye{width:60px;height:60px;border-radius:50%;background:#fff;position:relative;animation:blink 3.2s infinite;transition:transform .2s}
+.eye i{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px;border-radius:50%;background:#111;animation:look 2.6s ease-in-out infinite}
+@keyframes blink{0%,90%,100%{transform:scaleY(1)}94%{transform:scaleY(.08)}}
+@keyframes look{0%,100%{transform:translateX(-12px)}40%{transform:translateX(12px)}60%{transform:translate(4px,-8px)}}
+#gift.scared .eye{transform:scale(1.25);animation:none}
+#gift.scared .eye i{width:14px;height:14px;margin:-7px;animation:jit .12s linear infinite}
+@keyframes jit{0%,100%{transform:translate(-2px,0)}50%{transform:translate(2px,1px)}}
+.sweat{position:absolute;right:92px;top:96px;font-size:54px;opacity:0;transition:opacity .2s;z-index:3}
+#gift.scared .sweat{opacity:1;animation:drip .7s ease-in infinite}
+@keyframes drip{from{transform:translateY(-10px)}to{transform:translateY(26px)}}
+.stk{position:absolute;z-index:3;font-weight:700;white-space:nowrap}
+.stk.s-a{left:16px;top:20px;font-size:30px;color:#fff;background:#d62839;padding:2px 14px;border-radius:8px;transform:rotate(-12deg);box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.stk.s-b{right:12px;top:30px;font-size:26px;color:#3a1e10;background:#ffe066;padding:2px 12px;border-radius:8px;transform:rotate(9deg);box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.stk.s-c{left:50%;bottom:22px;transform:translateX(-50%) rotate(-3deg);font-size:30px;color:#5b1a1a;border:4px dashed #8b2a2a;padding:2px 18px;border-radius:10px;background:rgba(255,245,225,.6)}
+#jack{position:absolute;left:50%;bottom:260px;width:0;height:0;z-index:1}
+#jack .spring{position:absolute;left:-40px;bottom:0;width:80px;height:260px;transform-origin:50% 100%;transform:scaleY(.1)}
+#jack .head{position:absolute;left:-118px;bottom:240px;width:236px;height:236px;opacity:0}
+#jack .face{width:100%;height:100%;border-radius:50%;border:8px solid #ffd166;background:#fff8ec center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:150px;box-shadow:0 0 0 6px #5b3a1a,0 14px 30px rgba(0,0,0,.4)}
+#jack .hat{position:absolute;left:50%;top:-118px;width:120px;height:140px;margin-left:-40px;transform:rotate(18deg);transform-origin:50% 100%;
+  clip-path:polygon(50% 0,100% 100%,0 100%);background:repeating-linear-gradient(-35deg,#ff4d6d 0 18px,#ffd166 18px 36px,#4cc9f0 36px 54px)}
+#jack .pom{position:absolute;left:50%;top:-140px;width:40px;height:40px;margin-left:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#ffd166);transform:rotate(18deg)}
+#jack .bubble{position:absolute;left:250px;bottom:330px;white-space:nowrap;font-size:48px;font-weight:700;color:#e11d48;background:#fff;border:5px solid #3a1e10;border-radius:40px;padding:10px 28px;opacity:0}
+#jack .bubble::after{content:"";position:absolute;left:-26px;bottom:18px;border:16px solid transparent;border-right:24px solid #3a1e10}
+#jack .head.wob{animation:wob 1.1s ease-in-out infinite alternate}
+@keyframes wob{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
+#gift.s1{animation:gShake .5s ease-in-out infinite;--a:3deg}
+#gift.s2{animation:gShake .3s ease-in-out infinite;--a:6deg}
+#gift.s3{animation:gShake .14s linear infinite;--a:9deg}
+#gift.ready{animation:gBob 1.4s ease-in-out infinite}
+@keyframes gShake{0%,100%{transform:rotate(0)}25%{transform:rotate(calc(var(--a)*-1)) translateY(-8px)}75%{transform:rotate(var(--a)) translateY(-8px)}}
+@keyframes gBob{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-14px) scale(1.03)}}
+#gRays{position:absolute;left:50%;top:-60px;width:1400px;height:1400px;margin-left:-700px;z-index:0;opacity:0;pointer-events:none;
+  background:repeating-conic-gradient(rgba(255,230,140,.6) 0 9deg,transparent 9deg 22deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 60%);mask:radial-gradient(circle,#000 0,transparent 60%)}
+#gRays.on{animation:raysIn 1s ease-out forwards, raySpin2 14s linear infinite}
+@keyframes raysIn{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
+@keyframes raySpin2{to{rotate:360deg}}
+#cdNum{position:absolute;left:50%;top:330px;transform:translate(-50%,-50%);font-size:280px;font-weight:700;color:#ffd166;z-index:7;pointer-events:none;
+  text-shadow:0 10px 0 #b45309,0 0 60px rgba(255,209,102,.9);opacity:0}
+#btnOpen{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;display:none;font-size:46px;padding:20px 60px;border-radius:999px;animation:btnGlow 1.6s ease-in-out infinite}
 .tk{position:relative;width:100%;height:100%;background:#f1e4c6;border-radius:22px;overflow:hidden;box-shadow:0 0 60px rgba(255,209,102,.55),0 20px 40px rgba(0,0,0,.6)}
 .tk .hd{height:58px;background:linear-gradient(90deg,#2f9e5e,#41b873);color:#f6ffe8;font-size:36px;font-weight:700;letter-spacing:6px;text-align:center;line-height:58px}
 .tk .bd{display:flex;align-items:center;height:172px}
@@ -184,7 +234,12 @@ button{font-family:inherit;cursor:pointer;border:none}
 #stage.portrait #scoreboard h3{font-size:50px}
 #stage.portrait #revealMsg{left:40px;right:40px;top:140px;font-size:50px;text-align:center}
 #stage.portrait #bigCup{top:620px}
-#stage.portrait #ticket{top:960px;width:900px;height:280px}
+#stage.portrait #ticket{top:940px;width:900px;height:280px}
+#stage.portrait #gift{top:800px}
+#stage.portrait #jack .bubble{left:-200px;bottom:520px}
+#stage.portrait #gRays{top:240px}
+#stage.portrait #cdNum{top:560px;font-size:320px}
+#stage.portrait #btnOpen{bottom:300px;font-size:56px;padding:30px 70px}
 #stage.portrait .tk .hd{height:70px;line-height:70px;font-size:44px}
 #stage.portrait .tk .bd{height:210px}
 #stage.portrait .tk .nm{font-size:100px}
@@ -278,7 +333,23 @@ button{font-family:inherit;cursor:pointer;border:none}
     <div id="spot"></div>
     <div id="revealMsg">Từ từ nhấc cốc lên...</div>
     <div id="ticket"><div class="tk"><div class="hd">VÉ MAY MẮN</div><div class="bd"><div class="st">★</div><div class="nm" id="tkName">—</div></div></div></div>
+    <div id="gRays"></div>
+    <div id="gift">
+      <div id="jack">
+        <svg class="spring" viewBox="0 0 80 260" preserveAspectRatio="none"><polyline points="40,260 8,240 72,215 8,190 72,165 8,140 72,115 8,90 72,65 8,40 72,15 40,0" fill="none" stroke="#9aa5b1" stroke-width="9" stroke-linejoin="round"/><polyline points="40,260 8,240 72,215 8,190 72,165 8,140 72,115 8,90 72,65 8,40 72,15 40,0" fill="none" stroke="#e5ebf0" stroke-width="3"/></svg>
+        <div class="head"><div class="hat"></div><div class="pom"></div><div class="face" id="gFace">😜</div></div>
+        <div class="bubble">TÈN TEN! 🎉</div>
+      </div>
+      <div class="flap l"></div><div class="flap r"></div>
+      <div class="gbody">
+        <div class="stk s-a">⚠ DỄ VỠ</div><div class="stk s-b">KHÔNG ĐƯỢC LẮC! 😅</div>
+        <div class="peek"><div class="eye"><i></i></div><div class="eye"><i></i></div></div><div class="sweat">💦</div>
+        <div class="stk s-c" id="gName">📦 HÀNG CỦA THẦY CHUNG</div>
+      </div>
+    </div>
     <div id="bigCup"></div>
+    <div id="cdNum">3</div>
+    <button class="btn gold" id="btnOpen">🎁 MỞ HỘP</button>
     <canvas id="fx" width="1920" height="1080"></canvas>
     <div id="winner">
       <div class="wcard">
@@ -335,6 +406,7 @@ button{font-family:inherit;cursor:pointer;border:none}
    - SO_CAU: số câu hỏi của một ván chơi.
    ===================================================================== */
 const SO_CAU = 4;
+const TEN_GV = 'Thầy Chung';   // tên hiện trên hộp quà bí mật
 const CAU_HOI = [
   // Câu 1 – Tỉ lệ thức
   {muc:'Tỉ lệ thức', q:'Tỉ lệ thức có dạng nào sau đây?',
@@ -389,6 +461,8 @@ function noise(d=.08, v=.25, when=0, freq=1200){
   const g=AC.createGain(); g.gain.value=v; src.connect(bp); bp.connect(g); g.connect(master); src.start(t);
 }
 const SFX = {
+  boing(){ tone(140,.14,'square',.12,0,560); tone(560,.16,'sine',.3,.13,260); tone(260,.14,'sine',.25,.29,460); tone(460,.16,'sine',.2,.43,300); tone(300,.2,'sine',.15,.59,380); },
+  heart(){ tone(75,.16,'sine',.7); tone(62,.2,'sine',.6,.2); },
   click(){ tone(660,.08,'triangle',.2); },
   swoosh(){ noise(.25,.35,0,900); tone(300,.25,'sine',.08,0,700); },
   tick(){ tone(1200,.05,'square',.08); },
@@ -557,28 +631,62 @@ function fxLoop(){ const cv=$('#fx'), g=cv.getContext('2d'); g.clearRect(0,0,cv.
 
 function anim(el, frames, dur, easing='ease-in-out'){ return el.animate(frames,{duration:dur,easing,fill:'forwards'}).finished.catch(()=>{}); }
 
+let openGift=null;
+function anim2(el,frames,dur,easing='ease-out'){ return el.animate(frames,{duration:dur,easing,fill:'forwards'}); }
 async function openCup(c){
-  lock(true); current=c;
-  $('#bigCup').innerHTML=cupSVG(c.num); $('#tkName').textContent=c.name;
-  music(false); $('#ticket').classList.remove('on'); $('#winner').classList.remove('on');
+  lock(true); current=c; music(false);
+  $('#bigCup').innerHTML=cupSVG(c.num); $('#tkName').textContent=c.name; $('#winner').classList.remove('on');
+  // chuẩn bị hộp quà
+  const gift=$('#gift'), fl=$('.flap.l'), fr=$('.flap.r'), tk=$('#ticket'), rays=$('#gRays'), bc=$('#bigCup'), cd=$('#cdNum'),
+        head=$('#jack .head'), spring=$('#jack .spring'), bub=$('#jack .bubble'), peek=$('.peek');
+  [gift,fl,fr,tk,bc,cd,head,spring,bub].forEach(e=>e.getAnimations().forEach(a=>a.cancel()));
+  head.classList.remove('wob'); peek.style.opacity=1;
+  gift.className=''; rays.className=''; tk.style.zIndex=1; bc.style.transform=''; bc.style.opacity=1;
+  const gf=$('#gFace'); gf.style.backgroundImage=FACE?`url(${FACE})`:''; gf.textContent=FACE?'':'😜';
+  $('#gName').textContent='📦 HÀNG CỦA '+TEN_GV.toUpperCase();
   $('#revealMsg').textContent='Từ từ nhấc cốc lên...';
-  const bc=$('#bigCup'); bc.getAnimations().forEach(a=>a.cancel()); bc.style.transform='';
   show('reveal');
-  // cốc lắc nhẹ hồi hộp
+  // 1) cốc lắc nhẹ rồi nhấc lên, bay đi
   SFX.drum(2.6);
   await anim(bc,[{transform:'rotate(0)'},{transform:'rotate(-3deg)'},{transform:'rotate(3deg)'},{transform:'rotate(-2deg)'},{transform:'rotate(2deg)'},{transform:'rotate(0)'}],1100);
-  $('#ticket').classList.add('on');
-  // nhấc từ từ, nghiêng như ảnh mẫu
-  const lift=anim(bc,[{transform:'translateY(0) rotate(0)'},{transform:'translateY(-60px) rotate(8deg)',offset:.35},{transform:'translateY(-360px) rotate(16deg)'}],2200,'cubic-bezier(.45,0,.35,1)');
-  const tk=$('#ticket'), cx=SW/2, ty=tk.offsetTop;
-  for(let i=0;i<8;i++){ setTimeout(()=>burst(cx-tk.offsetWidth*0.4+Math.random()*140, ty+180+Math.random()*40, 14), 500+i*180); }
-  await lift;
-  SFX.reveal(); burst(cx,ty+120,140);
+  await anim(bc,[{transform:'translateY(0) rotate(0)'},{transform:'translateY(-60px) rotate(8deg)',offset:.35},{transform:'translateY(-360px) rotate(16deg)'}],2000,'cubic-bezier(.45,0,.35,1)');
+  SFX.swoosh();
+  await anim(bc,[{transform:'translateY(-360px) rotate(16deg)',opacity:1},{transform:'translateY(-1100px) rotate(40deg)',opacity:0}],600,'ease-in');
+  // 2) hộp quà bí mật – chờ chạm để mở
+  [784,988,1175].forEach((f,i)=>tone(f,.25,'triangle',.2,i*.1));
+  gift.className='ready';
+  $('#revealMsg').innerHTML=`📦 Hộp bí ẩn của <b style="color:#ffd166">${esc(TEN_GV)}</b>! Có ai trong đó... Chạm vào hộp để mở!`;
+  $('#btnOpen').style.display='block'; say('Ơ, có ai trong hộp kìa! Chạm vào hộp để mở');
+  await new Promise(res=>{ openGift=res; });
+  openGift=null; $('#btnOpen').style.display='none';
+  // 3) đếm ngược 3-2-1, hộp rung mạnh dần, tim đập
+  const msg=['Ai sẽ là người may mắn...?','Hộp đang run kìa... 😱','Chuẩn bị nhé...!'];
+  for(let n=3;n>=1;n--){
+    gift.className='s'+(4-n)+' scared'; $('#revealMsg').textContent=msg[3-n]; cd.textContent=n;
+    anim2(cd,[{opacity:0,transform:'translate(-50%,-50%) scale(2.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(.95)',offset:.35},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.75},{opacity:0,transform:'translate(-50%,-50%) scale(.6)'}],950,'ease-out');
+    SFX.heart(); tone(300+n*-60+240,.12,'square',.08); await sleep(1000);
+  }
+  // 4) bật nắp, tia sáng, vé tên bay lên từ hộp
+  gift.className=''; peek.style.opacity=0; SFX.boing();
+  anim2(fl,[{transform:'rotate(0)'},{transform:'rotate(-140deg)'}],450,'cubic-bezier(.2,1.4,.4,1)');
+  anim2(fr,[{transform:'rotate(0)'},{transform:'rotate(140deg)'}],450,'cubic-bezier(.2,1.4,.4,1)');
+  // mặt thầy bật lên trên lò xo, nảy tưng tưng
+  const S=[.1,1.3,.8,1.12,.94,1.03,1], O=[0,.3,.48,.64,.78,.9,1], H=260;
+  anim2(spring,S.map((v,i)=>({transform:`scaleY(${v})`,offset:O[i]})),1300,'ease-out');
+  anim2(head,S.map((v,i)=>({transform:`translateY(${H*(1-v)}px)`,opacity:i?1:0,offset:O[i]})),1300,'ease-out').finished.then(()=>head.classList.add('wob')).catch(()=>{});
+  setTimeout(()=>{ anim2(bub,[{opacity:0,transform:'scale(.2) rotate(-20deg)'},{opacity:1,transform:'scale(1.15) rotate(4deg)',offset:.6},{opacity:1,transform:'scale(1) rotate(-3deg)'}],500,'ease-out'); SFX.reveal(); },550);
+  rays.className='on';
+  const cx=SW/2, by=gift.offsetTop+140; burst(cx,by,160); confetti();
+  tk.style.zIndex=4; await sleep(600);
+  await anim(tk,[{opacity:0,transform:'translateX(-50%) translateY(60px) scale(.3)'},{opacity:1,transform:'translateX(-50%) translateY(-200px) scale(1.08)',offset:.8},{opacity:1,transform:'translateX(-50%) translateY(-190px) scale(1)'}],1300,'cubic-bezier(.2,.8,.3,1.2)');
+  tk.style.zIndex=4;
   $('#revealMsg').innerHTML=`🎉 Xin chúc mừng <b style="color:#ffd166">${esc(c.name)}</b>!`;
   c.opened = $('#remove').checked; if(c.opened) c.el.classList.add('opened');
   updatePill();
-  await sleep(1000); showWinner(c); lock(false);
+  await sleep(1300); showWinner(c); lock(false);
 }
+function tryOpenGift(){ if(openGift){ SFX.click(); openGift(); } }
+$('#gift').onclick=tryOpenGift; $('#btnOpen').onclick=tryOpenGift;
 $('#btnSkip').onclick=()=>{ $('#winner').classList.remove('on'); show('table'); setStatus('Bấm “Nhấc cốc ngẫu nhiên” để chọn bạn tiếp theo.'); };
 $('#btnToQuiz').onclick=()=>{ SFX.click(); $('#winner').classList.remove('on'); startQuestion(); };
 /* Màn công bố tên: chữ rơi từng chữ, pháo giấy */
@@ -651,7 +759,7 @@ addEventListener('keydown',e=>{
   if(k==='f'){ toggleFull(); return; } if(k==='m'){ $('#btnMute').click(); return; }
   if(scr==='quiz'){ const idx='abcd'.indexOf(k)>=0?'abcd'.indexOf(k):'1234'.indexOf(k); if(idx>=0){ choose(idx); return; }
     if(k==='enter'&&!answered){ revealAnswer(); return; } if(k===' '){ e.preventDefault(); answered? $('#btnNext').click() : revealAnswer(); } }
-  else if(scr==='reveal'&&k===' '){ e.preventDefault(); if(!busy&&$('#winner').classList.contains('on')) $('#btnToQuiz').click(); }
+  else if(scr==='reveal'&&k===' '){ e.preventDefault(); if(openGift) tryOpenGift(); else if(!busy&&$('#winner').classList.contains('on')) $('#btnToQuiz').click(); }
   else if(scr==='table'&&k===' '){ e.preventDefault(); pickRandom(); }
   else if(scr==='setup'&&k===' '){ e.preventDefault(); $('#btnStart').click(); }
 });
