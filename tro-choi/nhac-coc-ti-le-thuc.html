@@ -65,71 +65,22 @@ button{font-family:inherit;cursor:pointer;border:none}
 .cup.opened:hover{transform:none}
 .cup .tag{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);white-space:nowrap;font-size:26px;font-weight:700;background:#efe3c8;color:#3a1e10;padding:2px 14px;border-radius:10px;display:none}
 .cup.opened .tag{display:block}
-#controls{position:absolute;left:30px;right:440px;bottom:28px;display:flex;justify-content:center;gap:24px;z-index:5}
+#btnSpin{font-size:44px;padding:18px 60px}
+#controls{position:absolute;left:30px;right:440px;bottom:28px;align-items:center;display:flex;justify-content:center;gap:24px;z-index:5}
 
 /* ---------- Màn nhấc cốc ---------- */
 #reveal{background:rgba(8,5,4,.72);z-index:20}
 #reveal.show{display:block}
 #spot{position:absolute;left:50%;top:50%;width:1100px;height:900px;transform:translate(-50%,-50%);background:radial-gradient(ellipse at 50% 62%,rgba(255,210,140,.35),transparent 62%)}
-#ticket{position:absolute;left:50%;top:640px;width:640px;height:230px;transform:translateX(-50%);opacity:0;z-index:1}
-/* ---- Hộp quà bí mật ---- */
-#gift{position:absolute;left:50%;top:500px;width:520px;height:440px;margin-left:-260px;z-index:2;cursor:pointer;transform-origin:50% 100%}
-#gift .gbody{position:absolute;left:0;right:0;bottom:0;height:300px;border-radius:16px;z-index:2;
-  background:repeating-linear-gradient(90deg,rgba(0,0,0,.035) 0 3px,transparent 3px 14px),linear-gradient(180deg,#d6a468,#b07a40);
-  border:6px solid #5b3a1a;box-shadow:inset 0 -26px 0 rgba(0,0,0,.12),0 30px 40px rgba(0,0,0,.5)}
-#gift .gbody::before{content:"";position:absolute;left:50%;top:0;height:120px;width:90px;margin-left:-45px;background:rgba(240,225,180,.75);border-bottom:3px dashed rgba(91,58,26,.35)}
-.flap{position:absolute;top:80px;width:50%;height:64px;z-index:3;background:linear-gradient(180deg,#e2b47a,#c58f52);border:6px solid #5b3a1a}
-.flap.l{left:0;border-radius:14px 0 0 0;transform-origin:0 100%}
-.flap.r{right:0;border-radius:0 14px 0 0;transform-origin:100% 100%}
-.flap.l::after{content:"";position:absolute;right:-6px;top:-6px;bottom:-6px;width:45px;background:rgba(240,225,180,.8)}
-.flap.r::after{content:"";position:absolute;left:-6px;top:-6px;bottom:-6px;width:45px;background:rgba(240,225,180,.8)}
-.peek{position:absolute;left:50%;top:118px;width:230px;height:100px;margin-left:-115px;border-radius:50%;background:radial-gradient(ellipse,#120803 55%,#2a1608);box-shadow:inset 0 8px 0 rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;gap:22px;transition:opacity .2s}
-.eye{width:60px;height:60px;border-radius:50%;background:#fff;position:relative;animation:blink 3.2s infinite;transition:transform .2s}
-.eye i{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px;border-radius:50%;background:#111;animation:look 2.6s ease-in-out infinite}
-@keyframes blink{0%,90%,100%{transform:scaleY(1)}94%{transform:scaleY(.08)}}
-@keyframes look{0%,100%{transform:translateX(-12px)}40%{transform:translateX(12px)}60%{transform:translate(4px,-8px)}}
-#gift.scared .eye{transform:scale(1.25);animation:none}
-#gift.scared .eye i{width:14px;height:14px;margin:-7px;animation:jit .12s linear infinite}
-@keyframes jit{0%,100%{transform:translate(-2px,0)}50%{transform:translate(2px,1px)}}
-.sweat{position:absolute;right:92px;top:96px;font-size:54px;opacity:0;transition:opacity .2s;z-index:3}
-#gift.scared .sweat{opacity:1;animation:drip .7s ease-in infinite}
-@keyframes drip{from{transform:translateY(-10px)}to{transform:translateY(26px)}}
-.stk{position:absolute;z-index:3;font-weight:700;white-space:nowrap}
-.stk.s-a{left:16px;top:20px;font-size:30px;color:#fff;background:#d62839;padding:2px 14px;border-radius:8px;transform:rotate(-12deg);box-shadow:0 3px 0 rgba(0,0,0,.25)}
-.stk.s-b{right:12px;top:30px;font-size:26px;color:#3a1e10;background:#ffe066;padding:2px 12px;border-radius:8px;transform:rotate(9deg);box-shadow:0 3px 0 rgba(0,0,0,.25)}
-.stk.s-c{left:50%;bottom:22px;transform:translateX(-50%) rotate(-3deg);font-size:30px;color:#5b1a1a;border:4px dashed #8b2a2a;padding:2px 18px;border-radius:10px;background:rgba(255,245,225,.6)}
-#jack{position:absolute;left:50%;bottom:260px;width:0;height:0;z-index:1}
-#jack .spring{position:absolute;left:-40px;bottom:0;width:80px;height:260px;transform-origin:50% 100%;transform:scaleY(.1)}
-#jack .head{position:absolute;left:-118px;bottom:240px;width:236px;height:236px;opacity:0}
-#jack .face{width:100%;height:100%;border-radius:50%;border:8px solid #ffd166;background:#fff8ec center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:150px;box-shadow:0 0 0 6px #5b3a1a,0 14px 30px rgba(0,0,0,.4)}
-#jack .hat{position:absolute;left:50%;top:-118px;width:120px;height:140px;margin-left:-40px;transform:rotate(18deg);transform-origin:50% 100%;
-  clip-path:polygon(50% 0,100% 100%,0 100%);background:repeating-linear-gradient(-35deg,#ff4d6d 0 18px,#ffd166 18px 36px,#4cc9f0 36px 54px)}
-#jack .pom{position:absolute;left:50%;top:-140px;width:40px;height:40px;margin-left:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#ffd166);transform:rotate(18deg)}
-#jack .bubble{position:absolute;left:250px;bottom:330px;white-space:nowrap;font-size:48px;font-weight:700;color:#e11d48;background:#fff;border:5px solid #3a1e10;border-radius:40px;padding:10px 28px;opacity:0}
-#jack .bubble::after{content:"";position:absolute;left:-26px;bottom:18px;border:16px solid transparent;border-right:24px solid #3a1e10}
-#jack .head.wob{animation:wob 1.1s ease-in-out infinite alternate}
-@keyframes wob{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
-#gift.s1{animation:gShake .5s ease-in-out infinite;--a:3deg}
-#gift.s2{animation:gShake .3s ease-in-out infinite;--a:6deg}
-#gift.s3{animation:gShake .14s linear infinite;--a:9deg}
-#gift.ready{animation:gBob 1.4s ease-in-out infinite}
-@keyframes gShake{0%,100%{transform:rotate(0)}25%{transform:rotate(calc(var(--a)*-1)) translateY(-8px)}75%{transform:rotate(var(--a)) translateY(-8px)}}
-@keyframes gBob{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-14px) scale(1.03)}}
-#gRays{position:absolute;left:50%;top:-60px;width:1400px;height:1400px;margin-left:-700px;z-index:0;opacity:0;pointer-events:none;
+#gRays{position:absolute;left:50%;top:0;width:1400px;height:1400px;margin-left:-700px;z-index:0;opacity:0;pointer-events:none;
   background:repeating-conic-gradient(rgba(255,230,140,.6) 0 9deg,transparent 9deg 22deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 60%);mask:radial-gradient(circle,#000 0,transparent 60%)}
 #gRays.on{animation:raysIn 1s ease-out forwards, raySpin2 14s linear infinite}
 @keyframes raysIn{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
 @keyframes raySpin2{to{rotate:360deg}}
-#cdNum{position:absolute;left:50%;top:330px;transform:translate(-50%,-50%);font-size:280px;font-weight:700;color:#ffd166;z-index:7;pointer-events:none;
-  text-shadow:0 10px 0 #b45309,0 0 60px rgba(255,209,102,.9);opacity:0}
-#btnOpen{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;display:none;font-size:46px;padding:20px 60px;border-radius:999px;animation:btnGlow 1.6s ease-in-out infinite}
-.tk{position:relative;width:100%;height:100%;background:#f1e4c6;border-radius:22px;overflow:hidden;box-shadow:0 0 60px rgba(255,209,102,.55),0 20px 40px rgba(0,0,0,.6)}
-.tk .hd{height:58px;background:linear-gradient(90deg,#2f9e5e,#41b873);color:#f6ffe8;font-size:36px;font-weight:700;letter-spacing:6px;text-align:center;line-height:58px}
-.tk .bd{display:flex;align-items:center;height:172px}
-.tk .st{width:130px;text-align:center;font-size:76px;color:#e9a21c;border-right:5px dashed #b9a57f;height:130px;line-height:130px}
-.tk .nm{flex:1;text-align:center;font-size:84px;font-weight:700;color:#2b1a10;padding:0 20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tk::before,.tk::after{content:"";position:absolute;left:107px;width:46px;height:46px;border-radius:50%;background:#2b1d16}
-.tk::before{top:-23px}.tk::after{bottom:-23px}
+#bigFace{position:absolute;left:50%;top:510px;width:380px;height:380px;margin-left:-190px;z-index:2;opacity:0}
+#bigFace .bf{width:100%;height:100%;border-radius:50%;border:12px solid #ffd166;background:#fff8ec center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:230px;
+  box-shadow:0 0 0 8px #7a0f1d,0 0 80px rgba(255,209,102,.8)}
+#bigFace .bl{position:absolute;left:50%;bottom:-36px;transform:translateX(-50%);white-space:nowrap;font-size:46px;font-weight:700;color:#3a1e10;background:#ffd166;padding:4px 30px;border-radius:40px;box-shadow:0 6px 0 #b45309}
 #bigCup{position:absolute;left:50%;top:330px;width:560px;height:616px;margin-left:-280px;transform-origin:30% 100%;filter:drop-shadow(0 30px 30px rgba(0,0,0,.6));z-index:3}
 #bigCup svg{width:100%;height:100%}
 #revealMsg{position:absolute;left:40px;top:34px;font-size:40px;font-weight:700;background:rgba(10,6,6,.8);padding:14px 34px;border-radius:40px;border:2px solid rgba(255,255,255,.15)}
@@ -228,21 +179,15 @@ button{font-family:inherit;cursor:pointer;border:none}
 #stage.portrait #scorePill{font-size:34px;text-align:center}
 #stage.portrait #board{top:330px;bottom:330px;left:16px;right:16px}
 #stage.portrait #controls{left:30px;right:30px;bottom:40px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+#stage.portrait #btnSpin{grid-column:1/3}
 #stage.portrait #controls .btn{font-size:42px;padding:28px 10px}
 #stage.portrait .cup .tag{font-size:30px}
 #stage.portrait #scoreboard{top:330px;left:50px;right:50px;width:auto;max-height:1200px;font-size:44px}
 #stage.portrait #scoreboard h3{font-size:50px}
 #stage.portrait #revealMsg{left:40px;right:40px;top:140px;font-size:50px;text-align:center}
 #stage.portrait #bigCup{top:620px}
-#stage.portrait #ticket{top:940px;width:900px;height:280px}
-#stage.portrait #gift{top:800px}
-#stage.portrait #jack .bubble{left:-200px;bottom:520px}
-#stage.portrait #gRays{top:240px}
-#stage.portrait #cdNum{top:560px;font-size:320px}
-#stage.portrait #btnOpen{bottom:300px;font-size:56px;padding:30px 70px}
-#stage.portrait .tk .hd{height:70px;line-height:70px;font-size:44px}
-#stage.portrait .tk .bd{height:210px}
-#stage.portrait .tk .nm{font-size:100px}
+#stage.portrait #gRays{top:300px}
+#stage.portrait #bigFace{top:800px;width:420px;height:420px;margin-left:-210px}
 #stage.portrait .wcard{width:1000px;min-height:1200px;padding:60px 40px}
 #stage.portrait .wkick{font-size:52px}
 #stage.portrait .wnum{width:260px;height:260px;font-size:130px}
@@ -280,7 +225,7 @@ button{font-family:inherit;cursor:pointer;border:none}
       <h2>Ôn tập: Tỉ lệ thức</h2>
       <div class="howto">
         <b>Bước 1:</b> Nhập tên học sinh, mỗi tên giấu dưới một chiếc cốc.<br>
-        <b>Bước 2:</b> Xáo cốc rồi nhấc ngẫu nhiên một cốc để lộ vé tên.<br>
+        <b>Bước 2:</b> Quay cốc – một cốc văng ra, mở cốc thấy mặt thầy rồi hiện tên.<br>
         <b>Bước 3:</b> Học sinh có tên trả lời câu hỏi. Mỗi ván gồm <b>4 câu</b>: tỉ lệ thức, tìm x, dãy tỉ số bằng nhau, đảo chéo.<br>
         <span style="font-size:27px;opacity:.85">Phím tắt: Space – bước tiếp · A/B/C/D – chọn đáp án · F – toàn màn hình · M – tắt tiếng</span>
       </div>
@@ -320,8 +265,7 @@ button{font-family:inherit;cursor:pointer;border:none}
     </div>
     <div id="board"></div>
     <div id="controls">
-      <button class="btn blue" id="btnShuffle">🔀 Xáo cốc</button>
-      <button class="btn gold" id="btnPick">🎲 Nhấc cốc ngẫu nhiên</button>
+      <button class="btn gold" id="btnSpin">🌀 Quay cốc</button>
       <button class="btn ghost" id="btnScore">🏆 Bảng điểm</button>
       <button class="btn ghost" id="btnHome">✎ Sửa danh sách</button>
     </div>
@@ -332,24 +276,9 @@ button{font-family:inherit;cursor:pointer;border:none}
   <div id="reveal" class="screen">
     <div id="spot"></div>
     <div id="revealMsg">Từ từ nhấc cốc lên...</div>
-    <div id="ticket"><div class="tk"><div class="hd">VÉ MAY MẮN</div><div class="bd"><div class="st">★</div><div class="nm" id="tkName">—</div></div></div></div>
     <div id="gRays"></div>
-    <div id="gift">
-      <div id="jack">
-        <svg class="spring" viewBox="0 0 80 260" preserveAspectRatio="none"><polyline points="40,260 8,240 72,215 8,190 72,165 8,140 72,115 8,90 72,65 8,40 72,15 40,0" fill="none" stroke="#9aa5b1" stroke-width="9" stroke-linejoin="round"/><polyline points="40,260 8,240 72,215 8,190 72,165 8,140 72,115 8,90 72,65 8,40 72,15 40,0" fill="none" stroke="#e5ebf0" stroke-width="3"/></svg>
-        <div class="head"><div class="hat"></div><div class="pom"></div><div class="face" id="gFace">😜</div></div>
-        <div class="bubble">TÈN TEN! 🎉</div>
-      </div>
-      <div class="flap l"></div><div class="flap r"></div>
-      <div class="gbody">
-        <div class="stk s-a">⚠ DỄ VỠ</div><div class="stk s-b">KHÔNG ĐƯỢC LẮC! 😅</div>
-        <div class="peek"><div class="eye"><i></i></div><div class="eye"><i></i></div></div><div class="sweat">💦</div>
-        <div class="stk s-c" id="gName">📦 HÀNG CỦA THẦY CHUNG</div>
-      </div>
-    </div>
+    <div id="bigFace"><div class="bf" id="gFace">😜</div><div class="bl" id="gName">Thầy Chung</div></div>
     <div id="bigCup"></div>
-    <div id="cdNum">3</div>
-    <button class="btn gold" id="btnOpen">🎁 MỞ HỘP</button>
     <canvas id="fx" width="1920" height="1080"></canvas>
     <div id="winner">
       <div class="wcard">
@@ -562,8 +491,7 @@ $('#btnStart').onclick=()=>{
   students=list; scores={}; list.forEach(n=>scores[n]=scores[n]||0);
   qOrder=chonCau(); qIdx=0; asked=0; ended=false; $('#scoreboard').classList.remove('show');
   show('table'); buildBoard(); updatePill();
-  setStatus('Các bạn đã nằm dưới cốc! Bấm “Xáo cốc”.');
-  setTimeout(()=>shuffleCups(), 600);
+  setStatus('Các bạn đã nằm dưới cốc! Bấm “🌀 Quay cốc”.');
 };
 $('#btnHome').onclick=()=>{ if(busy) return; show('setup'); };
 /* Hỏi lần lượt theo đúng thứ tự trong CAU_HOI */
@@ -591,34 +519,43 @@ function relayout(){ if(!cups.length||!$('#table').classList.contains('show')) r
 function place(){ cups.forEach(c=>{ const s=slots[c.slot]; Object.assign(c.el.style,{left:s.x+'px',top:s.y+'px',width:s.w+'px',height:s.h+'px'}); }); }
 function setStatus(t){ $('#status').textContent=t; }
 function updatePill(){ $('#scorePill').textContent=`Câu hỏi: ${asked}/${qOrder.length}`; }
-function lock(v){ busy=v; ['#btnShuffle','#btnPick','#btnHome'].forEach(s=>$(s).disabled=v||(ended&&s!=='#btnHome')); }
+function lock(v){ busy=v; ['#btnSpin','#btnHome'].forEach(s=>$(s).disabled=v||(ended&&s!=='#btnHome')); }
 
-async function shuffleCups(){
-  if(busy) return; const live=cups.filter(c=>!c.opened); if(live.length<2){ return; }
-  lock(true); setStatus('Đang xáo cốc...'); music(true);
-  for(let k=0;k<10;k++){
-    const a=live[rnd(live.length)]; let b; do{ b=live[rnd(live.length)]; }while(b===a);
-    [a.slot,b.slot]=[b.slot,a.slot]; a.el.style.zIndex=2; b.el.style.zIndex=1; place(); SFX.swoosh(); await sleep(400);
-  }
-  // Tráo luôn tên bên dưới các cốc chưa mở để đảm bảo ngẫu nhiên
-  const nm=shuffleArr(live.map(c=>c.name)); live.forEach((c,i)=>{ c.name=nm[i]; c.el.querySelector('.tag').textContent=c.name; });
-  lock(false); setStatus('Bấm “Nhấc cốc ngẫu nhiên” hoặc chạm vào một cốc!');
-}
-$('#btnShuffle').onclick=()=>{ audio(); shuffleCups(); };
-
-async function pickRandom(){
+/* Quay cốc theo vòng tròn rồi văng ngẫu nhiên 1 cốc ra ngoài */
+async function spinCups(){
   if(busy||ended) return; const live=cups.filter(c=>!c.opened);
   if(!live.length){ setStatus('Đã mở hết cốc! Bấm “Sửa danh sách” để chơi lại.'); return; }
-  lock(true); setStatus('Cốc nào sẽ được chọn đây...?'); music(true);
-  const target=live[rnd(live.length)]; const steps=18+rnd(live.length);
-  // vòng sáng chạy qua các cốc sắp theo vị trí, chậm dần
-  const sorted=[...live].sort((p,q)=>p.slot-q.slot); const ti=sorted.indexOf(target); const order=[];
-  for(let i=steps-1;i>=0;i--) order.push(sorted[((ti-i)%sorted.length+sorted.length)%sorted.length]);
-  for(let i=0;i<order.length;i++){ live.forEach(c=>c.el.classList.remove('hl')); order[i].el.classList.add('hl'); SFX.tick(); await sleep(60+Math.pow(i/order.length,3)*420); }
-  await sleep(500); target.el.classList.remove('hl');
-  openCup(target);
+  lock(true); music(true); setStatus('🌀 Cốc đang quay...');
+  const bd=$('#board'), W=bd.offsetWidth, H=bd.offsetHeight, n=cups.length, cx=W/2, cy=H/2;
+  let sz=slots[0].w, R0=Math.min(W,H*1.0)/2-sz*0.6; const maxSz=2*Math.PI*Math.max(R0,100)/n*0.92;
+  if(sz>maxSz){ sz=maxSz; R0=Math.min(W,H)/2-sz*0.6; }
+  const R=Math.max(R0,120), sh=sz*1.1, order=[...cups].sort((a,b)=>a.slot-b.slot);
+  order.forEach(c=>{ c.el.style.transition='none'; c.el.classList.remove('hl'); });
+  const start=order.map(c=>({...slots[c.slot]}));
+  const ring=(i,ph)=>{ const t=-Math.PI/2+2*Math.PI*i/n+ph; return {x:cx+R*Math.cos(t)-sz/2, y:cy+R*Math.sin(t)*(H<W?0.92:1)-sh/2}; };
+  const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  const T1=700, T2=3600, TURNS=2.75; let lastHalf=0;
+  await new Promise(res=>{ const t0=performance.now();
+    const step=now=>{ const t=now-t0;
+      if(t<T1){ const k=ease(t/T1); order.forEach((c,i)=>{ const a=start[i], b=ring(i,0); Object.assign(c.el.style,{left:a.x+(b.x-a.x)*k+'px',top:a.y+(b.y-a.y)*k+'px',width:a.w+(sz-a.w)*k+'px',height:a.h+(sh-a.h)*k+'px'}); }); }
+      else { const u=Math.min(1,(t-T1)/T2), ph=2*Math.PI*TURNS*ease(u);
+        order.forEach((c,i)=>{ const b=ring(i,ph); c.el.style.left=b.x+'px'; c.el.style.top=b.y+'px'; c.el.style.width=sz+'px'; c.el.style.height=sh+'px'; });
+        const half=Math.floor(ph/Math.PI); if(half>lastHalf){ lastHalf=half; SFX.swoosh(); } }
+      if(t<T1+T2) requestAnimationFrame(step); else res(); };
+    requestAnimationFrame(step); });
+  // văng 1 cốc ra ngoài
+  const pick=live[rnd(live.length)], el=pick.el, L=parseFloat(el.style.left)+sz/2, Tp=parseFloat(el.style.top)+sh/2;
+  let ox=L-cx, oy=Tp-cy; const len=Math.hypot(ox,oy)||1; ox/=len; oy/=len;
+  el.style.zIndex=50; cups.forEach(c=>{ if(c!==pick) c.el.style.opacity=.25; });
+  SFX.swoosh(); SFX.boing(); setStatus('💥 Văng ra một chiếc cốc!');
+  await anim(el,[{transform:'none'},{transform:`translate(${ox*320}px,${oy*320}px) rotate(380deg) scale(1.5)`,offset:.45},{transform:`translate(${cx-L}px,${cy-Tp}px) rotate(720deg) scale(2.6)`}],1100,'cubic-bezier(.25,.8,.35,1)');
+  await sleep(250);
+  openCup(pick);
+  // đưa bàn cốc về vị trí cũ (đang ở màn khác nên không thấy)
+  setTimeout(()=>{ cups.forEach(c=>{ c.el.getAnimations().forEach(a=>a.cancel()); c.el.style.opacity=''; c.el.style.zIndex=''; }); place();
+    requestAnimationFrame(()=>requestAnimationFrame(()=>cups.forEach(c=>c.el.style.transition=''))); },300);
 }
-$('#btnPick').onclick=()=>{ audio(); pickRandom(); };
+$('#btnSpin').onclick=()=>{ audio(); spinCups(); };
 
 /* ===================== NHẤC CỐC ===================== */
 let fxParts=[], fxRun=false;
@@ -631,63 +568,30 @@ function fxLoop(){ const cv=$('#fx'), g=cv.getContext('2d'); g.clearRect(0,0,cv.
 
 function anim(el, frames, dur, easing='ease-in-out'){ return el.animate(frames,{duration:dur,easing,fill:'forwards'}).finished.catch(()=>{}); }
 
-let openGift=null;
-function anim2(el,frames,dur,easing='ease-out'){ return el.animate(frames,{duration:dur,easing,fill:'forwards'}); }
 async function openCup(c){
   lock(true); current=c; music(false);
-  $('#bigCup').innerHTML=cupSVG(c.num); $('#tkName').textContent=c.name; $('#winner').classList.remove('on');
-  // chuẩn bị hộp quà
-  const gift=$('#gift'), fl=$('.flap.l'), fr=$('.flap.r'), tk=$('#ticket'), rays=$('#gRays'), bc=$('#bigCup'), cd=$('#cdNum'),
-        head=$('#jack .head'), spring=$('#jack .spring'), bub=$('#jack .bubble'), peek=$('.peek');
-  [gift,fl,fr,tk,bc,cd,head,spring,bub].forEach(e=>e.getAnimations().forEach(a=>a.cancel()));
-  head.classList.remove('wob'); peek.style.opacity=1;
-  gift.className=''; rays.className=''; tk.style.zIndex=1; bc.style.transform=''; bc.style.opacity=1;
+  const bc=$('#bigCup'), face=$('#bigFace'), rays=$('#gRays');
+  [bc,face].forEach(e=>e.getAnimations().forEach(a=>a.cancel()));
+  bc.innerHTML=cupSVG(c.num); bc.style.transform=''; bc.style.opacity=1; rays.className=''; $('#winner').classList.remove('on');
   const gf=$('#gFace'); gf.style.backgroundImage=FACE?`url(${FACE})`:''; gf.textContent=FACE?'':'😜';
-  $('#gName').textContent='📦 HÀNG CỦA '+TEN_GV.toUpperCase();
-  $('#revealMsg').textContent='Từ từ nhấc cốc lên...';
+  $('#gName').textContent='😎 '+TEN_GV;
+  $('#revealMsg').textContent='Mở cốc nào...!';
   show('reveal');
-  // 1) cốc lắc nhẹ rồi nhấc lên, bay đi
-  SFX.drum(2.6);
-  await anim(bc,[{transform:'rotate(0)'},{transform:'rotate(-3deg)'},{transform:'rotate(3deg)'},{transform:'rotate(-2deg)'},{transform:'rotate(2deg)'},{transform:'rotate(0)'}],1100);
-  await anim(bc,[{transform:'translateY(0) rotate(0)'},{transform:'translateY(-60px) rotate(8deg)',offset:.35},{transform:'translateY(-360px) rotate(16deg)'}],2000,'cubic-bezier(.45,0,.35,1)');
-  SFX.swoosh();
-  await anim(bc,[{transform:'translateY(-360px) rotate(16deg)',opacity:1},{transform:'translateY(-1100px) rotate(40deg)',opacity:0}],600,'ease-in');
-  // 2) hộp quà bí mật – chờ chạm để mở
-  [784,988,1175].forEach((f,i)=>tone(f,.25,'triangle',.2,i*.1));
-  gift.className='ready';
-  $('#revealMsg').innerHTML=`📦 Hộp bí ẩn của <b style="color:#ffd166">${esc(TEN_GV)}</b>! Có ai trong đó... Chạm vào hộp để mở!`;
-  $('#btnOpen').style.display='block'; say('Ơ, có ai trong hộp kìa! Chạm vào hộp để mở');
-  await new Promise(res=>{ openGift=res; });
-  openGift=null; $('#btnOpen').style.display='none';
-  // 3) đếm ngược 3-2-1, hộp rung mạnh dần, tim đập
-  const msg=['Ai sẽ là người may mắn...?','Hộp đang run kìa... 😱','Chuẩn bị nhé...!'];
-  for(let n=3;n>=1;n--){
-    gift.className='s'+(4-n)+' scared'; $('#revealMsg').textContent=msg[3-n]; cd.textContent=n;
-    anim2(cd,[{opacity:0,transform:'translate(-50%,-50%) scale(2.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(.95)',offset:.35},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.75},{opacity:0,transform:'translate(-50%,-50%) scale(.6)'}],950,'ease-out');
-    SFX.heart(); tone(300+n*-60+240,.12,'square',.08); await sleep(1000);
-  }
-  // 4) bật nắp, tia sáng, vé tên bay lên từ hộp
-  gift.className=''; peek.style.opacity=0; SFX.boing();
-  anim2(fl,[{transform:'rotate(0)'},{transform:'rotate(-140deg)'}],450,'cubic-bezier(.2,1.4,.4,1)');
-  anim2(fr,[{transform:'rotate(0)'},{transform:'rotate(140deg)'}],450,'cubic-bezier(.2,1.4,.4,1)');
-  // mặt thầy bật lên trên lò xo, nảy tưng tưng
-  const S=[.1,1.3,.8,1.12,.94,1.03,1], O=[0,.3,.48,.64,.78,.9,1], H=260;
-  anim2(spring,S.map((v,i)=>({transform:`scaleY(${v})`,offset:O[i]})),1300,'ease-out');
-  anim2(head,S.map((v,i)=>({transform:`translateY(${H*(1-v)}px)`,opacity:i?1:0,offset:O[i]})),1300,'ease-out').finished.then(()=>head.classList.add('wob')).catch(()=>{});
-  setTimeout(()=>{ anim2(bub,[{opacity:0,transform:'scale(.2) rotate(-20deg)'},{opacity:1,transform:'scale(1.15) rotate(4deg)',offset:.6},{opacity:1,transform:'scale(1) rotate(-3deg)'}],500,'ease-out'); SFX.reveal(); },550);
-  rays.className='on';
-  const cx=SW/2, by=gift.offsetTop+140; burst(cx,by,160); confetti();
-  tk.style.zIndex=4; await sleep(600);
-  await anim(tk,[{opacity:0,transform:'translateX(-50%) translateY(60px) scale(.3)'},{opacity:1,transform:'translateX(-50%) translateY(-200px) scale(1.08)',offset:.8},{opacity:1,transform:'translateX(-50%) translateY(-190px) scale(1)'}],1300,'cubic-bezier(.2,.8,.3,1.2)');
-  tk.style.zIndex=4;
-  $('#revealMsg').innerHTML=`🎉 Xin chúc mừng <b style="color:#ffd166">${esc(c.name)}</b>!`;
+  SFX.drum(1.4);
+  await anim(bc,[{transform:'rotate(0)'},{transform:'rotate(-4deg)'},{transform:'rotate(4deg)'},{transform:'rotate(-2deg)'},{transform:'rotate(0)'}],700);
+  // nhấc cốc – hiện mặt thầy
+  const lift=anim(bc,[{transform:'translateY(0) rotate(0)'},{transform:'translateY(-420px) rotate(16deg)',offset:.7},{transform:'translateY(-1150px) rotate(40deg)',opacity:0}],1500,'cubic-bezier(.45,0,.4,1)');
+  await sleep(450);
+  anim(face,[{opacity:0,transform:'scale(.4)'},{opacity:1,transform:'scale(1.15)',offset:.6},{opacity:1,transform:'scale(1)'}],700,'ease-out');
+  rays.className='on'; SFX.boing(); setTimeout(()=>SFX.reveal(),300);
+  burst(SW/2, face.offsetTop+face.offsetHeight/2, 120);
+  $('#revealMsg').innerHTML=`🎉 Tèn ten! Là <b style="color:#ffd166">${esc(TEN_GV)}</b> đây!`;
+  await lift;
   c.opened = $('#remove').checked; if(c.opened) c.el.classList.add('opened');
   updatePill();
-  await sleep(1300); showWinner(c); lock(false);
+  await sleep(1200); showWinner(c); lock(false);
 }
-function tryOpenGift(){ if(openGift){ SFX.click(); openGift(); } }
-$('#gift').onclick=tryOpenGift; $('#btnOpen').onclick=tryOpenGift;
-$('#btnSkip').onclick=()=>{ $('#winner').classList.remove('on'); show('table'); setStatus('Bấm “Nhấc cốc ngẫu nhiên” để chọn bạn tiếp theo.'); };
+$('#btnSkip').onclick=()=>{ $('#winner').classList.remove('on'); show('table'); setStatus('Bấm “🌀 Quay cốc” để chọn bạn tiếp theo.'); };
 $('#btnToQuiz').onclick=()=>{ SFX.click(); $('#winner').classList.remove('on'); startQuestion(); };
 /* Màn công bố tên: chữ rơi từng chữ, pháo giấy */
 function showWinner(c){
@@ -745,7 +649,7 @@ $('#btnNext').onclick=()=>{ clearInterval(timerId); stopCd(); SFX.click(); show(
   if(asked>=qOrder.length){ ended=true; lock(false); renderScores(); $('#scoreboard').classList.add('show');
     setStatus('🏁 Hoàn thành '+qOrder.length+' câu hỏi! Bấm “Sửa danh sách” để chơi ván mới.'); SFX.reveal(); say('Trò chơi kết thúc. Chúc mừng các bạn'); return; }
   const left=cups.filter(c=>!c.opened).length;
-  setStatus(left? 'Bấm “Xáo cốc” hoặc “Nhấc cốc ngẫu nhiên” cho lượt tiếp theo.' : 'Đã mở hết cốc! Xem “Bảng điểm” 🏆'); };
+  setStatus(left? 'Bấm “🌀 Quay cốc” cho lượt tiếp theo.' : 'Đã mở hết cốc! Xem “Bảng điểm” 🏆'); };
 
 /* ===================== BẢNG ĐIỂM ===================== */
 function renderScores(){ const arr=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
@@ -759,8 +663,8 @@ addEventListener('keydown',e=>{
   if(k==='f'){ toggleFull(); return; } if(k==='m'){ $('#btnMute').click(); return; }
   if(scr==='quiz'){ const idx='abcd'.indexOf(k)>=0?'abcd'.indexOf(k):'1234'.indexOf(k); if(idx>=0){ choose(idx); return; }
     if(k==='enter'&&!answered){ revealAnswer(); return; } if(k===' '){ e.preventDefault(); answered? $('#btnNext').click() : revealAnswer(); } }
-  else if(scr==='reveal'&&k===' '){ e.preventDefault(); if(openGift) tryOpenGift(); else if(!busy&&$('#winner').classList.contains('on')) $('#btnToQuiz').click(); }
-  else if(scr==='table'&&k===' '){ e.preventDefault(); pickRandom(); }
+  else if(scr==='reveal'&&k===' '){ e.preventDefault(); if(!busy&&$('#winner').classList.contains('on')) $('#btnToQuiz').click(); }
+  else if(scr==='table'&&k===' '){ e.preventDefault(); spinCups(); }
   else if(scr==='setup'&&k===' '){ e.preventDefault(); $('#btnStart').click(); }
 });
 fit();
