@@ -337,17 +337,17 @@ button{font-family:inherit;cursor:pointer;border:none}
 const SO_CAU = 4;
 const CAU_HOI = [
   // Câu 1 – Tỉ lệ thức
-  {muc:'Tỉ lệ thức', q:'Cặp tỉ số nào lập thành một tỉ lệ thức?',
-   a:['{{3|4}} và {{6|9}}','{{2|3}} và {{6|9}}','{{1|2}} và {{3|5}}','{{2|3}} và {{4|9}}'], dung:1,
-   giai:'Rút gọn {{6|9}} = {{2|3}} nên ta có tỉ lệ thức <b>{{2|3}} = {{6|9}}</b>.'},
+  {muc:'Tỉ lệ thức', q:'Tỉ lệ thức có dạng nào sau đây?',
+   a:['a · b = c · d','{{a|b}} = {{c|d}} (b, d ≠ 0)','{{a|b}} + {{c|d}} = 1','{{a|b}} · {{c|d}} = 1'], dung:1,
+   giai:'Tỉ lệ thức là đẳng thức của hai tỉ số, có dạng <b>{{a|b}} = {{c|d}}</b> (b, d ≠ 0).'},
   // Câu 2 – Tìm x dựa vào tính chất nhân chéo
   {muc:'Tìm x – nhân chéo', q:'Tìm x, biết {{x|4}} = {{6|8}}.',
    a:['x = 12','x = 2','x = 3','x = 6'], dung:2,
    giai:'Nhân chéo: x · 8 = 4 · 6 = 24, suy ra x = 24 : 8 = <b>3</b>.'},
   // Câu 3 – Tính chất dãy tỉ số bằng nhau
-  {muc:'Dãy tỉ số bằng nhau', q:'Tìm x, y, biết {{x|3}} = {{y|5}} và x + y = 32.',
-   a:['x = 10; y = 22','x = 20; y = 12','x = 6; y = 10','x = 12; y = 20'], dung:3,
-   giai:'{{x|3}} = {{y|5}} = {{x + y|3 + 5}} = {{32|8}} = 4, suy ra <b>x = 3 · 4 = 12; y = 5 · 4 = 20</b>.'},
+  {muc:'Dãy tỉ số bằng nhau', q:'Theo tính chất dãy tỉ số bằng nhau: {{a|b}} = {{c|d}} = ?',
+   a:['{{a + c|b · d}}','{{a · c|b + d}}','{{a + b|c + d}}','{{a + c|b + d}}'], dung:3,
+   giai:'<b>{{a|b}} = {{c|d}} = {{a + c|b + d}} = {{a − c|b − d}}</b> (các tỉ số đều có nghĩa).'},
   // Câu 4 – Đảo chéo
   {muc:'Đảo chéo', q:'Từ tỉ lệ thức {{2|5}} = {{6|15}}, đảo chéo (đổi chỗ) hai trung tỉ ta được tỉ lệ thức nào?',
    a:['{{2|6}} = {{5|15}}','{{2|15}} = {{6|5}}','{{5|2}} = {{6|15}}','{{2|6}} = {{15|5}}'], dung:0,
