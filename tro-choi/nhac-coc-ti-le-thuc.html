@@ -137,7 +137,7 @@ button{font-family:inherit;cursor:pointer;border:none}
 #sol{flex:0 1 auto;min-height:0;background:#f3f8ff;border-left:8px solid #3b82f6;border-radius:22px;padding:12px 30px;font-size:40px;font-weight:700;line-height:1.4;color:#243447;box-shadow:0 8px 20px rgba(30,144,255,.08);display:none;overflow:auto}
 #sol b{color:#1d4ed8}
 #quiz .foot{margin-top:auto;display:flex;flex-wrap:wrap;justify-content:center;gap:24px}
-#verdict{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%) scale(0);font-size:120px;font-weight:700;padding:10px 60px;border-radius:40px;white-space:nowrap;box-shadow:0 20px 50px rgba(0,0,0,.5);transition:transform .35s cubic-bezier(.3,1.6,.5,1);pointer-events:none;z-index:4}
+#verdict{position:absolute;left:50%;top:45%;color:#fff;transform:translate(-50%,-50%) scale(0);font-size:120px;font-weight:700;padding:10px 60px;border-radius:40px;white-space:nowrap;box-shadow:0 20px 50px rgba(0,0,0,.5);transition:transform .35s cubic-bezier(.3,1.6,.5,1);pointer-events:none;z-index:4}
 #verdict.on{transform:translate(-50%,-50%) scale(1)}
 
 /* phân số */
@@ -226,7 +226,7 @@ button{font-family:inherit;cursor:pointer;border:none}
       <div class="howto">
         <b>Bước 1:</b> Nhập tên học sinh, mỗi tên giấu dưới một chiếc cốc.<br>
         <b>Bước 2:</b> Xáo cốc rồi nhấc ngẫu nhiên một cốc để lộ vé tên.<br>
-        <b>Bước 3:</b> Học sinh có tên trả lời câu hỏi. Mỗi ván gồm <b>4 câu</b> từ dễ đến khó.<br>
+        <b>Bước 3:</b> Học sinh có tên trả lời câu hỏi. Mỗi ván gồm <b>4 câu</b>: tỉ lệ thức, tìm x, dãy tỉ số bằng nhau, đảo chéo.<br>
         <span style="font-size:27px;opacity:.85">Phím tắt: Space – bước tiếp · A/B/C/D – chọn đáp án · F – toàn màn hình · M – tắt tiếng</span>
       </div>
     </div>
@@ -331,59 +331,27 @@ button{font-family:inherit;cursor:pointer;border:none}
    - Phân số viết dạng {{tử|mẫu}}, ví dụ {{2|3}} hiển thị là 2/3 xếp chồng.
    - a: 4 phương án A, B, C, D;  dung: chỉ số đáp án đúng (0 = A, 1 = B, 2 = C, 3 = D).
    - giai: lời giải ngắn hiện khi bấm "Hiện đáp án".
-   - SO_CAU: số câu hỏi của một ván chơi. Mỗi ván lấy ngẫu nhiên 1 câu Nhận biết,
-     1 câu Thông hiểu, 1 câu Vận dụng, 1 câu Vận dụng cao (từ dễ đến khó).
+   - Các câu được hỏi lần lượt đúng thứ tự trong danh sách dưới đây (Câu 1 → Câu 4).
+   - SO_CAU: số câu hỏi của một ván chơi.
    ===================================================================== */
 const SO_CAU = 4;
 const CAU_HOI = [
-  {muc:'Nhận biết', q:'Tỉ lệ thức là gì?',
-   a:['Đẳng thức của hai tỉ số {{a|b}} = {{c|d}}','Tổng của hai tỉ số','Tích của hai phân số','Hiệu của hai tỉ số'], dung:0,
-   giai:'Tỉ lệ thức là đẳng thức của hai tỉ số {{a|b}} = {{c|d}} (b, d ≠ 0).'},
-  {muc:'Nhận biết', q:'Nếu {{a|b}} = {{c|d}} thì:',
-   a:['a + d = b + c','a · d = b · c','a · b = c · d','a · c = b · d'], dung:1,
-   giai:'Tính chất 1 của tỉ lệ thức: nếu {{a|b}} = {{c|d}} thì <b>a · d = b · c</b> (tích ngoại tỉ bằng tích trung tỉ).'},
-  {muc:'Nhận biết', q:'Trong tỉ lệ thức {{3|4}} = {{9|12}}, các <b>ngoại tỉ</b> là:',
-   a:['4 và 9','3 và 9','3 và 12','4 và 12'], dung:2,
-   giai:'Với {{a|b}} = {{c|d}}: a, d là ngoại tỉ; b, c là trung tỉ. Vậy ngoại tỉ là <b>3 và 12</b>.'},
-  {muc:'Nhận biết', q:'Cặp tỉ số nào lập thành một tỉ lệ thức?',
-   a:['{{2|3}} và {{4|9}}','{{3|4}} và {{6|9}}','{{1|2}} và {{3|5}}','{{2|3}} và {{6|9}}'], dung:3,
-   giai:'{{6|9}} = {{2|3}} nên ta có tỉ lệ thức <b>{{2|3}} = {{6|9}}</b>.'},
-  {muc:'Thông hiểu', q:'Tỉ số 1,2 : 3,6 lập được tỉ lệ thức với tỉ số nào?',
-   a:['3 : 6','2 : 6','1 : 2','3 : 1'], dung:1,
-   giai:'1,2 : 3,6 = {{12|36}} = {{1|3}} và 2 : 6 = {{1|3}}. Vậy chọn <b>2 : 6</b>.'},
-  {muc:'Thông hiểu', q:'Cặp tỉ số nào <b>KHÔNG</b> lập được tỉ lệ thức?',
-   a:['6 : 8 và 9 : 12','1,5 : 2 và 3 : 4','4 : 5 và 8 : 15','0,2 : 0,3 và 2 : 3'], dung:2,
-   giai:'{{4|5}} = {{12|15}} ≠ {{8|15}}. Các cặp còn lại đều bằng nhau. Chọn <b>4 : 5 và 8 : 15</b>.'},
-  {muc:'Thông hiểu', q:'Từ đẳng thức 2 · 15 = 5 · 6, ta lập được tỉ lệ thức nào?',
-   a:['{{2|5}} = {{15|6}}','{{2|5}} = {{6|15}}','{{5|2}} = {{6|15}}','{{2|6}} = {{15|5}}'], dung:1,
-   giai:'Nếu a · d = b · c thì {{a|b}} = {{c|d}}. Với a = 2, d = 15, b = 5, c = 6 ta có <b>{{2|5}} = {{6|15}}</b>.'},
-  {muc:'Thông hiểu', q:'Từ tỉ lệ thức {{a|b}} = {{c|d}} (a, b, c, d ≠ 0) suy ra tỉ lệ thức nào?',
-   a:['{{a|c}} = {{d|b}}','{{b|a}} = {{c|d}}','{{d|b}} = {{c|a}}','{{a|d}} = {{c|b}}'], dung:2,
-   giai:'Từ a · d = b · c, đổi chỗ hai ngoại tỉ a và d: <b>{{d|b}} = {{c|a}}</b>.'},
-  {muc:'Thông hiểu', q:'Từ bốn số 2; 3; 4; 6 lập được tỉ lệ thức nào?',
-   a:['{{2|3}} = {{6|4}}','{{2|4}} = {{6|3}}','{{3|4}} = {{2|6}}','{{2|3}} = {{4|6}}'], dung:3,
-   giai:'2 · 6 = 3 · 4 = 12 nên <b>{{2|3}} = {{4|6}}</b>.'},
-  {muc:'Vận dụng', q:'Tìm x, biết {{x|5}} = {{12|15}}.',
-   a:['x = 3','x = 4','x = 6','x = 36'], dung:1,
-   giai:'x = {{5 · 12|15}} = {{60|15}} = <b>4</b>.'},
-  {muc:'Vận dụng', q:'Tìm x, biết {{2|x}} = {{3|6}}.',
-   a:['x = 9','x = 1','x = 4','x = 3'], dung:2,
-   giai:'3 · x = 2 · 6 = 12, suy ra x = 12 : 3 = <b>4</b>.'},
-  {muc:'Vận dụng', q:'Tìm x, biết {{x|−3}} = {{8|6}}.',
-   a:['x = −4','x = 4','x = −16','x = −1'], dung:0,
-   giai:'x = {{(−3) · 8|6}} = {{−24|6}} = <b>−4</b>.'},
-  {muc:'Vận dụng', q:'Tìm x, biết 0,5 : x = 2 : 8.',
-   a:['x = 0,125','x = 32','x = 2','x = 4'], dung:2,
-   giai:'2 · x = 0,5 · 8 = 4, suy ra x = 4 : 2 = <b>2</b>.'},
-  {muc:'Vận dụng', q:'Tìm x, biết {{x − 1|3}} = {{4|6}}.',
-   a:['x = 3','x = 2','x = 1','x = 9'], dung:0,
-   giai:'x − 1 = {{3 · 4|6}} = 2, suy ra x = <b>3</b>.'},
-  {muc:'Vận dụng', q:'Trên bản đồ tỉ lệ 1 : 50 000, khoảng cách giữa hai điểm là 4 cm. Khoảng cách thực tế là:',
-   a:['200 m','2 km','20 km','12,5 km'], dung:1,
-   giai:'Gọi khoảng cách thực tế là x (cm): {{1|50 000}} = {{4|x}}, suy ra x = 200 000 cm = <b>2 km</b>.'},
-  {muc:'Vận dụng cao', q:'Tìm x, biết {{x|2}} = {{8|x}}.',
-   a:['x = 4','x = −4','x = 16','x = 4 hoặc x = −4'], dung:3,
-   giai:'x · x = 2 · 8 = 16, suy ra x² = 16, nên <b>x = 4 hoặc x = −4</b>.'},
+  // Câu 1 – Tỉ lệ thức
+  {muc:'Tỉ lệ thức', q:'Cặp tỉ số nào lập thành một tỉ lệ thức?',
+   a:['{{3|4}} và {{6|9}}','{{2|3}} và {{6|9}}','{{1|2}} và {{3|5}}','{{2|3}} và {{4|9}}'], dung:1,
+   giai:'Rút gọn {{6|9}} = {{2|3}} nên ta có tỉ lệ thức <b>{{2|3}} = {{6|9}}</b>.'},
+  // Câu 2 – Tìm x dựa vào tính chất nhân chéo
+  {muc:'Tìm x – nhân chéo', q:'Tìm x, biết {{x|4}} = {{6|8}}.',
+   a:['x = 12','x = 2','x = 3','x = 6'], dung:2,
+   giai:'Nhân chéo: x · 8 = 4 · 6 = 24, suy ra x = 24 : 8 = <b>3</b>.'},
+  // Câu 3 – Tính chất dãy tỉ số bằng nhau
+  {muc:'Dãy tỉ số bằng nhau', q:'Tìm x, y, biết {{x|3}} = {{y|5}} và x + y = 32.',
+   a:['x = 10; y = 22','x = 20; y = 12','x = 6; y = 10','x = 12; y = 20'], dung:3,
+   giai:'{{x|3}} = {{y|5}} = {{x + y|3 + 5}} = {{32|8}} = 4, suy ra <b>x = 3 · 4 = 12; y = 5 · 4 = 20</b>.'},
+  // Câu 4 – Đảo chéo
+  {muc:'Đảo chéo', q:'Từ tỉ lệ thức {{2|5}} = {{6|15}}, đảo chéo (đổi chỗ) hai trung tỉ ta được tỉ lệ thức nào?',
+   a:['{{2|6}} = {{5|15}}','{{2|15}} = {{6|5}}','{{5|2}} = {{6|15}}','{{2|6}} = {{15|5}}'], dung:0,
+   giai:'Hai trung tỉ là 5 và 6. Đổi chỗ 5 và 6 ta được <b>{{2|6}} = {{5|15}}</b> (kiểm tra: 2 · 15 = 6 · 5 = 30).'},
 ];
 
 /* ===================== TIỆN ÍCH ===================== */
@@ -524,13 +492,8 @@ $('#btnStart').onclick=()=>{
   setTimeout(()=>shuffleCups(), 600);
 };
 $('#btnHome').onclick=()=>{ if(busy) return; show('setup'); };
-/* Chọn SO_CAU câu: lần lượt mỗi mức độ một câu, từ dễ đến khó */
-function chonCau(){
-  const MUC=['Nhận biết','Thông hiểu','Vận dụng','Vận dụng cao'], out=[];
-  for(let i=0;i<SO_CAU;i++){ const m=MUC[i%MUC.length]; const pool=[...CAU_HOI.keys()].filter(k=>CAU_HOI[k].muc===m&&!out.includes(k));
-    const rest=[...CAU_HOI.keys()].filter(k=>!out.includes(k)); const from=pool.length?pool:rest; if(from.length) out.push(from[rnd(from.length)]); }
-  return out;
-}
+/* Hỏi lần lượt theo đúng thứ tự trong CAU_HOI */
+function chonCau(){ return [...CAU_HOI.keys()].slice(0, SO_CAU); }
 
 /* ===================== BÀN CỐC ===================== */
 function layout(n){
