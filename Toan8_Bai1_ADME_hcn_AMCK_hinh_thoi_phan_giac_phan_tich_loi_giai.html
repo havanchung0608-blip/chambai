@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toán 8 – Bài 1: Hình chữ nhật, hình thoi và đường phân giác</title>
+<style>
+  :root{--bg:#0f2233;--bar:#0a1826;--ink:#eaf2ff;--gold:#ffd23f;--sky:#7fd3ff}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"Times New Roman",Times,serif;overflow:hidden}
+  #app{display:flex;flex-direction:column;height:100vh}
+  #top{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bar);flex-wrap:wrap}
+  #ttl{font-size:clamp(18px,1.6vw,26px);font-weight:bold;color:var(--gold);margin-right:auto}
+  .tab{font-family:inherit;font-size:clamp(15px,1.3vw,21px);font-weight:bold;padding:6px 14px;border-radius:999px;border:2px solid #2f6fde;background:transparent;color:var(--ink);cursor:pointer}
+  .tab.on{background:#2f6fde;color:#fff}
+  #main{flex:1;display:grid;grid-template-columns:46% 54%;min-height:0}
+  #figP{position:relative;background:#fbfaf3;min-height:0;overflow:hidden}
+  #cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #badge{position:absolute;left:10px;top:10px;background:#e8553a;color:#fff;font-weight:bold;padding:4px 14px;border-radius:10px;font-size:22px;z-index:2}
+  #txtP{display:flex;flex-direction:column;min-height:0;padding:10px 16px 34px}
+  #stitle{font-size:clamp(20px,1.9vw,32px);font-weight:bold;color:var(--sky);margin-bottom:8px;border-bottom:2px solid rgba(127,211,255,.35);padding-bottom:4px}
+  #wrap{flex:1;position:relative;overflow:hidden;min-height:0}
+  #lines{line-height:1.22}
+  #lines .ln{padding:.06em .35em;margin:.03em 0;border-radius:.3em;border:3px solid transparent}
+  #lines .ln.cur{border-color:var(--gold);background:rgba(255,210,63,.10)}
+  #tree{position:absolute;inset:0;display:flex;justify-content:safe center;align-items:safe center}
+  #tin{flex:none;font-size:30px}
+  .nd{display:flex;flex-direction:column;align-items:center}
+  .nd.hide{display:none}
+  .kids{display:flex;gap:.3em;align-items:flex-start;justify-content:safe center}
+  .stk{display:flex;flex-direction:column;align-items:center}
+  .stk.hide{display:none}
+  .stk .lv{display:flex;flex-direction:column;align-items:center;gap:.18em;border:.08em dashed var(--gold);border-radius:.45em;padding:.18em}
+  .arr{color:var(--gold);font-weight:bold;line-height:1;font-size:1em;margin:.04em 0}
+  .bx{background:#e8f1ff;color:#13233a;border:.12em solid #2f6fde;border-radius:.4em;padding:.15em .3em;text-align:center;max-width:var(--bxw,12em);line-height:1.18;white-space:normal}
+  .bx.root{border-color:#e8553a;background:#ffe9e3}
+  .bx.gt{border-color:#1f9d6b;background:#e1f7ec}
+  .bx.biet{border-color:#e8900f;background:#fff0d6}
+  .bx .nt{font-size:.72em;font-style:italic;color:#4d5e7a;margin-top:.08em}
+  .bx.cur{box-shadow:0 0 0 .16em var(--gold),0 0 .6em .2em rgba(255,210,63,.6)}
+  .fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.86em;margin:0 .08em;line-height:1.05}
+  .fr>span:first-child{border-bottom:.07em solid currentColor;padding:0 .12em}
+  .hat{position:relative;display:inline-block}
+  .hat::before{content:"";position:absolute;left:4%;right:4%;top:-.16em;height:.3em;background:currentColor;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30' preserveAspectRatio='none'%3E%3Cpolyline points='4,27 50,4 96,27' fill='none' stroke='black' stroke-width='8'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30' preserveAspectRatio='none'%3E%3Cpolyline points='4,27 50,4 96,27' fill='none' stroke='black' stroke-width='8'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+  .tag{color:var(--gold);font-weight:bold}
+  #bar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;justify-content:center;padding:6px 8px;background:var(--bar)}
+  #bar button{font-family:inherit;font-size:clamp(14px,1.2vw,19px);font-weight:bold;border:0;cursor:pointer;padding:7px 13px;border-radius:999px;color:#fff;background:#2f6fde;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+  #bar button:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+  #bMode{background:#7a4fd6} #bNext{background:#1f9d6b} #bPause{background:#e89a1a} #bReset{background:#5b6b86} #bFast{background:#c0392b}
+  #bVoice.off{background:#7d8798}
+  #bar select{font-family:inherit;font-size:15px;max-width:230px;padding:5px;border-radius:8px}
+  #bar label{font-size:16px}
+  #sig{position:fixed;right:14px;bottom:58px;font-size:16px;color:#ffd23f;opacity:.85;font-style:italic;pointer-events:none;z-index:3}
+  #wm{position:fixed;inset:-50%;pointer-events:none;z-index:4;display:flex;flex-wrap:wrap;align-content:center;gap:90px 160px;transform:rotate(-28deg);opacity:.045;font-size:46px;font-weight:bold;color:#7fa7d9;justify-content:center}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <div id="ttl">Toán 8 – Bài 1: Hình chữ nhật, hình thoi và đường phân giác</div>
+    <div id="tabs"></div>
+  </div>
+  <div id="main">
+    <div id="figP"><div id="badge">Toán 8</div><canvas id="cv"></canvas></div>
+    <div id="txtP"><div id="stitle"></div><div id="wrap"><div id="lines"></div></div></div>
+  </div>
+  <div id="bar">
+    <button id="bMode">▶ Tự động</button>
+    <button id="bNext">▶ Bắt đầu</button>
+    <button id="bPause">⏸ Tạm dừng</button>
+    <button id="bReset">↺ Làm lại</button>
+    <button id="bFast">⏩ Nhanh</button>
+    <button id="bVoice">🔊 Giọng đọc</button>
+    <button id="bAgain">🔁 Đọc lại</button>
+    <select id="vSel" title="Chọn giọng đọc"></select>
+    <label>Tốc độ <input id="vRate" type="range" min="0.6" max="1.4" step="0.05" value="0.95"></label>
+  </div>
+</div>
+<div id="sig">Thầy Hà Văn Chung – SĐT 0988938901</div>
+<div id="wm"></div>
+
+<script>
+/* =====================================================================
+   ENGINE – mô phỏng dựng hình + người que + phân tích đi lên + lời giải
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const ease = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+const lerp = (a, b, t) => a + (b - a) * t;
+const lerpP = (p, q, t) => ({x: lerp(p.x, q.x, t), y: lerp(p.y, q.y, t)});
+const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
+const rad = d => d * Math.PI / 180;
+const G = {
+  ang: (P, Q) => Math.atan2(Q.y - P.y, Q.x - P.x) * 180 / Math.PI,
+  lerp: (P, Q, t) => lerpP(P, Q, t),
+  d: dist,
+  dir: (P, deg, r) => ({x: P.x + r * Math.cos(rad(deg)), y: P.y + r * Math.sin(rad(deg))}),
+  inter(P1, P2, Q1, Q2) {
+    const a1 = P2.y - P1.y, b1 = P1.x - P2.x, c1 = a1 * P1.x + b1 * P1.y;
+    const a2 = Q2.y - Q1.y, b2 = Q1.x - Q2.x, c2 = a2 * Q1.x + b2 * Q1.y;
+    const D = a1 * b2 - a2 * b1;
+    return {x: (c1 * b2 - c2 * b1) / D, y: (a1 * c2 - a2 * c1) / D};
+  },
+  circ(C1, r1, C2, r2) {
+    const d = dist(C1, C2), a = (r1 * r1 - r2 * r2 + d * d) / (2 * d), h = Math.sqrt(Math.max(0, r1 * r1 - a * a));
+    const ux = (C2.x - C1.x) / d, uy = (C2.y - C1.y) / d, M = {x: C1.x + a * ux, y: C1.y + a * uy};
+    return [{x: M.x - h * uy, y: M.y + h * ux}, {x: M.x + h * uy, y: M.y - h * ux}];
+  }
+};
+function projL(P, A, B) {
+  const vx = B.x - A.x, vy = B.y - A.y, t = ((P.x - A.x) * vx + (P.y - A.y) * vy) / (vx * vx + vy * vy);
+  return {x: A.x + t * vx, y: A.y + t * vy};
+}
+
+/* ---------- Canvas & khung nhìn ---------- */
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const VIEW = {s: 60, ox: 0, oy: 0, cw: 800, ch: 800, f: 1};
+let FIG = null;
+function resize() {
+  const r = $('#figP').getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+  VIEW.cw = r.width; VIEW.ch = r.height; VIEW.dpr = dpr;
+  const [x0, x1, y0, y1] = FIG.box, pad = 16;
+  VIEW.s = Math.min((r.width - 2 * pad) / (x1 - x0), (r.height - 2 * pad) / (y1 - y0));
+  VIEW.ox = (r.width - (x1 - x0) * VIEW.s) / 2 - x0 * VIEW.s;
+  VIEW.oy = (r.height - (y1 - y0) * VIEW.s) / 2 + y1 * VIEW.s;
+  VIEW.f = clamp(VIEW.s / 62, .6, 1.5);
+  if (MAN.sx === null) { MAN.sx = idleX(); MAN.sy = VIEW.ch * .4; }
+  fitAll();
+}
+const W = P => ({x: VIEW.ox + P.x * VIEW.s, y: VIEW.oy - P.y * VIEW.s});
+
+/* ---------- Đối tượng đã vẽ ---------- */
+let ITEMS = [];
+let ERASE = null; // {list, p}
+const COL = {ink: '#1b2a4a', aux: '#8d99ad', glow: '#ff2d6f'};
+function itemAlpha(it) {
+  if (!ERASE || !it.aux) return 1;
+  const k = ERASE.list.indexOf(it), n = ERASE.list.length;
+  return k < 0 ? 1 : 1 - clamp(ERASE.p * n - k);
+}
+function strokeSeg(it, a, b, al = 1) {
+  const f = VIEW.f;
+  ctx.save(); ctx.globalAlpha = al; ctx.lineCap = 'round';
+  if (it.aux) { ctx.strokeStyle = COL.aux; ctx.lineWidth = 1.7 * f; ctx.setLineDash([7 * f, 6 * f]); }
+  else { ctx.strokeStyle = it.col || COL.ink; ctx.lineWidth = (it.w || 3) * f; if (it.dash) ctx.setLineDash([11 * f, 8 * f]); }
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.restore();
+}
+function strokeArc(C, r, a0, a1, al = 1) {
+  const c = W(C), f = VIEW.f;
+  ctx.save(); ctx.globalAlpha = al; ctx.strokeStyle = COL.aux; ctx.lineWidth = 1.7 * f;
+  ctx.beginPath(); ctx.arc(c.x, c.y, r * VIEW.s, -rad(a0), -rad(a1), a1 > a0); ctx.stroke(); ctx.restore();
+}
+function drawLabel(txt, x, y, size, color, italic = true) {
+  ctx.save(); ctx.font = `${italic ? 'italic ' : ''}bold ${size}px "Times New Roman", Times, serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(251,250,243,.95)'; ctx.strokeText(txt, x, y);
+  ctx.fillStyle = color || COL.ink; ctx.fillText(txt, x, y); ctx.restore();
+}
+function drawPoint(P, name, dx, dy, al = 1) {
+  const p = W(P), f = VIEW.f;
+  ctx.save(); ctx.globalAlpha = al; ctx.fillStyle = COL.ink;
+  ctx.beginPath(); ctx.arc(p.x, p.y, 4.6 * f, 0, 7); ctx.fill(); ctx.restore();
+  if (name) { ctx.save(); ctx.globalAlpha = al; drawLabel(name, p.x + dx * f, p.y + dy * f, 28 * f); ctx.restore(); }
+}
+function drawRA(V, d1, d2, col, al = 1) {
+  const v = W(V), k = 13 * VIEW.f;
+  const u1 = {x: Math.cos(rad(d1)), y: -Math.sin(rad(d1))}, u2 = {x: Math.cos(rad(d2)), y: -Math.sin(rad(d2))};
+  ctx.save(); ctx.globalAlpha = al; ctx.strokeStyle = col || COL.ink; ctx.lineWidth = 1.8 * VIEW.f;
+  ctx.beginPath(); ctx.moveTo(v.x + u1.x * k, v.y + u1.y * k);
+  ctx.lineTo(v.x + (u1.x + u2.x) * k, v.y + (u1.y + u2.y) * k); ctx.lineTo(v.x + u2.x * k, v.y + u2.y * k); ctx.stroke(); ctx.restore();
+}
+function renderItems() {
+  for (const it of ITEMS) {
+    const al = itemAlpha(it); if (al <= 0) continue;
+    if (it.k === 'seg') strokeSeg(it, W(it.P), W(it.Q), al);
+    else if (it.k === 'arc') strokeArc(it.C, it.r, it.a0, it.a1, al);
+    else if (it.k === 'ra') drawRA(it.V, it.d1, it.d2, null, al);
+  }
+  for (const it of ITEMS) if (it.k === 'pt') drawPoint(it.P, it.name, it.dx, it.dy);
+}
+
+/* ---------- Dụng cụ (vẽ bằng canvas, có tên thầy) ---------- */
+function pencilDir() { return {x: -0.5, y: -0.866}; }
+function drawPencil(tip) {
+  const ch = VIEW.ch, d = pencilDir(), L = .14 * ch, w = .016 * ch;
+  const n = {x: -d.y, y: d.x};
+  const at = t => ({x: tip.x + d.x * t, y: tip.y + d.y * t});
+  const quad = (t0, t1, w0, w1, fill) => {
+    const a = at(t0), b = at(t1);
+    ctx.fillStyle = fill; ctx.beginPath();
+    ctx.moveTo(a.x + n.x * w0, a.y + n.y * w0); ctx.lineTo(b.x + n.x * w1, b.y + n.y * w1);
+    ctx.lineTo(b.x - n.x * w1, b.y - n.y * w1); ctx.lineTo(a.x - n.x * w0, a.y - n.y * w0); ctx.closePath(); ctx.fill();
+  };
+  ctx.save();
+  quad(0, .012 * ch, 0, w * .3, '#333');
+  quad(.012 * ch, .032 * ch, w * .3, w / 2, '#e9c89a');
+  quad(.032 * ch, L - .02 * ch, w / 2, w / 2, '#f3b51b');
+  quad(L - .02 * ch, L - .012 * ch, w / 2, w / 2, '#b9bcc4');
+  quad(L - .012 * ch, L, w / 2, w / 2, '#ef8fa3');
+  const m = at(L * .55);
+  ctx.translate(m.x, m.y); ctx.rotate(Math.atan2(d.y, d.x) + Math.PI);
+  ctx.fillStyle = '#5a3d00'; ctx.font = `bold ${Math.round(w * .8)}px "Times New Roman"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('2B  Thầy Chung', 0, 1);
+  ctx.restore();
+}
+const pencilGrip = tip => { const d = pencilDir(), k = .095 * VIEW.ch; return {x: tip.x + d.x * k, y: tip.y + d.y * k}; };
+
+function drawRulerTool(a, b, side, al) {
+  if (al <= 0) return;
+  const L = dist(a, b), u = {x: (b.x - a.x) / L, y: (b.y - a.y) / L}, n = {x: -u.y * side, y: u.x * side};
+  const ext = 24, wd = .055 * VIEW.ch, off = 3;
+  const p0 = {x: a.x - u.x * ext + n.x * off, y: a.y - u.y * ext + n.y * off};
+  ctx.save(); ctx.globalAlpha = al;
+  ctx.transform(u.x, u.y, n.x, n.y, p0.x, p0.y); // trục x theo cạnh, trục y theo pháp tuyến n
+  ctx.fillStyle = 'rgba(255,233,140,.82)'; ctx.strokeStyle = '#a77d0c'; ctx.lineWidth = 1.5;
+  ctx.fillRect(0, 0, L + 2 * ext, wd); ctx.strokeRect(0, 0, L + 2 * ext, wd);
+  ctx.strokeStyle = '#4a3a10'; ctx.lineWidth = 1;
+  const mm = VIEW.s / 10;
+  for (let k = 0; ext + k * mm <= L + 2 * ext - 4; k++) {
+    const x = ext + k * mm, len = k % 10 === 0 ? wd * .38 : (k % 5 === 0 ? wd * .26 : wd * .15);
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, len); ctx.stroke();
+  }
+  ctx.fillStyle = '#6b4f05'; ctx.font = `bold ${Math.round(wd * .26)}px "Times New Roman"`; ctx.textAlign = 'center';
+  ctx.fillText('Thầy Hà Văn Chung', (L + 2 * ext) / 2, wd * .82);
+  ctx.restore();
+}
+function drawEke(V, uA, uD, la, ld, al) {
+  if (al <= 0) return;
+  const P1 = {x: V.x + uA.x * la, y: V.y + uA.y * la}, P2 = {x: V.x + uD.x * ld, y: V.y + uD.y * ld};
+  ctx.save(); ctx.globalAlpha = al;
+  ctx.fillStyle = 'rgba(110,190,255,.34)'; ctx.strokeStyle = '#2366b8'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(V.x, V.y); ctx.lineTo(P1.x, P1.y); ctx.lineTo(P2.x, P2.y); ctx.closePath(); ctx.fill(); ctx.stroke();
+  const g = {x: (V.x + P1.x + P2.x) / 3, y: (V.y + P1.y + P2.y) / 3};
+  ctx.beginPath();
+  [V, P1, P2].forEach((q, i) => { const r = {x: g.x + (q.x - g.x) * .45, y: g.y + (q.y - g.y) * .45}; i ? ctx.lineTo(r.x, r.y) : ctx.moveTo(r.x, r.y); });
+  ctx.closePath(); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#123e74'; ctx.font = `bold ${Math.round(12 * VIEW.f)}px "Times New Roman"`; ctx.textAlign = 'center';
+  ctx.fillText('Ê ke – Thầy Chung', g.x, g.y + 4);
+  ctx.restore();
+}
+function compassGeo(N, P, sideSign) {
+  const d = Math.max(1, dist(N, P)), L = Math.max(d * .62, d / 2 + 14, .1 * VIEW.ch);
+  const u = {x: (P.x - N.x) / d, y: (P.y - N.y) / d}, h = Math.sqrt(L * L - d * d / 4);
+  const pr = {x: u.y * sideSign, y: -u.x * sideSign}, mid = lerpP(N, P, .5);
+  const H = {x: mid.x + pr.x * h, y: mid.y + pr.y * h}, T = {x: H.x + pr.x * .035 * VIEW.ch, y: H.y + pr.y * .035 * VIEW.ch};
+  return {N, P, H, T};
+}
+function drawCompass(g, al = 1) {
+  ctx.save(); ctx.globalAlpha = al; ctx.lineCap = 'round';
+  const w = Math.max(5, .009 * VIEW.ch);
+  ctx.strokeStyle = '#6b7a90'; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.moveTo(g.H.x, g.H.y); ctx.lineTo(g.N.x, g.N.y); ctx.stroke();
+  ctx.strokeStyle = '#222'; ctx.lineWidth = 2.5; const nv = {x: g.N.x - g.H.x, y: g.N.y - g.H.y}, nl = Math.hypot(nv.x, nv.y);
+  ctx.beginPath(); ctx.moveTo(g.N.x - nv.x / nl * 12, g.N.y - nv.y / nl * 12); ctx.lineTo(g.N.x, g.N.y); ctx.stroke();
+  const pv = {x: g.P.x - g.H.x, y: g.P.y - g.H.y}, pl = Math.hypot(pv.x, pv.y);
+  const pb = {x: g.P.x - pv.x / pl * 26, y: g.P.y - pv.y / pl * 26}, pt = {x: g.P.x - pv.x / pl * 9, y: g.P.y - pv.y / pl * 9};
+  ctx.strokeStyle = '#6b7a90'; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(g.H.x, g.H.y); ctx.lineTo(pb.x, pb.y); ctx.stroke();
+  ctx.strokeStyle = '#f2b705'; ctx.lineWidth = w + 1; ctx.beginPath(); ctx.moveTo(pb.x, pb.y); ctx.lineTo(pt.x, pt.y); ctx.stroke();
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(pt.x, pt.y); ctx.lineTo(g.P.x, g.P.y); ctx.stroke();
+  ctx.strokeStyle = '#3d4a5f'; ctx.lineWidth = w * .8; ctx.beginPath(); ctx.moveTo(g.H.x, g.H.y); ctx.lineTo(g.T.x, g.T.y); ctx.stroke();
+  ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(g.H.x, g.H.y, w * 1.2, 0, 7); ctx.fill();
+  ctx.fillStyle = '#3d4a5f'; ctx.beginPath(); ctx.arc(g.T.x, g.T.y, w * .8, 0, 7); ctx.fill();
+  ctx.restore();
+}
+function drawEraser(c) {
+  const w = .1 * VIEW.ch, h = .045 * VIEW.ch;
+  ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(-0.35);
+  ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#8b97a8'; ctx.lineWidth = 2;
+  ctx.fillRect(-w / 2, -h / 2, w, h); ctx.strokeRect(-w / 2, -h / 2, w, h);
+  ctx.fillStyle = '#2f6fde'; ctx.fillRect(-w / 2, -h / 2, w * .55, h);
+  ctx.fillStyle = '#fff'; ctx.font = `bold ${Math.round(h * .38)}px "Times New Roman"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('Thầy Chung', -w * .22, 1);
+  ctx.restore();
+}
+
+/* ---------- Các thao tác dựng hình (op) ---------- */
+function rulerSide(P, Q, away) {
+  const a = W(P), b = W(Q), c = W(away || FIG.cen), L = dist(a, b);
+  const n = {x: -(b.y - a.y) / L, y: (b.x - a.x) / L}, m = lerpP(a, b, .5);
+  return ((m.x - c.x) * n.x + (m.y - c.y) * n.y) >= 0 ? 1 : -1;
+}
+function R(P, Q, o = {}) {
+  const it = {k: 'seg', P, Q, col: o.col, dash: o.dash, aux: o.aux, w: o.w};
+  const tipAt = p => lerpP(W(P), W(Q), ease(clamp((p - .15) / .72)));
+  return {
+    dur: o.dur || 1.6,
+    under(p) {
+      const a = W(P), b = W(Q), side = o.side || rulerSide(P, Q, o.away);
+      drawRulerTool(a, b, side, clamp(p / .12) * clamp((1 - p) / .1));
+      if (p > .15) strokeSeg(it, a, tipAt(p));
+    },
+    over(p) { drawPencil(tipAt(p)); },
+    grip(p) { return pencilGrip(tipAt(p)); },
+    commit() { ITEMS.push(it); }
+  };
+}
+function EKE(V, alongDeg, drawDeg, _unused, o = {}) {
+  const Q = o.to, it = {k: 'seg', P: V, Q, col: o.col, dash: o.dash};
+  const la = (o.la || 2.4), ld = Math.max(G.d(V, Q) + .6, 2.6);
+  const tipAt = p => lerpP(W(V), W(Q), ease(clamp((p - .2) / .68)));
+  return {
+    dur: o.dur || 2,
+    under(p) {
+      const v = W(V), s = VIEW.s;
+      const uA = {x: Math.cos(rad(alongDeg)), y: -Math.sin(rad(alongDeg))}, uD = {x: Math.cos(rad(drawDeg)), y: -Math.sin(rad(drawDeg))};
+      drawEke(v, uA, uD, la * s, ld * s, clamp(p / .12) * clamp((1 - p) / .1));
+      if (p > .2) strokeSeg(it, v, tipAt(p));
+    },
+    over(p) { drawPencil(tipAt(p)); },
+    grip(p) { return pencilGrip(tipAt(p)); },
+    commit() { ITEMS.push(it); }
+  };
+}
+function CMP(C, r, a0, a1, o = {}) {
+  const it = {k: 'arc', C, r, a0, a1, aux: true};
+  let side = null;
+  const angAt = p => a0 + (a1 - a0) * ease(clamp((p - .15) / .75));
+  const geo = p => {
+    const c = W(C), a = angAt(p), P = {x: c.x + r * VIEW.s * Math.cos(rad(a)), y: c.y - r * VIEW.s * Math.sin(rad(a))};
+    if (side === null) {
+      const cen = {x: VIEW.cw * .55, y: VIEW.ch * .5};
+      const g1 = compassGeo(c, P, 1), g2 = compassGeo(c, P, -1);
+      side = dist(g1.H, cen) < dist(g2.H, cen) ? 1 : -1;
+    }
+    return compassGeo(c, P, side);
+  };
+  return {
+    dur: o.dur || 1.3,
+    under(p) {
+      const al = clamp(p / .1) * clamp((1 - p) / .08);
+      if (p > .15) strokeArc(C, r, a0, angAt(p));
+      drawCompass(geo(p), al);
+    },
+    over() {},
+    grip(p) { return geo(p).T; },
+    commit() { ITEMS.push(it); side = null; }
+  };
+}
+function PT(name, P, dx, dy, o = {}) {
+  const it = {k: 'pt', name, P, dx, dy};
+  return {
+    dur: o.dur || .7,
+    under(p) { if (p > .55) drawPoint(P, name, dx, dy, clamp((p - .55) / .2)); },
+    over(p) { const w = W(P); drawPencil({x: w.x, y: w.y - 10 * Math.max(0, Math.sin(p * Math.PI * 2))}); },
+    grip(p) { const w = W(P); return pencilGrip({x: w.x, y: w.y - 10 * Math.max(0, Math.sin(p * Math.PI * 2))}); },
+    commit() { ITEMS.push(it); }
+  };
+}
+function RA(V, d1, d2) {
+  return {dur: .3, under(p) { drawRA(V, d1, d2, null, p); }, over() {}, grip: () => null, commit() { ITEMS.push({k: 'ra', V, d1, d2}); }};
+}
+function WAIT(s) { return {dur: s, under() {}, over() {}, grip: () => null, commit() {}}; }
+function itemCenter(it) {
+  if (it.k === 'seg') return W(lerpP(it.P, it.Q, .5));
+  const m = (it.a0 + it.a1) / 2; return W(G.dir(it.C, m, it.r));
+}
+function ERASE_ALL(o = {}) {
+  let path = null;
+  const posAt = p => {
+    const n = path.length; if (!n) return {x: VIEW.cw * .5, y: VIEW.ch * .5};
+    const x = clamp(p * n - .5, 0, n - 1), k = Math.floor(x), t = x - k;
+    const a = itemCenter(path[k]), b = itemCenter(path[Math.min(n - 1, k + 1)]);
+    const w = Math.sin(p * n * Math.PI * 2) * 14;
+    return {x: lerp(a.x, b.x, t) + w, y: lerp(a.y, b.y, t)};
+  };
+  return {
+    dur: o.dur || 2.4,
+    under(p) { if (!path) { path = ITEMS.filter(i => i.aux); ERASE = {list: path, p: 0}; } ERASE.p = p; },
+    over(p) { if (path) drawEraser(posAt(p)); },
+    grip(p) { return path ? posAt(p) : null; },
+    commit() { ITEMS = ITEMS.filter(i => !i.aux); ERASE = null; path = null; }
+  };
+}
+
+/* ---------- Nhấn mạnh (HL) & kí hiệu (MK) ---------- */
+const HLC = {y: '255,196,0', c: '0,170,255', p: '255,45,111', g: '20,190,100', o: '255,130,0'};
+function hlPoly(pts, al, k) {
+  const c = HLC[k || 'y']; ctx.save();
+  ctx.beginPath(); pts.forEach((P, i) => { const w = W(P); i ? ctx.lineTo(w.x, w.y) : ctx.moveTo(w.x, w.y); }); ctx.closePath();
+  ctx.fillStyle = `rgba(${c},${.25 * al})`; ctx.fill();
+  ctx.strokeStyle = `rgba(${c},${.9 * al})`; ctx.lineWidth = 5 * VIEW.f; ctx.lineJoin = 'round'; ctx.stroke(); ctx.restore();
+}
+function hlSeg(P, Q, al, k) {
+  const c = HLC[k || 'c'], a = W(P), b = W(Q); ctx.save(); ctx.lineCap = 'round';
+  ctx.strokeStyle = `rgba(${c},${.85 * al})`; ctx.lineWidth = 9 * VIEW.f;
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.restore();
+}
+function hlPt(P, al, k) {
+  const c = HLC[k || 'p'], w = W(P); ctx.save();
+  ctx.fillStyle = `rgba(${c},${.3 * al})`; ctx.strokeStyle = `rgba(${c},${al})`; ctx.lineWidth = 3.5 * VIEW.f;
+  ctx.beginPath(); ctx.arc(w.x, w.y, 15 * VIEW.f, 0, 7); ctx.fill(); ctx.stroke(); ctx.restore();
+}
+function hlAng(V, a, b, r, al, k) {
+  const c = HLC[k || 'p'], w = W(V), R = r * VIEW.s; ctx.save();
+  ctx.beginPath(); ctx.moveTo(w.x, w.y); ctx.arc(w.x, w.y, R, -rad(a), -rad(b), true); ctx.closePath();
+  ctx.fillStyle = `rgba(${c},${.35 * al})`; ctx.fill();
+  ctx.strokeStyle = `rgba(${c},${al})`; ctx.lineWidth = 3 * VIEW.f; ctx.stroke(); ctx.restore();
+}
+function rightMark(V, a, b, al, col) { ctx.save(); ctx.globalAlpha = al; drawRA(V, a, b, col); ctx.restore(); }
+function angPair(V, P, Q) {
+  let a = G.ang(V, P), b = G.ang(V, Q);
+  if (((b - a + 360) % 360) > 180) { const t = a; a = b; b = t; }
+  if (b < a) b += 360; return [a, b];
+}
+function rq(V, P, Q, al, k) { const [a, b] = angPair(V, P, Q); hlAng(V, a, b, .55, al, k || 'p'); rightMark(V, a, b, al, COL.glow); }
+function ag(V, P, Q, al, k, r) { const [a, b] = angPair(V, P, Q); hlAng(V, a, b, r || .9, al, k || 'p'); }
+// khoá nhấn mạnh: "p:ABC|y" đa giác, "s:AB|c" đoạn, "t:M|p" điểm, "r:DAE|p" góc vuông, "a:ABF|o" góc
+function parseHL(key) {
+  const [body, k] = key.split('|'), [t, n] = body.split(':'), P = [...n].map(ch => FIG.P[ch]);
+  return {t, P, k};
+}
+function drawHL(key, al) {
+  const h = parseHL(key);
+  if (h.t === 'p') hlPoly(h.P, al, h.k || 'y');
+  else if (h.t === 's') hlSeg(h.P[0], h.P[1], al, h.k || 'c');
+  else if (h.t === 't') hlPt(h.P[0], al, h.k || 'p');
+  else if (h.t === 'r') rq(h.P[1], h.P[0], h.P[2], al, h.k || 'p');
+  else if (h.t === 'a') ag(h.P[1], h.P[0], h.P[2], al, h.k || 'p');
+}
+function hlCenter(key) {
+  const h = parseHL(key);
+  if (h.t === 'r' || h.t === 'a') return h.P[1];
+  const s = h.P.reduce((a, b) => ({x: a.x + b.x, y: a.y + b.y}), {x: 0, y: 0});
+  return {x: s.x / h.P.length, y: s.y / h.P.length};
+}
+function tick(P, Q, n) {
+  const a = W(P), b = W(Q), m = lerpP(a, b, .5), L = dist(a, b), u = {x: (b.x - a.x) / L, y: (b.y - a.y) / L}, nn = {x: -u.y, y: u.x};
+  const f = VIEW.f, h = 8 * f;
+  ctx.save(); ctx.strokeStyle = '#d6336c'; ctx.lineWidth = 2.4 * f;
+  if (n === 'o') { ctx.beginPath(); ctx.arc(m.x, m.y, 6 * f, 0, 7); ctx.stroke(); }
+  else if (n === 'x') {
+    ctx.beginPath(); ctx.moveTo(m.x - 6 * f, m.y - 6 * f); ctx.lineTo(m.x + 6 * f, m.y + 6 * f);
+    ctx.moveTo(m.x + 6 * f, m.y - 6 * f); ctx.lineTo(m.x - 6 * f, m.y + 6 * f); ctx.stroke();
+  } else for (let i = 0; i < n; i++) {
+    const o = (i - (n - 1) / 2) * 6 * f, c = {x: m.x + u.x * o, y: m.y + u.y * o};
+    ctx.beginPath(); ctx.moveTo(c.x - nn.x * h, c.y - nn.y * h); ctx.lineTo(c.x + nn.x * h, c.y + nn.y * h); ctx.stroke();
+  }
+  ctx.restore();
+}
+function arcMark(V, a, b, r, n) {
+  const w = W(V); ctx.save(); ctx.strokeStyle = '#d6336c'; ctx.lineWidth = 2.2 * VIEW.f;
+  for (let i = 0; i < n; i++) { ctx.beginPath(); ctx.arc(w.x, w.y, (r + i * .12) * VIEW.s, -rad(a), -rad(b), true); ctx.stroke(); }
+  ctx.restore();
+}
+
+/* ---------- Người que ---------- */
+const MAN = {sx: null, sy: null, phase: 0, walk: 0, facing: 1, hand: null};
+const idleX = () => Math.max(.07 * VIEW.ch, W({x: FIG.box[0], y: 0}).x + .1 * VIEW.ch);
+function ik(S, T, a, b, pick) {
+  let d = clamp(dist(S, T), 1, a + b - .5);
+  const phi = Math.atan2(T.y - S.y, T.x - S.x), al = Math.acos(clamp((a * a + d * d - b * b) / (2 * a * d), -1, 1));
+  const c1 = {x: S.x + a * Math.cos(phi + al), y: S.y + a * Math.sin(phi + al)}, c2 = {x: S.x + a * Math.cos(phi - al), y: S.y + a * Math.sin(phi - al)};
+  const J = pick(c1, c2), ang = Math.atan2(T.y - J.y, T.x - J.x);
+  return {J, E: {x: J.x + b * Math.cos(ang), y: J.y + b * Math.sin(ang)}};
+}
+function updateMan(dt, grip, pointAt) {
+  const ch = VIEW.ch;
+  let tx, ty;
+  if (grip) { tx = grip.x - .13 * ch; ty = clamp(grip.y + .1 * ch, .34 * ch, .43 * ch); }
+  else if (pointAt || !PLAY.drawScene) { tx = idleX(); ty = .4 * ch; }
+  else { tx = MAN.sx; ty = .4 * ch; }
+  const k = 1 - Math.exp(-dt * (PLAY.fast ? 18 : 7));
+  const ox = MAN.sx;
+  MAN.sx += (tx - MAN.sx) * k; MAN.sy += (ty - MAN.sy) * k;
+  const vx = (MAN.sx - ox) / Math.max(dt, 1e-3);
+  MAN.phase += (MAN.sx - ox) / (.05 * ch);
+  MAN.walk += ((Math.abs(vx) > .08 * ch ? 1 : 0) - MAN.walk) * Math.min(1, dt * 8);
+  if (Math.abs(vx) > .1 * ch) MAN.facing = vx > 0 ? 1 : -1; else if (grip || pointAt) MAN.facing = 1;
+  const S = {x: MAN.sx, y: MAN.sy}, reach = .325 * ch;
+  if (grip) MAN.hand = grip;
+  else if (pointAt) {
+    const p = W(pointAt), d = dist(S, p), r = Math.min(reach, d - .02 * ch);
+    MAN.hand = {x: S.x + (p.x - S.x) / d * r, y: S.y + (p.y - S.y) / d * r};
+  } else MAN.hand = {x: S.x + .05 * ch, y: S.y + .28 * ch};
+}
+function drawMan() {
+  const ch = VIEW.ch, S = {x: MAN.sx, y: MAN.sy}, fc = MAN.facing;
+  const hip = {x: S.x, y: S.y + .19 * ch}, neckY = S.y - .018 * ch, hr = .04 * ch, head = {x: S.x, y: neckY - hr};
+  const ground = .985 * ch, th = .225 * ch, arm = .163 * ch, p = MAN.phase, w = MAN.walk;
+  ctx.save(); ctx.globalAlpha = .93; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = "#1d2b4f"; ctx.lineWidth = Math.max(3, .0085 * ch);
+  const fwd = (a, b) => ((a.x - b.x) * fc > 0 ? a : b), below = (a, b) => (a.y > b.y ? a : b), back = (a, b) => ((a.x - b.x) * fc < 0 ? a : b);
+  const amp = .04 * ch * w;
+  [[-1, 0], [1, Math.PI]].forEach(([sg, ph]) => {
+    const foot = {x: hip.x + sg * .03 * ch + amp * Math.sin(p + ph), y: ground - .02 * ch * w * Math.max(0, Math.cos(p + ph))};
+    const k = ik(hip, foot, th, th, fwd);
+    ctx.beginPath(); ctx.moveTo(hip.x, hip.y); ctx.lineTo(k.J.x, k.J.y); ctx.lineTo(k.E.x, k.E.y); ctx.lineTo(k.E.x + .022 * ch * fc, k.E.y); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.moveTo(hip.x, hip.y); ctx.lineTo(S.x, neckY); ctx.stroke();
+  let k = ik(S, {x: S.x - .025 * ch * fc + .03 * ch * w * Math.sin(p), y: S.y + .27 * ch}, arm, arm, back);
+  ctx.beginPath(); ctx.moveTo(S.x, S.y); ctx.lineTo(k.J.x, k.J.y); ctx.lineTo(k.E.x, k.E.y); ctx.stroke();
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(head.x, head.y, hr, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#1d2b4f';
+  ctx.beginPath(); ctx.arc(head.x + .009 * ch * fc, head.y - .008 * ch, .0045 * ch, 0, 7); ctx.arc(head.x + .024 * ch * fc, head.y - .008 * ch, .0045 * ch, 0, 7); ctx.fill();
+  ctx.lineWidth = Math.max(2, .004 * ch); ctx.beginPath(); ctx.arc(head.x + .016 * ch * fc, head.y + .006 * ch, .013 * ch, .15 * Math.PI, .85 * Math.PI); ctx.stroke();
+  ctx.lineWidth = Math.max(3, .0085 * ch);
+  k = ik(S, MAN.hand || {x: S.x, y: S.y + .3 * ch}, arm, arm, below);
+  ctx.beginPath(); ctx.moveTo(S.x, S.y); ctx.lineTo(k.J.x, k.J.y); ctx.lineTo(k.E.x, k.E.y); ctx.stroke();
+  ctx.fillStyle = '#1d2b4f'; ctx.beginPath(); ctx.arc(k.E.x, k.E.y, .011 * ch, 0, 7); ctx.fill();
+  ctx.restore();
+}
+
+/* ---------- Định dạng chữ toán ---------- */
+function fmt(s) {
+  if (!s) return '';
+  s = s.replace(/ (=|\+|−|∈|⊥|\/\/|<|>|:) /g, '&nbsp;$1&nbsp;');
+  s = s.replace(/\[\[(.+?)\|\|(.+?)\]\]/g, '<span class="fr"><span>$1</span><span>$2</span></span>');
+  s = s.replace(/\^\{(.+?)\}/g, '<span class="hat">$1</span>');
+  s = s.replace(/_\{(.+?)\}/g, '<sub>$1</sub>');
+  return s;
+}
+
+/* ---------- Giọng đọc tiếng Việt – GIỌNG NỮ MẶC ĐỊNH ---------- */
+const AUDIO_CLIPS = {};
+const VOICE = {on: true, rate: .95, v: null, pitch: 1, token: 0, list: [], audio: null};
+try { const r = parseFloat(localStorage.getItem('tc_rate')); if (r >= .6 && r <= 1.4) VOICE.rate = r; } catch (e) {}
+function vRank(v) {
+  const n = (v.name + ' ' + (v.voiceURI || '')).toLowerCase();
+  if (!/^vi/i.test(v.lang || '') && !/vietnam|tiếng việt/.test(n)) return -1;
+  if (/hoaimy/.test(n)) return 100;
+  if (/google/.test(n)) return 90;
+  if (/linh/.test(n)) return 80;
+  if (/namminh|\ban\b/.test(n)) return 10;
+  return 50;
+}
+const vMale = v => /namminh|\ban\b/i.test(v.name);
+function pickVoice() {
+  if (!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices().filter(v => vRank(v) >= 0).sort((a, b) => vRank(b) - vRank(a));
+  VOICE.list = vs;
+  const sel = $('#vSel'); sel.innerHTML = '';
+  if (!vs.length) { const o = document.createElement('option'); o.textContent = 'Không có giọng tiếng Việt'; sel.appendChild(o); VOICE.v = null; return; }
+  let saved = null; try { saved = localStorage.getItem('tc_voice_nu'); } catch (e) {}
+  vs.forEach((v, i) => { const o = document.createElement('option'); o.value = i; o.textContent = v.name + (vMale(v) ? ' – nam' : ' – nữ'); sel.appendChild(o); });
+  let idx = Math.max(0, vs.findIndex(v => v.name === saved)); if (saved === null) idx = 0;
+  sel.value = idx; VOICE.v = vs[idx];
+  VOICE.pitch = (vMale(VOICE.v) && vs.every(vMale)) ? 1.35 : 1;
+}
+function splitChunks(t) {
+  const parts = t.match(/[^.,;:!?]+[.,;:!?]*/g) || [t], out = []; let cur = '';
+  for (const p of parts) { if ((cur + p).length > 150 && cur) { out.push(cur.trim()); cur = p; } else cur += p; }
+  if (cur.trim()) out.push(cur.trim()); return out;
+}
+function stopSpeak() { VOICE.token++; if ('speechSynthesis' in window) speechSynthesis.cancel(); if (VOICE.audio) { VOICE.audio.pause(); VOICE.audio = null; } }
+function speak(text, cb) {
+  stopSpeak();
+  const tk = VOICE.token; let done = false, tm = null;
+  const fin = () => { if (done || tk !== VOICE.token) return; done = true; clearTimeout(tm); cb && cb(); };
+  if (!text) { tm = setTimeout(fin, 300); return; }
+  if (PLAY.fast) { tm = setTimeout(fin, 250); return; }
+  if (!VOICE.on) { tm = setTimeout(fin, Math.max(1500, text.length * 50)); return; }
+  if (AUDIO_CLIPS[text]) {
+    const [src, sec] = AUDIO_CLIPS[text], a = new Audio(src); a.playbackRate = VOICE.rate; VOICE.audio = a;
+    a.onended = fin; a.play().catch(() => {}); tm = setTimeout(fin, (sec / VOICE.rate + 3) * 1000); return;
+  }
+  if (!('speechSynthesis' in window)) { tm = setTimeout(fin, Math.max(1500, text.length * 60)); return; }
+  tm = setTimeout(fin, (8 + text.length * .17 / VOICE.rate) * 1000);
+  const chunks = splitChunks(text); let k = 0;
+  const next = () => {
+    if (tk !== VOICE.token) return;
+    if (k >= chunks.length) { fin(); return; }
+    const u = new SpeechSynthesisUtterance(chunks[k++]);
+    u.lang = 'vi-VN'; if (VOICE.v) u.voice = VOICE.v; u.rate = VOICE.rate; u.pitch = VOICE.pitch;
+    u.onend = next; u.onerror = next; speechSynthesis.speak(u);
+  };
+  setTimeout(next, 80);
+}
+
+/* ---------- Trình chiếu ---------- */
+let SCENES = [], TL = [];
+const PLAY = {cur: -1, auto: true, paused: false, fast: false, opsQ: [], op: null, opT: 0, opsDone: true, spoke: true, timer: null, drawScene: true, shownScene: -1};
+function buildTimeline() {
+  TL = [];
+  SCENES.forEach((sc, si) => {
+    if (sc.tree) {
+      sc.beats = []; sc.nodeBeat = {};
+      (function dfs(n) { sc.nodeBeat[n.id] = sc.beats.length; sc.beats.push({node: n.id, say: n.say, hl: n.hl, mk: n.mk}); (n.ch || []).forEach(dfs); })(sc.tree);
+    }
+    sc.first = TL.length;
+    sc.beats.forEach((b, bi) => TL.push({si, bi, b}));
+  });
+}
+function mkActive() {
+  const s = new Set();
+  for (let i = 0; i <= PLAY.cur && i < TL.length; i++) {
+    const mk = TL[i].b.mk || [];
+    if (i < PLAY.cur || PLAY.opsDone) mk.forEach(m => s.add(m));
+  }
+  return s;
+}
+function applyInstant(upto) { // áp dụng tức thì mọi op của các beat < upto
+  ITEMS = []; ERASE = null;
+  for (let i = 0; i < upto; i++) (TL[i].b.ops || []).forEach(op => op.commit());
+}
+function finishCurrentOps() {
+  if (PLAY.op) { PLAY.op.commit(); PLAY.op = null; }
+  while (PLAY.opsQ.length) PLAY.opsQ.shift().commit();
+  PLAY.opsDone = true;
+}
+function showBeat(i, jump) {
+  clearTimeout(PLAY.timer);
+  if (i >= TL.length) { PLAY.cur = TL.length - 1; stopSpeak(); updateButtons(); return; }
+  if (jump || i !== PLAY.cur + 1) { PLAY.op = null; PLAY.opsQ = []; applyInstant(i); }
+  else finishCurrentOps();
+  PLAY.cur = i;
+  const {si, b} = TL[i];
+  PLAY.drawScene = si === 0;
+  PLAY.opsQ = (b.ops || []).slice(); PLAY.op = null; PLAY.opsDone = PLAY.opsQ.length === 0;
+  renderText();
+  PLAY.spoke = false;
+  if (!PLAY.paused) speak(b.say, () => { PLAY.spoke = true; checkDone(); });
+  updateButtons();
+}
+function checkDone() {
+  if (!PLAY.opsDone || !PLAY.spoke || PLAY.paused) return;
+  if (PLAY.auto && PLAY.cur < TL.length - 1) {
+    const sceneEnd = TL[PLAY.cur + 1].si !== TL[PLAY.cur].si;
+    PLAY.timer = setTimeout(() => showBeat(PLAY.cur + 1), PLAY.fast ? 120 : (sceneEnd ? 1400 : 450));
+  }
+}
+function next() {
+  if (PLAY.paused) { togglePause(); return; }
+  if (PLAY.cur >= TL.length - 1) return;
+  stopSpeak(); showBeat(PLAY.cur + 1);
+}
+function togglePause() {
+  PLAY.paused = !PLAY.paused;
+  clearTimeout(PLAY.timer);
+  if (PLAY.paused) stopSpeak();
+  else if (PLAY.cur >= 0 && !PLAY.spoke) speak(TL[PLAY.cur].b.say, () => { PLAY.spoke = true; checkDone(); });
+  else checkDone();
+  updateButtons();
+}
+function resetAll() {
+  clearTimeout(PLAY.timer); stopSpeak();
+  PLAY.cur = -1; PLAY.op = null; PLAY.opsQ = []; PLAY.opsDone = true; PLAY.paused = false; PLAY.drawScene = true;
+  ITEMS = []; ERASE = null; MAN.sx = idleX(); MAN.sy = VIEW.ch * .4;
+  PLAY.shownScene = -1; renderText(); updateButtons();
+}
+function updateButtons() {
+  $('#bMode').textContent = PLAY.auto ? '▶ Tự động' : '✋ Ấn nút';
+  $('#bNext').textContent = PLAY.cur < 0 ? '▶ Bắt đầu' : '⏭ Tiếp';
+  $('#bPause').textContent = PLAY.paused ? '▶ Tiếp tục' : '⏸ Tạm dừng';
+  $('#bFast').textContent = PLAY.fast ? '⏩ Nhanh: Bật' : '⏩ Nhanh';
+  $('#bVoice').textContent = VOICE.on ? '🔊 Giọng đọc' : '🔇 Tắt tiếng';
+  $('#bVoice').classList.toggle('off', !VOICE.on);
+  const si = PLAY.cur >= 0 ? TL[PLAY.cur].si : 0;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === SCENES[si].tab));
+}
+
+/* ---------- Khung chữ: lời giải / sơ đồ ---------- */
+function renderText() {
+  const si = PLAY.cur >= 0 ? TL[PLAY.cur].si : 0, sc = SCENES[si], local = PLAY.cur >= 0 ? TL[PLAY.cur].bi : -1;
+  const wrap = $('#wrap');
+  if (PLAY.shownScene !== si) {
+    PLAY.shownScene = si;
+    $('#stitle').innerHTML = fmt(sc.title);
+    wrap.innerHTML = '';
+    if (sc.tree) {
+      const tr = document.createElement('div'); tr.id = 'tree';
+      const tin = document.createElement('div'); tin.id = 'tin';
+      const build = (n, root) => {
+        const nd = document.createElement('div'); nd.className = 'nd hide'; nd.dataset.id = n.id;
+        if (!root) { const a = document.createElement('div'); a.className = 'arr'; a.textContent = '⇑'; nd.appendChild(a); }
+        const bx = document.createElement('div'); bx.className = 'bx ' + (root ? 'root' : (n.k || 'mid'));
+        bx.innerHTML = fmt(n.t) + (n.n ? `<div class="nt">${fmt(n.n)}</div>` : '');
+        nd.appendChild(bx);
+        if (n.ch && n.ch.length) {
+          const kd = document.createElement('div'); kd.className = 'kids';
+          const leaves = n.ch.filter(c => !(c.ch && c.ch.length));
+          let stk = null;
+          n.ch.forEach(c => {
+            if (leaves.length >= 2 && leaves.includes(c)) { // các ô lá cùng cấp xếp thành cột cho gọn
+              if (!stk) {
+                stk = document.createElement('div'); stk.className = 'stk hide';
+                const a = document.createElement('div'); a.className = 'arr'; a.textContent = '⇑'; stk.appendChild(a);
+                const lv = document.createElement('div'); lv.className = 'lv'; stk.appendChild(lv); kd.appendChild(stk);
+              }
+              const cn = build(c, false); cn.querySelector(':scope > .arr').remove(); stk.lastChild.appendChild(cn);
+            } else kd.appendChild(build(c, false));
+          });
+          nd.appendChild(kd);
+        }
+        return nd;
+      };
+      tin.appendChild(build(sc.tree, true)); tr.appendChild(tin); wrap.appendChild(tr);
+    } else {
+      const ls = document.createElement('div'); ls.id = 'lines';
+      sc.beats.forEach((b, bi) => { if (b.line) { const d = document.createElement('div'); d.className = 'ln'; d.dataset.bi = bi; d.innerHTML = fmt(b.line); d.style.display = 'none'; ls.appendChild(d); } });
+      wrap.appendChild(ls);
+    }
+  }
+  if (sc.tree) {
+    const curId = local >= 0 ? sc.beats[local].node : null;
+    wrap.querySelectorAll('.nd').forEach(nd => {
+      const bi = sc.nodeBeat[nd.dataset.id];
+      nd.classList.toggle('hide', !(bi <= local));
+      nd.querySelector(':scope > .bx').classList.toggle('cur', nd.dataset.id === curId);
+    });
+    wrap.querySelectorAll('.stk').forEach(st => st.classList.toggle('hide', !st.querySelector('.nd:not(.hide)')));
+  } else {
+    let lastLine = -1;
+    wrap.querySelectorAll('.ln').forEach(d => { const bi = +d.dataset.bi; d.style.display = bi <= local ? '' : 'none'; if (bi <= local) lastLine = bi; });
+    wrap.querySelectorAll('.ln').forEach(d => d.classList.toggle('cur', +d.dataset.bi === lastLine));
+  }
+  fitAll();
+}
+function fitAll() {
+  const wrap = $('#wrap'); if (!wrap) return;
+  const tin = $('#tin'), ls = $('#lines');
+  if (tin) {
+    const ok = () => tin.offsetWidth <= wrap.clientWidth - 4 && tin.offsetHeight <= wrap.clientHeight - 4;
+    const set = v => tin.style.fontSize = v + 'px';
+    let best = null;
+    for (const w of [9, 12, 15, 19]) {
+      tin.style.setProperty('--bxw', w + 'em');
+      let lo = 14, hi = 52, cand;
+      set(hi);
+      if (ok()) cand = hi;
+      else { while (hi - lo > .5) { const m = (lo + hi) / 2; set(m); if (ok()) lo = m; else hi = m; } set(lo); cand = ok() ? lo : lo - 1; }
+      if (!best || cand > best.f) best = {w, f: cand};
+    }
+    tin.style.setProperty('--bxw', best.w + 'em'); set(Math.max(14, best.f));
+  } else if (ls) {
+    const ok = () => ls.scrollHeight <= wrap.clientHeight - 2;
+    let lo = 28, hi = 60; ls.style.fontSize = hi + 'px';
+    if (!ok()) { while (hi - lo > .5) { const m = (lo + hi) / 2; ls.style.fontSize = m + 'px'; if (ok()) lo = m; else hi = m; } ls.style.fontSize = lo + 'px'; }
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+}
+
+/* ---------- Vòng lặp vẽ ---------- */
+let clock = 0, lastTs = null;
+function frame(ts) {
+  const dt = lastTs === null ? 0 : Math.min(.05, (ts - lastTs) / 1000); lastTs = ts; clock += dt;
+  if (!PLAY.paused && PLAY.cur >= 0) {
+    if (!PLAY.op && PLAY.opsQ.length) { PLAY.op = PLAY.opsQ.shift(); PLAY.opT = 0; }
+    if (PLAY.op) {
+      PLAY.opT += dt * (PLAY.fast ? 4 : 1);
+      if (PLAY.opT >= PLAY.op.dur) {
+        PLAY.op.commit(); PLAY.op = null;
+        if (!PLAY.opsQ.length) { PLAY.opsDone = true; checkDone(); }
+      }
+    }
+  }
+  const s = VIEW.dpr || 1;
+  ctx.setTransform(s, 0, 0, s, 0, 0);
+  ctx.fillStyle = '#fbfaf3'; ctx.fillRect(0, 0, VIEW.cw, VIEW.ch);
+  ctx.strokeStyle = 'rgba(47,111,222,.07)'; ctx.lineWidth = 1;
+  for (let x = VIEW.ox % VIEW.s; x < VIEW.cw; x += VIEW.s) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, VIEW.ch); ctx.stroke(); }
+  for (let y = VIEW.oy % VIEW.s; y < VIEW.ch; y += VIEW.s) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(VIEW.cw, y); ctx.stroke(); }
+  renderItems();
+  mkActive().forEach(m => FIG.MK[m] && FIG.MK[m]());
+  const b = PLAY.cur >= 0 ? TL[PLAY.cur].b : null;
+  const hls = b && PLAY.opsDone ? (b.hl || []) : [];
+  const al = .55 + .45 * Math.sin(clock * 6);
+  hls.forEach(k => drawHL(k, al));
+  const p = PLAY.op ? clamp(PLAY.opT / PLAY.op.dur) : 0;
+  if (PLAY.op) PLAY.op.under(p);
+  const grip = PLAY.op ? PLAY.op.grip(p) : null;
+  const pointAt = !PLAY.drawScene && hls.length ? hlCenter(hls[0]) : null;
+  updateMan(dt, grip, pointAt);
+  drawMan();
+  if (PLAY.op) PLAY.op.over(p);
+  requestAnimationFrame(frame);
+}
+
+function boot() {
+  document.title = FIG.title;
+  $('#ttl').textContent = FIG.title; $('#badge').textContent = FIG.badge;
+  $('#wm').innerHTML = Array(40).fill('<span>Thầy Hà Văn Chung</span>').join('');
+  buildTimeline();
+  const tabs = [...new Set(SCENES.map(s => s.tab))];
+  tabs.forEach(t => {
+    const b = document.createElement('button'); b.className = 'tab'; b.textContent = t; b.dataset.tab = t;
+    b.onclick = () => { const si = SCENES.findIndex(s => s.tab === t); stopSpeak(); PLAY.paused = false; showBeat(SCENES[si].first, true); };
+    $('#tabs').appendChild(b);
+  });
+  $('#bMode').onclick = () => { PLAY.auto = !PLAY.auto; updateButtons(); if (PLAY.auto) checkDone(); else clearTimeout(PLAY.timer); };
+  $('#bNext').onclick = next;
+  $('#bPause').onclick = () => { if (PLAY.cur >= 0) togglePause(); };
+  $('#bReset').onclick = resetAll;
+  $('#bFast').onclick = () => { PLAY.fast = !PLAY.fast; if (PLAY.fast) stopSpeak(); updateButtons(); if (PLAY.cur >= 0 && !PLAY.spoke) speak(TL[PLAY.cur].b.say, () => { PLAY.spoke = true; checkDone(); }); };
+  $('#bVoice').onclick = () => { VOICE.on = !VOICE.on; if (!VOICE.on) stopSpeak(); updateButtons(); if (PLAY.cur >= 0 && !PLAY.spoke && !PLAY.paused) speak(TL[PLAY.cur].b.say, () => { PLAY.spoke = true; checkDone(); }); };
+  $('#bAgain').onclick = () => { if (PLAY.cur >= 0) { clearTimeout(PLAY.timer); PLAY.spoke = false; speak(TL[PLAY.cur].b.say, () => { PLAY.spoke = true; checkDone(); }); } };
+  $('#vSel').onchange = e => { VOICE.v = VOICE.list[+e.target.value] || null; VOICE.pitch = (VOICE.v && vMale(VOICE.v) && VOICE.list.every(vMale)) ? 1.35 : 1; try { localStorage.setItem('tc_voice_nu', VOICE.v ? VOICE.v.name : ''); } catch (er) {} };
+  const rt = $('#vRate'); rt.value = VOICE.rate;
+  rt.oninput = () => { VOICE.rate = +rt.value; try { localStorage.setItem('tc_rate', VOICE.rate); } catch (e) {} };
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+    if (e.code === 'Space' || e.code === 'ArrowRight') { e.preventDefault(); next(); }
+    if (e.key === 'r' || e.key === 'R') $('#bAgain').click();
+  });
+  if ('speechSynthesis' in window) { pickVoice(); setTimeout(pickVoice, 600); setTimeout(pickVoice, 2000); speechSynthesis.onvoiceschanged = pickVoice; }
+  window.addEventListener('resize', resize);
+  resize(); renderText(); updateButtons();
+  requestAnimationFrame(frame);
+  // dùng cho kiểm thử
+  window.__TL = TL; window.__SCENES = SCENES;
+  window.__go = i => { PLAY.auto = false; PLAY.fast = true; showBeat(i, true); finishCurrentOps(); updateButtons(); };
+}
+
+/* ===== TOÁN 8 – BÀI 1: HÌNH CHỮ NHẬT, HÌNH THOI VÀ ĐƯỜNG PHÂN GIÁC ===== */
+const A = {x: 0, y: 0}, B = {x: 0, y: 6}, C = {x: 8, y: 0};
+const M = G.lerp(B, C, .5);
+const D = projL(M, A, B), E = projL(M, A, C);
+const K = {x: 2 * E.x - M.x, y: 2 * E.y - M.y};
+const uBA = {x: (A.x - B.x) / G.d(A, B), y: (A.y - B.y) / G.d(A, B)}, uBC = {x: (C.x - B.x) / G.d(B, C), y: (C.y - B.y) / G.d(B, C)};
+const BIS = {x: B.x + uBA.x + uBC.x, y: B.y + uBA.y + uBC.y};
+const F = G.inter(B, BIS, A, C), I = G.inter(B, F, M, D);
+// điểm phụ dựng hình
+const [X1, X2] = G.circ(B, 6, C, 6);
+const Pb = G.dir(B, G.ang(B, A), 2), Qb = G.dir(B, G.ang(B, C), 2);
+const Rb = G.circ(Pb, 2, Qb, 2).sort((u, v) => G.d(v, B) - G.d(u, B))[0];
+
+FIG = {
+  title: 'Toán 8 – Bài 1: Hình chữ nhật, hình thoi và đường phân giác',
+  badge: 'Toán 8',
+  box: [-4.4, 9.4, -3.9, 6.8],
+  cen: {x: 8 / 3, y: 2},
+  P: {A, B, C, M, D, E, K, F, I},
+  MK: {
+    'MB=MC': () => { tick(B, M, 1); tick(M, C, 1); },
+    'EM=EK': () => { tick(E, M, 'o'); tick(E, K, 'o'); },
+    'angB': () => { arcMark(B, G.ang(B, A), G.ang(B, F), .9, 1); arcMark(B, G.ang(B, F), G.ang(B, C), .75, 1); },
+    'DA=DB': () => { tick(A, D, 2); tick(D, B, 2); },
+    'EA=EC': () => { tick(A, E, 3); tick(E, C, 3); },
+    'IB=IF': () => { tick(B, I, 'x'); tick(I, F, 'x'); }
+  }
+};
+(function () { const st = document.createElement('style'); st.textContent = '.bx{white-space:normal}.kids{gap:.3em!important;justify-content:safe center!important}#tree{align-items:safe center!important}'; document.head.appendChild(st); })();
+
+const aB1 = G.ang(B, X1), aB2 = G.ang(B, X2), aC1 = G.ang(C, X1), aC2 = G.ang(C, X2);
+const aBA = G.ang(B, A) + 360, aBC = G.ang(B, C) + 360; // 270°, 323,13°
+const aPR = G.ang(Pb, Rb), aQR = G.ang(Qb, Rb) + 360;
+
+SCENES = [
+  /* ---------------- ĐỀ BÀI VÀ VẼ HÌNH ---------------- */
+  {title: 'ĐỀ BÀI VÀ VẼ HÌNH', tab: 'Đề bài', beats: [
+    {line: '<span class="tag">Đề bài.</span> Cho △<i>ABC</i> vuông tại <i>A</i> (<i>AB</i> < <i>AC</i>).',
+     say: 'Cho tam giác a bê xê vuông tại a, với a bê nhỏ hơn a xê.', hl: []},
+    {say: 'Bạn nhỏ đặt thước kẻ, vẽ cạnh a xê nằm ngang dài tám xăng ti mét.',
+     ops: [PT('A', A, -20, 20), R(A, C), PT('C', C, 20, 18)], hl: ['s:AC|c']},
+    {say: 'Đặt ê ke có đỉnh góc vuông trùng với điểm a, kẻ cạnh a bê vuông góc với a xê, dài sáu xăng ti mét.',
+     ops: [EKE(A, 0, 90, 0, {to: B, la: 3}), PT('B', B, -22, -12), RA(A, 0, 90)], hl: ['s:AB|c', 'r:BAC|p']},
+    {say: 'Dùng thước nối bê với xê, ta được tam giác a bê xê vuông tại a.',
+     ops: [R(B, C)], hl: ['p:ABC|c']},
+    {line: 'Gọi <i>M</i> là trung điểm của cạnh huyền <i>BC</i>.',
+     say: 'Gọi em là trung điểm của cạnh huyền bê xê.', hl: ['s:BC|c']},
+    {say: 'Dựng trung điểm bằng compa. Lấy bê làm tâm, vẽ hai cung tròn. Giữ nguyên khẩu độ, lấy xê làm tâm vẽ hai cung cắt hai cung trước.',
+     ops: [CMP(B, 6, aB1 + 9, aB1 - 9), CMP(B, 6, aB2 + 9, aB2 - 9), CMP(C, 6, aC1 - 9, aC1 + 9), CMP(C, 6, aC2 - 9, aC2 + 9)], hl: ['s:BC|c']},
+    {say: 'Nối hai giao điểm của các cung, đường nối cắt bê xê tại trung điểm em.',
+     ops: [R(X1, X2, {aux: true, dur: 1.4}), PT('M', M, 16, -18)], hl: ['t:M|p'], mk: ['MB=MC']},
+    {line: 'Kẻ <i>MD</i> ⊥ <i>AB</i> tại <i>D</i>.',
+     say: 'Kẻ em đê vuông góc với a bê tại đê.', hl: ['t:M|p', 's:AB|c']},
+    {say: 'Đặt một cạnh góc vuông của ê ke nằm trên a bê, cạnh kia đi qua em. Kẻ theo cạnh ê ke, chân đường vuông góc là điểm đê.',
+     ops: [EKE(D, 90, 0, 0, {to: M, la: 2.2}), PT('D', D, -24, 4), RA(D, 0, 270)], hl: ['s:MD|c', 'r:ADM|p']},
+    {line: 'Kẻ <i>ME</i> ⊥ <i>AC</i> tại <i>E</i>.',
+     say: 'Kẻ em e vuông góc với a xê tại e.', hl: ['t:M|p', 's:AC|c']},
+    {say: 'Đặt ê ke có một cạnh góc vuông nằm trên a xê, cạnh kia đi qua em, kẻ được em e, chân đường vuông góc là điểm e.',
+     ops: [EKE(E, 0, 90, 0, {to: M, la: 2.2}), PT('E', E, 14, 22), RA(E, 90, 180)], hl: ['s:ME|c', 'r:AEM|p']},
+    {line: '<b>a)</b> Chứng minh tứ giác <i>ADME</i> là hình chữ nhật và <i>AM</i> = <i>DE</i>.',
+     say: 'Câu a. Chứng minh tứ giác a đê em e là hình chữ nhật và a em bằng đê e.', hl: ['p:ADME|y']},
+    {say: 'Kẻ thêm hai đường chéo a em và đê e của tứ giác a đê em e.',
+     ops: [R(A, M, {col: '#2f6fde', dash: true, w: 2.4}), R(D, E, {col: '#2f6fde', dash: true, w: 2.4})], hl: ['s:AM|c', 's:DE|o']},
+    {line: '<b>b)</b> Chứng minh <i>D</i>, <i>E</i> lần lượt là trung điểm của <i>AB</i>, <i>AC</i>.',
+     say: 'Câu b. Chứng minh đê và e lần lượt là trung điểm của a bê và a xê.', hl: ['t:D|p', 't:E|g']},
+    {line: 'Trên tia đối của tia <i>EM</i> lấy điểm <i>K</i> sao cho <i>EK</i> = <i>EM</i>; chứng minh tứ giác <i>AMCK</i> là hình thoi.',
+     say: 'Trên tia đối của tia e em lấy điểm ca sao cho e ca bằng e em. Chứng minh tứ giác a em xê ca là hình thoi.', hl: ['s:EM|c']},
+    {say: 'Đặt mũi nhọn compa tại e, mở khẩu độ bằng e em, quay xuống phía dưới vẽ cung cắt tia đối của tia e em tại ca.',
+     ops: [CMP(E, G.d(E, M), 99, 81), CMP(E, G.d(E, K), 258, 282), R(E, K, {dash: true, w: 2.4}), PT('K', K, 20, 12)], hl: ['s:EK|p', 's:EM|c'], mk: ['EM=EK']},
+    {say: 'Nối xê với ca, nối ca với a, được tứ giác a em xê ca.',
+     ops: [R(C, K, {col: '#c2410c', dash: true, w: 2.4, away: {x: 4, y: 0}}), R(K, A, {col: '#c2410c', dash: true, w: 2.4, away: {x: 4, y: 0}})], hl: ['p:AMCK|p']},
+    {line: '<b>c)</b> Tia phân giác của ^{<i>ABC</i>} cắt <i>MD</i> tại <i>I</i> và cắt <i>AC</i> tại <i>F</i>.',
+     say: 'Câu c. Tia phân giác của góc a bê xê cắt em đê tại i và cắt a xê tại ép.', hl: ['a:ABC|o']},
+    {say: 'Dựng tia phân giác bằng compa. Tâm bê vẽ cung cắt hai cạnh của góc. Từ hai giao điểm vẽ hai cung cùng bán kính cắt nhau.',
+     ops: [CMP(B, 2, aBA - 8, aBC + 8, {dur: 1.6}), CMP(Pb, 2, aPR - 14, aPR + 14), CMP(Qb, 2, aQR - 14, aQR + 14)], hl: ['a:ABC|o']},
+    {say: 'Đặt thước nối bê với giao điểm của hai cung, kẻ tia phân giác cắt em đê tại i và cắt a xê tại ép.',
+     ops: [R(B, F, {col: '#1b2a4a'}), PT('I', I, 15, -18), PT('F', F, -8, 24)], hl: ['s:BF|o', 't:I|p', 't:F|g'], mk: ['angB']},
+    {line: 'Chứng minh <i>I</i> là trung điểm của <i>BF</i> và [[<i>ID</i>||<i>IM</i>]] = [[<i>FA</i>||<i>FC</i>]].',
+     say: 'Chứng minh i là trung điểm của bê ép và tỉ số i đê trên i em bằng tỉ số ép a trên ép xê.', hl: ['s:BF|o', 's:ID|c', 's:IM|p']},
+    {say: 'Dùng tẩy xoá các đường dựng hình phụ. Hình vẽ đã hoàn thành.',
+     ops: [ERASE_ALL()], hl: ['p:ABC|c']}
+  ]},
+
+  /* ---------------- PHÂN TÍCH GIẢ THIẾT ---------------- */
+  {title: 'PHÂN TÍCH GIẢ THIẾT', tab: 'Phân tích GT', beats: [
+    {line: '△<i>ABC</i> vuông tại <i>A</i> ⇒ ^{<i>BAC</i>} = 90°; <i>AB</i> ⊥ <i>AC</i>.',
+     say: 'Tam giác a bê xê vuông tại a, suy ra góc bê a xê bằng 90 độ và a bê vuông góc với a xê.', hl: ['p:ABC|c', 'r:BAC|p']},
+    {line: '<i>M</i> là trung điểm <i>BC</i> ⇒ <i>MB</i> = <i>MC</i> = [[<i>BC</i>||2]].',
+     say: 'Em là trung điểm của bê xê, suy ra em bê bằng em xê và bằng một nửa bê xê.', hl: ['s:MB|c', 's:MC|p']},
+    {line: '<i>MD</i> ⊥ <i>AB</i> tại <i>D</i> ⇒ ^{<i>ADM</i>} = 90°.',
+     say: 'Em đê vuông góc với a bê tại đê, suy ra góc a đê em bằng 90 độ.', hl: ['s:MD|c', 'r:ADM|p']},
+    {line: '<i>MD</i> ⊥ <i>AB</i>, <i>AC</i> ⊥ <i>AB</i> ⇒ <i>MD</i> // <i>AC</i>.',
+     say: 'Em đê và a xê cùng vuông góc với a bê, suy ra em đê song song với a xê.', hl: ['s:MD|c', 's:AC|g']},
+    {line: '<i>ME</i> ⊥ <i>AC</i> tại <i>E</i> ⇒ ^{<i>AEM</i>} = 90°.',
+     say: 'Em e vuông góc với a xê tại e, suy ra góc a e em bằng 90 độ.', hl: ['s:ME|c', 'r:AEM|p']},
+    {line: '<i>ME</i> ⊥ <i>AC</i>, <i>AB</i> ⊥ <i>AC</i> ⇒ <i>ME</i> // <i>AB</i>.',
+     say: 'Em e và a bê cùng vuông góc với a xê, suy ra em e song song với a bê.', hl: ['s:ME|c', 's:AB|g']},
+    {line: '<i>K</i> thuộc tia đối của tia <i>EM</i>, <i>EK</i> = <i>EM</i> ⇒ <i>E</i> là trung điểm <i>MK</i>.',
+     say: 'Ca thuộc tia đối của tia e em và e ca bằng e em, suy ra e là trung điểm của em ca.', hl: ['s:EK|p', 's:EM|c', 't:E|y']},
+    {line: '<i>BF</i> là tia phân giác của ^{<i>ABC</i>} ⇒ ^{<i>ABF</i>} = ^{<i>FBC</i>}.',
+     say: 'Bê ép là tia phân giác của góc a bê xê, suy ra góc a bê ép bằng góc ép bê xê.', hl: ['a:ABF|o', 'a:FBC|g']},
+    {line: '<span class="tag">Nhận xét 1:</span> tứ giác <i>ADME</i> đã có ba góc vuông tại <i>A</i>, <i>D</i>, <i>E</i>.',
+     say: 'Nhận xét một. Tứ giác a đê em e đã có ba góc vuông tại a, đê và e.', hl: ['p:ADME|y', 'r:DAE|p', 'r:ADM|p', 'r:AEM|p']},
+    {line: '<span class="tag">Nhận xét 2:</span> đường thẳng <i>MD</i> đi qua trung điểm <i>M</i> của <i>BC</i> và song song với <i>AC</i>.',
+     say: 'Nhận xét hai. Đường thẳng em đê đi qua trung điểm em của bê xê và song song với a xê.', hl: ['s:MD|c', 's:AC|g', 't:M|p']},
+    {line: '<span class="tag">Cần chứng minh:</span> a) <i>ADME</i> là hình chữ nhật; <i>AM</i> = <i>DE</i>.',
+     say: 'Cần chứng minh. Câu a, tứ giác a đê em e là hình chữ nhật và a em bằng đê e.', hl: ['p:ADME|y']},
+    {line: 'b) <i>D</i>, <i>E</i> là trung điểm của <i>AB</i>, <i>AC</i>; <i>AMCK</i> là hình thoi.',
+     say: 'Câu b, đê và e là trung điểm của a bê và a xê, tứ giác a em xê ca là hình thoi.', hl: ['p:AMCK|p']},
+    {line: 'c) <i>I</i> là trung điểm của <i>BF</i>; [[<i>ID</i>||<i>IM</i>]] = [[<i>FA</i>||<i>FC</i>]].',
+     say: 'Câu c, i là trung điểm của bê ép và i đê trên i em bằng ép a trên ép xê.', hl: ['s:BF|o', 's:ID|c', 's:IM|p']}
+  ]},
+
+  /* ---------------- CÂU A ---------------- */
+  {title: 'Câu a – SƠ ĐỒ PHÂN TÍCH ĐI LÊN: <i>ADME</i> là hình chữ nhật', tab: 'Câu a', tree:
+    {id: 'a1', t: '<i>ADME</i> là hình chữ nhật', n: 'tứ giác có ba góc vuông',
+     say: 'Muốn chứng minh tứ giác a đê em e là hình chữ nhật, ta cần chứng minh tứ giác có ba góc vuông.', hl: ['p:ADME|y'], ch: [
+      {id: 'a1_1', t: '^{<i>DAE</i>} = 90°', n: 'cùng là một góc',
+       say: 'Góc đê a e bằng 90 độ vì góc đê a e cũng chính là góc bê a xê.', hl: ['r:DAE|p'], ch: [
+        {id: 'a1_1a', t: '^{<i>BAC</i>} = 90°', n: 'định nghĩa tam giác vuông',
+         say: 'Góc bê a xê bằng 90 độ theo định nghĩa tam giác vuông.', hl: ['r:BAC|p', 'p:ABC|c'], ch: [
+          {id: 'a1_1a1', t: '△<i>ABC</i> vuông tại <i>A</i>', n: 'giả thiết', k: 'gt',
+           say: 'Tam giác a bê xê vuông tại a, theo giả thiết.', hl: ['p:ABC|c']}]},
+        {id: 'a1_1b', t: '<i>D</i> ∈ <i>AB</i>', n: 'giả thiết', k: 'gt',
+         say: 'Điểm đê thuộc cạnh a bê, theo giả thiết.', hl: ['t:D|p', 's:AB|c']},
+        {id: 'a1_1c', t: '<i>E</i> ∈ <i>AC</i>', n: 'giả thiết', k: 'gt',
+         say: 'Điểm e thuộc cạnh a xê, theo giả thiết.', hl: ['t:E|p', 's:AC|c']}]},
+      {id: 'a1_2', t: '^{<i>ADM</i>} = 90°', n: 'định nghĩa hai đường vuông góc',
+       say: 'Góc a đê em bằng 90 độ, theo định nghĩa hai đường thẳng vuông góc.', hl: ['r:ADM|p'], ch: [
+        {id: 'a1_2a', t: '<i>MD</i> ⊥ <i>AB</i> tại <i>D</i>', n: 'giả thiết', k: 'gt',
+         say: 'Em đê vuông góc với a bê tại đê, theo giả thiết.', hl: ['s:MD|c', 's:AB|g']}]},
+      {id: 'a1_3', t: '^{<i>AEM</i>} = 90°', n: 'định nghĩa hai đường vuông góc',
+       say: 'Góc a e em bằng 90 độ, theo định nghĩa hai đường thẳng vuông góc.', hl: ['r:AEM|p'], ch: [
+        {id: 'a1_3a', t: '<i>ME</i> ⊥ <i>AC</i> tại <i>E</i>', n: 'giả thiết', k: 'gt',
+         say: 'Em e vuông góc với a xê tại e, theo giả thiết.', hl: ['s:ME|c', 's:AC|g']}]}
+    ]}},
+  {title: 'Câu a – SƠ ĐỒ PHÂN TÍCH ĐI LÊN: <i>AM</i> = <i>DE</i>', tab: 'Câu a', tree:
+    {id: 'a2', t: '<i>AM</i> = <i>DE</i>', n: 'hai đường chéo của hình chữ nhật',
+     say: 'Muốn chứng minh a em bằng đê e, ta cần chỉ ra a em và đê e là hai đường chéo của một hình chữ nhật.', hl: ['s:AM|c', 's:DE|o'], ch: [
+      {id: 'a2_1', t: '<i>ADME</i> là hình chữ nhật', n: 'đã chứng minh ở trên', k: 'biet',
+       say: 'Tứ giác a đê em e là hình chữ nhật, đã chứng minh ở trên.', hl: ['p:ADME|y']}]}},
+  {title: 'Câu a – LỜI GIẢI', tab: 'Câu a', beats: [
+    {line: 'Xét tứ giác <i>ADME</i> có: ^{<i>DAE</i>} = 90° (△<i>ABC</i> vuông tại <i>A</i>);',
+     say: 'Xét tứ giác a đê em e có góc đê a e bằng 90 độ, vì tam giác a bê xê vuông tại a.', hl: ['p:ADME|y', 'r:DAE|p']},
+    {line: '^{<i>ADM</i>} = 90° (<i>MD</i> ⊥ <i>AB</i> tại <i>D</i>);',
+     say: 'Góc a đê em bằng 90 độ, vì em đê vuông góc với a bê tại đê.', hl: ['r:ADM|p', 's:MD|c']},
+    {line: '^{<i>AEM</i>} = 90° (<i>ME</i> ⊥ <i>AC</i> tại <i>E</i>).',
+     say: 'Góc a e em bằng 90 độ, vì em e vuông góc với a xê tại e.', hl: ['r:AEM|p', 's:ME|c']},
+    {line: '⇒ <i>ADME</i> là hình chữ nhật (tứ giác có ba góc vuông).',
+     say: 'Suy ra tứ giác a đê em e là hình chữ nhật, vì là tứ giác có ba góc vuông.', hl: ['p:ADME|y']},
+    {line: '<i>ADME</i> là hình chữ nhật ⇒ <i>AM</i> = <i>DE</i> (hai đường chéo của hình chữ nhật bằng nhau).',
+     say: 'Tứ giác a đê em e là hình chữ nhật nên a em bằng đê e, vì hai đường chéo của hình chữ nhật bằng nhau.', hl: ['s:AM|c', 's:DE|o']},
+    {line: '<span class="tag">Vậy</span> <i>ADME</i> là hình chữ nhật và <i>AM</i> = <i>DE</i>.',
+     say: 'Vậy tứ giác a đê em e là hình chữ nhật và a em bằng đê e.', hl: ['p:ADME|y', 's:AM|c', 's:DE|o']}
+  ]},
+
+  /* ---------------- CÂU B ---------------- */
+  {title: 'Câu b – SƠ ĐỒ PHÂN TÍCH ĐI LÊN: <i>D</i> là trung điểm <i>AB</i>', tab: 'Câu b', tree:
+    {id: 'b1', t: '<i>D</i> là trung điểm <i>AB</i>', n: 'qua trung điểm một cạnh, // cạnh kia',
+     say: 'Muốn chứng minh đê là trung điểm của a bê, ta dùng định lí: đường thẳng đi qua trung điểm một cạnh của tam giác và song song với cạnh thứ hai thì đi qua trung điểm cạnh thứ ba.', hl: ['t:D|p', 's:AB|c'], ch: [
+      {id: 'b1_1', t: '<i>M</i> là trung điểm <i>BC</i>', n: 'giả thiết', k: 'gt',
+       say: 'Em là trung điểm của bê xê, theo giả thiết.', hl: ['t:M|p', 's:BC|c']},
+      {id: 'b1_2', t: '<i>MD</i> // <i>AC</i>', n: 'cùng vuông góc với <i>AB</i>',
+       say: 'Em đê song song với a xê vì hai đường thẳng này cùng vuông góc với a bê.', hl: ['s:MD|c', 's:AC|g'], ch: [
+        {id: 'b1_2a', t: '<i>MD</i> ⊥ <i>AB</i>', n: 'giả thiết', k: 'gt',
+         say: 'Em đê vuông góc với a bê, theo giả thiết.', hl: ['s:MD|c', 'r:ADM|p']},
+        {id: 'b1_2b', t: '<i>AC</i> ⊥ <i>AB</i>', n: 'định nghĩa tam giác vuông',
+         say: 'A xê vuông góc với a bê, theo định nghĩa tam giác vuông.', hl: ['s:AC|g', 'r:BAC|p'], ch: [
+          {id: 'b1_2b1', t: '△<i>ABC</i> vuông tại <i>A</i>', n: 'giả thiết', k: 'gt',
+           say: 'Vì tam giác a bê xê vuông tại a, theo giả thiết.', hl: ['p:ABC|c']}]}]},
+      {id: 'b1_3', t: '<i>D</i> ∈ <i>AB</i>', n: 'giả thiết', k: 'gt',
+       say: 'Điểm đê nằm trên cạnh a bê, theo giả thiết.', hl: ['t:D|p', 's:AB|c']}
+    ]}},
+  {title: 'Câu b – SƠ ĐỒ PHÂN TÍCH ĐI LÊN: <i>E</i> là trung điểm <i>AC</i>', tab: 'Câu b', tree:
+    {id: 'b2', t: '<i>E</i> là trung điểm <i>AC</i>', n: 'qua trung điểm một cạnh, // cạnh kia',
+     say: 'Muốn chứng minh e là trung điểm của a xê, ta cũng dùng định lí đường thẳng đi qua trung điểm một cạnh và song song với cạnh thứ hai.', hl: ['t:E|p', 's:AC|c'], ch: [
+      {id: 'b2_1', t: '<i>M</i> là trung điểm <i>BC</i>', n: 'giả thiết', k: 'gt',
+       say: 'Em là trung điểm của bê xê, theo giả thiết đã cho.', hl: ['t:M|p', 's:BC|c']},
+      {id: 'b2_2', t: '<i>ME</i> // <i>AB</i>', n: 'cùng vuông góc với <i>AC</i>',
+       say: 'Em e song song với a bê vì hai đường thẳng này cùng vuông góc với a xê.', hl: ['s:ME|c', 's:AB|g'], ch: [
+        {id: 'b2_2a', t: '<i>ME</i> ⊥ <i>AC</i>', n: 'giả thiết', k: 'gt',
+         say: 'Em e vuông góc với a xê, theo giả thiết.', hl: ['s:ME|c', 'r:AEM|p']},
+        {id: 'b2_2b', t: '<i>AB</i> ⊥ <i>AC</i>', n: 'định nghĩa tam giác vuông',
+         say: 'A bê vuông góc với a xê, theo định nghĩa tam giác vuông.', hl: ['s:AB|g', 'r:BAC|p'], ch: [
+          {id: 'b2_2b1', t: '△<i>ABC</i> vuông tại <i>A</i>', n: 'giả thiết', k: 'gt',
+           say: 'Do tam giác a bê xê vuông tại a, theo giả thiết.', hl: ['p:ABC|c']}]}]},
+      {id: 'b2_3', t: '<i>E</i> ∈ <i>AC</i>', n: 'giả thiết', k: 'gt',
+       say: 'Điểm e nằm trên cạnh a xê, theo giả thiết.', hl: ['t:E|p', 's:AC|c']}
+    ]}},
+  {title: 'Câu b – SƠ ĐỒ PHÂN TÍCH ĐI LÊN: <i>AMCK</i> là hình thoi', tab: 'Câu b', tree:
+    {id: 'b3', t: '<i>AMCK</i> là hình thoi', n: 'hình bình hành có hai đường chéo vuông góc',
+     say: 'Muốn chứng minh tứ giác a em xê ca là hình thoi, ta chứng minh nó là hình bình hành có hai đường chéo vuông góc.', hl: ['p:AMCK|p'], ch: [
+      {id: 'b3_1', t: '<i>AMCK</i> là hình bình hành', n: 'hai đường chéo cắt nhau tại trung điểm mỗi đường',
+       say: 'Tứ giác a em xê ca là hình bình hành nếu hai đường chéo a xê và em ca cắt nhau tại trung điểm của mỗi đường.', hl: ['p:AMCK|y', 's:AC|c', 's:MK|p'], ch: [
+        {id: 'b3_1a', t: '<i>E</i> là trung điểm <i>AC</i>', n: 'đã chứng minh ở trên', k: 'biet',
+         say: 'E là trung điểm của a xê, đã chứng minh ở trên.', hl: ['t:E|p', 's:AC|c']},
+        {id: 'b3_1b', t: '<i>E</i> là trung điểm <i>MK</i>', n: 'định nghĩa trung điểm',
+         say: 'E là trung điểm của em ca, theo định nghĩa trung điểm.', hl: ['t:E|p', 's:MK|p'], ch: [
+          {id: 'b3_1b1', t: '<i>EK</i> = <i>EM</i>', n: 'giả thiết', k: 'gt',
+           say: 'E ca bằng e em, theo giả thiết.', hl: ['s:EK|p', 's:EM|c']},
+          {id: 'b3_1b2', t: '<i>E</i> nằm giữa <i>M</i>, <i>K</i>', n: 'định nghĩa tia đối',
+           say: 'Điểm e nằm giữa em và ca, theo định nghĩa hai tia đối nhau.', hl: ['t:E|y', 's:MK|p'], ch: [
+            {id: 'b3_1b2a', t: '<i>K</i> ∈ tia đối của tia <i>EM</i>', n: 'giả thiết', k: 'gt',
+             say: 'Ca thuộc tia đối của tia e em, theo giả thiết.', hl: ['s:EK|p', 't:K|g']}]}]}]},
+      {id: 'b3_2', t: '<i>AC</i> ⊥ <i>MK</i>', n: 'cùng một đường thẳng',
+       say: 'A xê vuông góc với em ca vì em ca và em e cùng nằm trên một đường thẳng.', hl: ['s:AC|c', 's:MK|p'], ch: [
+        {id: 'b3_2a', t: '<i>ME</i> ⊥ <i>AC</i>', n: 'giả thiết', k: 'gt',
+         say: 'Em e vuông góc với a xê, theo giả thiết đã cho.', hl: ['s:ME|c', 'r:AEM|p']},
+        {id: 'b3_2b', t: '<i>K</i> thuộc đường thẳng <i>ME</i>', n: 'định nghĩa tia đối',
+         say: 'Ca thuộc đường thẳng em e, theo định nghĩa tia đối.', hl: ['s:MK|p', 't:K|g'], ch: [
+          {id: 'b3_2b1', t: '<i>K</i> ∈ tia đối của tia <i>EM</i>', n: 'giả thiết', k: 'gt',
+           say: 'Vì ca thuộc tia đối của tia e em, theo giả thiết.', hl: ['s:EK|p', 't:K|g']}]}]}
+    ]}},
+  {title: 'Câu b – LỜI GIẢI', tab: 'Câu b', beats: [
+    {line: 'Ta có <i>MD</i> ⊥ <i>AB</i>, <i>AC</i> ⊥ <i>AB</i> ⇒ <i>MD</i> // <i>AC</i> (cùng vuông góc với <i>AB</i>).',
+     say: 'Ta có em đê vuông góc với a bê, a xê vuông góc với a bê, suy ra em đê song song với a xê vì cùng vuông góc với a bê.', hl: ['s:MD|c', 's:AC|g']},
+    {line: '△<i>ABC</i> có <i>M</i> là trung điểm <i>BC</i>, <i>MD</i> // <i>AC</i>, <i>D</i> ∈ <i>AB</i>',
+     say: 'Tam giác a bê xê có em là trung điểm của bê xê, em đê song song với a xê, đê thuộc a bê.', hl: ['p:ABC|c', 't:M|p', 's:MD|o']},
+    {line: '⇒ <i>D</i> là trung điểm của <i>AB</i> (đường thẳng qua trung điểm một cạnh, song song cạnh thứ hai).',
+     say: 'Suy ra đê là trung điểm của a bê, vì đường thẳng đi qua trung điểm một cạnh và song song với cạnh thứ hai thì đi qua trung điểm cạnh thứ ba.', hl: ['t:D|p', 's:AB|c'], mk: ['DA=DB']},
+    {line: 'Tương tự: <i>ME</i> ⊥ <i>AC</i>, <i>AB</i> ⊥ <i>AC</i> ⇒ <i>ME</i> // <i>AB</i>.',
+     say: 'Tương tự, em e vuông góc với a xê, a bê vuông góc với a xê, suy ra em e song song với a bê.', hl: ['s:ME|c', 's:AB|g']},
+    {line: '△<i>ABC</i> có <i>M</i> là trung điểm <i>BC</i>, <i>ME</i> // <i>AB</i>, <i>E</i> ∈ <i>AC</i> ⇒ <i>E</i> là trung điểm <i>AC</i>.',
+     say: 'Tam giác a bê xê có em là trung điểm bê xê, em e song song với a bê, e thuộc a xê, suy ra e là trung điểm của a xê.', hl: ['t:E|p', 's:AC|c'], mk: ['EA=EC']},
+    {line: '<i>K</i> thuộc tia đối của tia <i>EM</i> và <i>EK</i> = <i>EM</i> ⇒ <i>E</i> là trung điểm <i>MK</i>.',
+     say: 'Vì ca thuộc tia đối của tia e em và e ca bằng e em nên e là trung điểm của đoạn em ca.', hl: ['t:E|y', 's:EK|p', 's:EM|c']},
+    {line: 'Tứ giác <i>AMCK</i> có hai đường chéo <i>AC</i>, <i>MK</i> cắt nhau tại trung điểm <i>E</i> của mỗi đường',
+     say: 'Tứ giác a em xê ca có hai đường chéo a xê và em ca cắt nhau tại trung điểm e của mỗi đường.', hl: ['p:AMCK|y', 's:AC|c', 's:MK|p']},
+    {line: '⇒ <i>AMCK</i> là hình bình hành.',
+     say: 'Suy ra tứ giác a em xê ca là hình bình hành.', hl: ['p:AMCK|y']},
+    {line: 'Mặt khác <i>MK</i> ⊥ <i>AC</i> (vì <i>ME</i> ⊥ <i>AC</i>, <i>K</i> thuộc đường thẳng <i>ME</i>)',
+     say: 'Mặt khác em ca vuông góc với a xê, vì em e vuông góc với a xê và ca thuộc đường thẳng em e.', hl: ['s:MK|p', 's:AC|c', 'r:AEM|y']},
+    {line: '⇒ hình bình hành <i>AMCK</i> là hình thoi (hai đường chéo vuông góc).',
+     say: 'Suy ra hình bình hành a em xê ca là hình thoi, vì có hai đường chéo vuông góc.', hl: ['p:AMCK|p']},
+    {line: '<span class="tag">Vậy</span> <i>D</i>, <i>E</i> lần lượt là trung điểm của <i>AB</i>, <i>AC</i>; tứ giác <i>AMCK</i> là hình thoi.',
+     say: 'Vậy đê và e lần lượt là trung điểm của a bê và a xê, tứ giác a em xê ca là hình thoi.', hl: ['t:D|o', 't:E|g', 'p:AMCK|p']}
+  ]},
+
+  /* ---------------- CÂU C ---------------- */
+  {title: 'Câu c – SƠ ĐỒ PHÂN TÍCH ĐI LÊN: <i>I</i> là trung điểm <i>BF</i>', tab: 'Câu c', tree:
+    {id: 'c1', t: '<i>I</i> là trung điểm <i>BF</i>', n: 'qua trung điểm một cạnh, // cạnh kia',
+     say: 'Muốn chứng minh i là trung điểm của bê ép, ta xét tam giác a bê ép và dùng định lí đường thẳng đi qua trung điểm một cạnh, song song với cạnh thứ hai.', hl: ['p:ABF|g', 't:I|p'], ch: [
+      {id: 'c1_1', t: '<i>D</i> là trung điểm <i>AB</i>', n: 'câu b', k: 'biet',
+       say: 'Đê là trung điểm của a bê, đã chứng minh ở câu b.', hl: ['t:D|p', 's:AB|c']},
+      {id: 'c1_2', t: '<i>DI</i> // <i>AF</i>', n: 'nằm trên hai đường thẳng song song',
+       say: 'Đê i song song với a ép vì hai đoạn thẳng này nằm trên hai đường thẳng song song.', hl: ['s:DI|c', 's:AF|o'], ch: [
+        {id: 'c1_2a', t: '<i>MD</i> // <i>AC</i>', n: 'câu b', k: 'biet',
+         say: 'Em đê song song với a xê, đã chứng minh ở câu b.', hl: ['s:MD|c', 's:AC|g']},
+        {id: 'c1_2b', t: '<i>I</i> ∈ <i>MD</i>', n: 'giả thiết', k: 'gt',
+         say: 'Điểm i thuộc em đê, theo giả thiết.', hl: ['t:I|p', 's:MD|c']},
+        {id: 'c1_2c', t: '<i>F</i> ∈ <i>AC</i>', n: 'giả thiết', k: 'gt',
+         say: 'Điểm ép thuộc a xê, theo giả thiết.', hl: ['t:F|p', 's:AC|g']}]},
+      {id: 'c1_3', t: '<i>I</i> ∈ <i>BF</i>', n: 'giả thiết', k: 'gt',
+       say: 'Điểm i thuộc bê ép, theo giả thiết.', hl: ['t:I|p', 's:BF|o']}
+    ]}},
+  {title: 'Câu c – SƠ ĐỒ PHÂN TÍCH ĐI LÊN: [[<i>ID</i>||<i>IM</i>]] = [[<i>FA</i>||<i>FC</i>]]', tab: 'Câu c', tree:
+    {id: 'c2', t: '[[<i>ID</i>||<i>IM</i>]] = [[<i>FA</i>||<i>FC</i>]]', n: 'chia vế theo vế',
+     say: 'Muốn chứng minh i đê trên i em bằng ép a trên ép xê, ta tính i đê và i em theo ép a và ép xê rồi chia vế theo vế.', hl: ['s:ID|c', 's:IM|p', 's:FA|o', 's:FC|g'], ch: [
+      {id: 'c2_1', t: '<i>ID</i> = [[<i>FA</i>||2]]', n: 'tính chất đường trung bình',
+       say: 'I đê bằng một nửa ép a, theo tính chất đường trung bình của tam giác.', hl: ['s:ID|c', 's:FA|o'], ch: [
+        {id: 'c2_1a', t: '<i>DI</i> là đường trung bình của △<i>ABF</i>', n: 'định nghĩa đường trung bình',
+         say: 'Đê i là đường trung bình của tam giác a bê ép, theo định nghĩa đường trung bình.', hl: ['p:ABF|g', 's:DI|c'], ch: [
+          {id: 'c2_1a1', t: '<i>D</i> là trung điểm <i>AB</i>', n: 'câu b', k: 'biet',
+           say: 'Đê là trung điểm của a bê, kết quả câu b.', hl: ['t:D|p', 's:AB|c']},
+          {id: 'c2_1a2', t: '<i>I</i> là trung điểm <i>BF</i>', n: 'đã chứng minh ở trên', k: 'biet',
+           say: 'I là trung điểm của bê ép, đã chứng minh ở trên.', hl: ['t:I|p', 's:BF|o']}]}]},
+      {id: 'c2_2', t: '<i>IM</i> = [[<i>FC</i>||2]]', n: 'trừ vế theo vế',
+       say: 'I em bằng một nửa ép xê, có được bằng cách trừ vế theo vế hai đẳng thức.', hl: ['s:IM|p', 's:FC|g'], ch: [
+        {id: 'c2_2a', t: '<i>DM</i> = [[<i>AC</i>||2]]', n: 'cùng bằng <i>AE</i>',
+         say: 'Đê em bằng một nửa a xê, vì cùng bằng a e.', hl: ['s:DM|c', 's:AC|g'], ch: [
+          {id: 'c2_2a1', t: '<i>DM</i> = <i>AE</i>', n: 'cạnh đối của hình chữ nhật',
+           say: 'Đê em bằng a e vì là hai cạnh đối của hình chữ nhật.', hl: ['s:DM|c', 's:AE|o'], ch: [
+            {id: 'c2_2a1a', t: '<i>ADME</i> là hình chữ nhật', n: 'câu a', k: 'biet',
+             say: 'Tứ giác a đê em e là hình chữ nhật, kết quả câu a.', hl: ['p:ADME|y']}]},
+          {id: 'c2_2a2', t: '<i>AE</i> = [[<i>AC</i>||2]]', n: 'định nghĩa trung điểm',
+           say: 'A e bằng một nửa a xê, theo định nghĩa trung điểm.', hl: ['s:AE|o', 's:AC|g'], ch: [
+            {id: 'c2_2a2a', t: '<i>E</i> là trung điểm <i>AC</i>', n: 'câu b', k: 'biet',
+             say: 'E là trung điểm của a xê, kết quả câu b.', hl: ['t:E|p', 's:AC|g']}]}]},
+        {id: 'c2_2b', t: '<i>ID</i> = [[<i>FA</i>||2]]', n: 'đã chứng minh ở trên', k: 'biet',
+         say: 'I đê bằng một nửa ép a, đã chứng minh ở nhánh trên.', hl: ['s:ID|c', 's:FA|o']},
+        {id: 'c2_2c', t: '<i>I</i> nằm giữa <i>D</i>, <i>M</i>', n: 'giả thiết', k: 'gt',
+         say: 'Điểm i nằm giữa đê và em, theo giả thiết.', hl: ['t:I|p', 's:DM|c']},
+        {id: 'c2_2d', t: '<i>F</i> nằm giữa <i>A</i>, <i>C</i>', n: 'giả thiết', k: 'gt',
+         say: 'Điểm ép nằm giữa a và xê, theo giả thiết.', hl: ['t:F|p', 's:AC|g']}]}
+    ]}},
+  {title: 'Câu c – LỜI GIẢI', tab: 'Câu c', beats: [
+    {line: '<i>MD</i> // <i>AC</i> (câu b), <i>I</i> ∈ <i>MD</i>, <i>F</i> ∈ <i>AC</i> ⇒ <i>DI</i> // <i>AF</i>.',
+     say: 'Em đê song song với a xê theo câu b, i thuộc em đê, ép thuộc a xê, suy ra đê i song song với a ép.', hl: ['s:DI|c', 's:AF|o']},
+    {line: '△<i>ABF</i> có <i>D</i> là trung điểm <i>AB</i> (câu b), <i>DI</i> // <i>AF</i>, <i>I</i> ∈ <i>BF</i>',
+     say: 'Tam giác a bê ép có đê là trung điểm của a bê theo câu b, đê i song song với a ép, i thuộc bê ép.', hl: ['p:ABF|g', 't:D|p', 's:DI|c']},
+    {line: '⇒ <i>I</i> là trung điểm của <i>BF</i>.',
+     say: 'Suy ra i là trung điểm của bê ép.', hl: ['t:I|p', 's:BF|o'], mk: ['IB=IF']},
+    {line: '⇒ <i>DI</i> là đường trung bình của △<i>ABF</i> ⇒ <i>ID</i> = [[<i>FA</i>||2]]. (1)',
+     say: 'Do đó đê i là đường trung bình của tam giác a bê ép, nên i đê bằng một nửa ép a. Ghi là một.', hl: ['s:ID|c', 's:FA|o']},
+    {line: '<i>ADME</i> là hình chữ nhật (câu a) ⇒ <i>DM</i> = <i>AE</i> (cạnh đối).',
+     say: 'Tứ giác a đê em e là hình chữ nhật theo câu a, nên đê em bằng a e vì là hai cạnh đối.', hl: ['p:ADME|y', 's:DM|c', 's:AE|o']},
+    {line: '<i>E</i> là trung điểm <i>AC</i> (câu b) ⇒ <i>AE</i> = [[<i>AC</i>||2]] ⇒ <i>DM</i> = [[<i>AC</i>||2]]. (2)',
+     say: 'E là trung điểm của a xê theo câu b, nên a e bằng một nửa a xê, do đó đê em bằng một nửa a xê. Ghi là hai.', hl: ['s:AE|o', 's:DM|c']},
+    {line: '<i>I</i> nằm giữa <i>D</i>, <i>M</i> nên <i>IM</i> = <i>DM</i> − <i>ID</i> = [[<i>AC</i>||2]] − [[<i>FA</i>||2]]',
+     say: 'Vì i nằm giữa đê và em nên i em bằng đê em trừ i đê, bằng một nửa a xê trừ một nửa ép a.', hl: ['s:IM|p', 's:DM|c']},
+    {line: '= [[<i>AC</i> − <i>FA</i>||2]] = [[<i>FC</i>||2]] (vì <i>F</i> nằm giữa <i>A</i>, <i>C</i>). (3)',
+     say: 'Bằng a xê trừ ép a, tất cả chia hai, bằng một nửa ép xê, vì ép nằm giữa a và xê. Ghi là ba.', hl: ['s:FC|g', 's:IM|p']},
+    {line: 'Từ (1) và (3): [[<i>ID</i>||<i>IM</i>]] = [[<i>FA</i>||2]] : [[<i>FC</i>||2]] = [[<i>FA</i>||<i>FC</i>]].',
+     say: 'Từ một và ba, chia vế theo vế, ta được i đê trên i em bằng ép a trên ép xê.', hl: ['s:ID|c', 's:IM|p', 's:FA|o', 's:FC|g']},
+    {line: '<span class="tag">Vậy</span> <i>I</i> là trung điểm của <i>BF</i> và [[<i>ID</i>||<i>IM</i>]] = [[<i>FA</i>||<i>FC</i>]].',
+     say: 'Vậy i là trung điểm của bê ép và tỉ số i đê trên i em bằng tỉ số ép a trên ép xê.', hl: ['t:I|p', 's:BF|o']}
+  ]}
+];
+
+/* ----- Kiểm tra hình ----- */
+(function () {
+  const eq = (a, b) => Math.abs(a - b) < 1e-6, bad = [];
+  const dot = (P, Q, R) => (Q.x - P.x) * (R.x - P.x) + (Q.y - P.y) * (R.y - P.y);
+  if (!eq(dot(A, B, C), 0)) bad.push('góc A');
+  if (!(G.d(A, B) < G.d(A, C))) bad.push('AB<AC');
+  if (!eq(dot(D, A, M), 0) || !eq(dot(E, A, M), 0)) bad.push('vuông góc D, E');
+  if (!eq(G.d(D, A), G.d(D, B)) || !eq(G.d(E, A), G.d(E, C))) bad.push('trung điểm D, E');
+  if (!eq(G.d(E, K), G.d(E, M))) bad.push('EK=EM');
+  if (!eq(G.d(I, B), G.d(I, F))) bad.push('I trung điểm BF');
+  if (!eq(G.d(I, D) / G.d(I, M), G.d(F, A) / G.d(F, C))) bad.push('tỉ số');
+  if (!eq(G.d(Rb, Pb), 2) || !eq(G.d(X1, B), G.d(X1, C))) bad.push('dựng hình');
+  if (bad.length) console.warn('KIỂM TRA HÌNH SAI', bad); else console.log('Kiểm tra hình: đúng');
+})();
+
+boot();
+</script>
+</body>
+</html>
