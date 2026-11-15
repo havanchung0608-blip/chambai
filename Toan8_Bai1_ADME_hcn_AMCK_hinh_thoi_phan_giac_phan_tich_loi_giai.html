@@ -513,7 +513,7 @@ function arcMark(V, a, b, r, n) {
 
 /* ---------- Người que: vẽ, rê tay theo hình, khoanh hình, vẽ cung góc, gõ điểm, nói, nhảy mừng ---------- */
 const MAN = {sx: null, sy: null, phase: 0, walk: 0, facing: 1, hand: null, finger: null, free: null, jump: 0};
-const idleX = () => Math.max(.07 * VIEW.ch, W({x: FIG.box[0], y: 0}).x + .1 * VIEW.ch);
+const idleX = () => Math.max(.12 * VIEW.ch, W({x: FIG.box[0], y: 0}).x + .13 * VIEW.ch);
 function ik(S, T, a, b, pick) {
   let d = clamp(dist(S, T), 1, a + b - .5);
   const phi = Math.atan2(T.y - S.y, T.x - S.x), al = Math.acos(clamp((a * a + d * d - b * b) / (2 * a * d), -1, 1));
@@ -555,13 +555,15 @@ function updateMan(dt, grip, finger, mode) {
   else if (finger) {
     const d = Math.max(1, dist(S, finger)), r = Math.min(.32 * ch, d), u = {x: (finger.x - S.x) / d, y: (finger.y - S.y) / d};
     MAN.finger = {x: S.x + u.x * r, y: S.y + u.y * r};
-    MAN.hand = {x: MAN.finger.x - u.x * .028 * ch, y: MAN.finger.y - u.y * .028 * ch};
+    MAN.hand = {x: MAN.finger.x - u.x * .048 * ch, y: MAN.finger.y - u.y * .048 * ch};
   } else if (mode === 'cheer') MAN.hand = {x: S.x + .08 * ch, y: S.y - .29 * ch + .02 * ch * Math.sin(clock * 13)};
+  else if (mode === 'think') MAN.hand = {x: S.x + .032 * ch * MAN.facing, y: S.y - .012 * ch}; // nắm tay chống cằm
   else MAN.hand = {x: S.x + .05 * ch, y: S.y + .28 * ch};
   const fc = MAN.facing;
+  MAN.handPose = grip ? 'grip' : finger ? 'point' : mode === 'cheer' ? 'open' : mode === 'think' ? 'fist' : 'relax';
+  MAN.freePose = mode === 'cheer' ? 'open' : (VOICE.talking && !grip && mode !== 'think') ? 'open' : 'relax';
   if (mode === 'cheer') MAN.free = {x: S.x - .08 * ch, y: S.y - .29 * ch + .02 * ch * Math.sin(clock * 13 + 1)};
-  else if (mode === 'think') MAN.free = {x: S.x + .03 * ch * fc, y: S.y - .03 * ch};
-  else if (VOICE.talking && !grip) MAN.free = {x: S.x - .1 * ch * fc, y: S.y - .08 * ch + .03 * ch * Math.sin(clock * 4)};
+  else if (VOICE.talking && !grip && mode !== 'think') MAN.free = {x: S.x - .1 * ch * fc, y: S.y - .08 * ch + .03 * ch * Math.sin(clock * 4)};
   else MAN.free = null;
 }
 const LOOK = {skin: '#f2c08f', skinL: '#a8703f', shirt: '#2f6fde', shirtL: '#173f8f', shorts: '#1d2b4f', shortsL: '#0b1424', hair: '#2b1b12', shoe: '#262626'};
@@ -578,6 +580,41 @@ function limb(A, B, wa, wm, wb, fill, line, tm) {
   ctx.quadraticCurveTo(c2.x, c2.y, a2.x, a2.y);
   ctx.arc(A.x, A.y, wa / 2, ang - Math.PI / 2, ang + Math.PI / 2, true);
   ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = line; ctx.lineWidth = Math.max(1.2, .0022 * VIEW.ch); ctx.stroke();
+}
+// Bàn tay như người thật: lòng bàn tay, 4 ngón (2 đốt), ngón cái, móng tay.
+// pose: 'grip' nắm dụng cụ | 'point' chỉ ngón trỏ | 'open' xoè tay | 'fist' nắm tay | 'relax' buông tự nhiên
+function drawHand(E, ang, pose, ts, idxLen) {
+  const p = .001 * VIEW.ch, F = LOOK.skin, Ln = LOOK.skinL;
+  const seg = (x1, y1, x2, y2, w) => limb({x: x1 * p, y: y1 * p}, {x: x2 * p, y: y2 * p}, w * p, w * 1.04 * p, w * .9 * p, F, Ln, .5);
+  const nail = (x, y, a) => { ctx.save(); ctx.translate(x * p, y * p); ctx.rotate(a); ctx.fillStyle = '#f7d9c4'; ctx.strokeStyle = 'rgba(168,112,63,.6)'; ctx.lineWidth = Math.max(.8, p * 1.2); ctx.beginPath(); ctx.ellipse(-1.6 * p, 0, 2.4 * p, 1.7 * p, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.restore(); };
+  const finger = (y0, a, len, w, curl) => { // ngón 2 đốt, curl: độ cong (độ) ở khớp giữa
+    const r = a * Math.PI / 180, x1 = 22 + Math.cos(r) * len * .55, y1 = y0 + Math.sin(r) * len * .55;
+    const r2 = r + curl * Math.PI / 180, x2 = x1 + Math.cos(r2) * len * .45, y2 = y1 + Math.sin(r2) * len * .45;
+    seg(22, y0, x1, y1, w); seg(x1, y1, x2, y2, w * .92);
+    if (curl < 40) nail(x2, y2, r2);
+  };
+  const KN = [-7.5, -2.5, 2.5, 7.5], W5 = [5.2, 5.5, 5.1, 4.5], LEN = [20, 22, 20, 16];
+  ctx.save(); ctx.translate(E.x, E.y); ctx.rotate(ang); ctx.scale(1, ts);
+  // lòng bàn tay
+  ctx.fillStyle = F; ctx.strokeStyle = Ln; ctx.lineWidth = Math.max(1, p * 2);
+  ctx.beginPath(); ctx.moveTo(0, -9 * p); ctx.quadraticCurveTo(12 * p, -12.5 * p, 24 * p, -10 * p); ctx.lineTo(24 * p, 10 * p);
+  ctx.quadraticCurveTo(12 * p, 12.5 * p, 0, 9 * p); ctx.closePath(); ctx.fill(); ctx.stroke();
+  if (pose === 'open') {
+    [-15, -5, 5, 15].forEach((a, i) => finger(KN[i], a, LEN[i], W5[i], 6));
+    seg(5, -9, 13, -20, 6.2); seg(13, -20, 20, -27, 5.6); nail(20, -27, -0.8);
+  } else if (pose === 'point') {
+    const il = Math.max(14, idxLen || 24);
+    seg(22, KN[0], 22 + il * .55, KN[0], W5[0]); seg(22 + il * .55, KN[0], 22 + il, KN[0], W5[0] * .92); nail(22 + il, KN[0], 0);
+    [1, 2, 3].forEach(i => { seg(22, KN[i], 28, KN[i] + 1.5, W5[i]); seg(28, KN[i] + 1.5, 23, KN[i] + 4, W5[i] * .9); });
+    seg(6, -10, 15, -9, 6); seg(15, -9, 23, -3, 5.4);
+  } else if (pose === 'grip' || pose === 'fist') {
+    KN.forEach((y, i) => { seg(22, y, 29, y + 1, W5[i]); seg(29, y + 1, 25, y + 5, W5[i] * .9); });
+    seg(6, -10, 16, -12, 6.2); seg(16, -12, 27, -8, 5.6); nail(27, -8, .35);
+  } else { // relax
+    [-6, -2, 2, 6].forEach((a, i) => finger(KN[i], a, LEN[i] * .95, W5[i], 28));
+    seg(6, -9, 14, -15, 6); seg(14, -15, 21, -16, 5.4); nail(21, -16, .1);
+  }
+  ctx.restore();
 }
 function musc(A, B, t0, t1, off) { // đường rãnh cơ trên chi
   const L = dist(A, B) || 1, n = {x: -(B.y - A.y) / L, y: (B.x - A.x) / L};
@@ -610,20 +647,22 @@ function drawMan() {
     ctx.fillStyle = L.shoe; ctx.beginPath(); ctx.ellipse(F.x + .016 * u * fc, F.y + .018 * u, .031 * u, .012 * u, 0, 0, 7); ctx.fill(); // giày
     ctx.fillStyle = '#e8553a'; ctx.fillRect(F.x + .016 * u * fc - .025 * u, F.y + .024 * u, .05 * u, .004 * u);
   };
-  const drawArm = (Sh, T, pick, finger) => {
+  const drawArm = (Sh, T, pick, finger, pose) => {
     const k = ik(Sh, T, arm, arm, pick), J = k.J, E = k.E;
     limb(J, E, .038 * u, .046 * u, .022 * u, L.skin, L.skinL, .25);                      // cẳng tay rắn chắc
     limb(Sh, J, .05 * u, .068 * u, .032 * u, L.skin, L.skinL, .5);                       // bắp tay (cơ nhị đầu) to
     musc(Sh, J, .32, .72, .02 * u); musc(J, E, .08, .4, .012 * u);                       // đường cơ
     ctx.fillStyle = L.skin; ctx.strokeStyle = L.skinL; ctx.lineWidth = lw;               // cơ vai (delta)
     ctx.beginPath(); ctx.arc(Sh.x, Sh.y + .004 * u, .031 * u, 0, 7); ctx.fill(); ctx.stroke();
-    if (finger) limb(E, finger, .012 * u, .011 * u, .009 * u, L.skin, L.skinL, .5);      // ngón trỏ chỉ hình
-    ctx.fillStyle = L.skin; ctx.strokeStyle = L.skinL; ctx.lineWidth = lw;
-    ctx.beginPath(); ctx.arc(E.x, E.y, .017 * u, 0, 7); ctx.fill(); ctx.stroke();       // bàn tay
+    // bàn tay thật theo tư thế
+    const ang = pose === 'point' && finger ? Math.atan2(finger.y - E.y, finger.x - E.x) : Math.atan2(E.y - J.y, E.x - J.x);
+    const c = Math.cos(ang), ts = Math.abs(c) > .3 ? Math.sign(c) : fc;
+    const il = finger ? dist(E, finger) / (.001 * u) - 22 : 24;
+    drawHand(E, ang, pose, ts, il);
   };
   // tay sau, hai chân
   const fa = MAN.free || {x: shB.x - .02 * u * fc + .03 * u * w * Math.sin(p), y: S.y + .27 * u};
-  drawArm(shB, fa, MAN.free ? below : back, null);
+  drawArm(shB, fa, MAN.free ? below : back, null, MAN.freePose || 'relax');
   drawLeg(legs.find(l => l.sg === -fc)); drawLeg(legs.find(l => l.sg === fc));
   // thân: áo phông ôm cơ ngực, eo thon
   // thân hình chữ V: vai rộng, ngực nở, eo thon – da trần + áo ba lỗ
@@ -679,7 +718,7 @@ function drawMan() {
   if (VOICE.talking) { ctx.fillStyle = '#7a1f1f'; ctx.beginPath(); ctx.ellipse(mo.x, mo.y, .008 * u, (.0018 + .0062 * Math.abs(Math.sin(clock * 13))) * u, 0, 0, 7); ctx.fill(); }
   else { ctx.strokeStyle = '#7a1f1f'; ctx.lineWidth = Math.max(1.5, .003 * u); ctx.beginPath(); ctx.arc(mo.x, mo.y - .006 * u, .009 * u, .2 * Math.PI, .8 * Math.PI); ctx.stroke(); }
   // tay trước: cầm dụng cụ / chỉ hình / giơ cao
-  drawArm(shF, MAN.hand || {x: S.x, y: S.y + .3 * u}, below, MAN.finger);
+  drawArm(shF, MAN.hand || {x: S.x, y: S.y + .3 * u}, below, MAN.finger, MAN.handPose || 'relax');
   ctx.restore();
 }
 
