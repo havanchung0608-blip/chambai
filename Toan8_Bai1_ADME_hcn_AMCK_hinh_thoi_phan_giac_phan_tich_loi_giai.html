@@ -211,8 +211,8 @@ function fxDraw() {
   FX.rings.forEach(r => {
     if (r.t < 0) return;
     const k = r.t / r.life, R = Math.max(1, r.max * f * ease(k));
-    ctx.save(); ctx.globalAlpha = 1 - k; ctx.strokeStyle = `rgb(${r.col})`; ctx.lineWidth = 12 * f * (1 - k) + 1;
-    ctx.shadowColor = `rgb(${r.col})`; ctx.shadowBlur = 24; ctx.beginPath(); ctx.arc(r.x, r.y, R, 0, 7); ctx.stroke();
+    ctx.save(); ctx.globalAlpha = .75 * (1 - k); ctx.strokeStyle = `rgb(${r.col})`; ctx.lineWidth = 6 * f * (1 - k) + 1;
+    ctx.shadowColor = `rgb(${r.col})`; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(r.x, r.y, R, 0, 7); ctx.stroke();
     ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 3.5 * f * (1 - k) + .5; ctx.beginPath(); ctx.arc(r.x, r.y, R * .84, 0, 7); ctx.stroke(); ctx.restore();
   });
   FX.parts.forEach(q => {
@@ -235,7 +235,7 @@ function fxSpark(x, y, n, col) {
 function fxRing(x, y, col, max) { FX.rings.push({x, y, col, t: 0, life: .75, max: max || 180}); FX.rings.push({x, y, col, t: -.14, life: .95, max: (max || 180) * 1.45}); }
 function fxConfetti() {
   const pal = ['255,61,87', '255,196,0', '0,176,255', '0,200,120', '170,80,255', '255,120,0'];
-  for (let i = 0; i < 80; i++) FX.parts.push({x: Math.random() * VIEW.cw, y: -20 - Math.random() * 80, vx: (Math.random() - .5) * 120, vy: 120 + Math.random() * 180, g: 160, life: 2.4 + Math.random(), t: 0, r: (4 + Math.random() * 4) * VIEW.f, col: pal[i % 6], type: 'conf', rot: Math.random() * 6, vr: (Math.random() - .5) * 14});
+  for (let i = 0; i < 40; i++) FX.parts.push({x: Math.random() * VIEW.cw, y: -20 - Math.random() * 80, vx: (Math.random() - .5) * 120, vy: 120 + Math.random() * 180, g: 160, life: 2.4 + Math.random(), t: 0, r: (4 + Math.random() * 4) * VIEW.f, col: pal[i % 6], type: 'conf', rot: Math.random() * 6, vr: (Math.random() - .5) * 14});
 }
 const fxShake = a => { FX.shake = Math.max(FX.shake, a * VIEW.f); };
 const fxPunch = a => { FX.punch = Math.max(FX.punch, a); };
@@ -501,8 +501,8 @@ function angPair(V, P, Q) {
   if (b < a) b += 360; return [a, b];
 }
 function glowLine(a, b, c, al, w) {
-  ctx.save(); ctx.lineCap = 'round'; ctx.shadowColor = rgba(c, 1); ctx.shadowBlur = 26 * VIEW.f;
-  ctx.strokeStyle = rgba(c, .95 * al); ctx.lineWidth = (w || 12) * VIEW.f;
+  ctx.save(); ctx.lineCap = 'round'; ctx.shadowColor = rgba(c, .8); ctx.shadowBlur = 10 * VIEW.f;
+  ctx.strokeStyle = rgba(c, .85 * al); ctx.lineWidth = (w || 9) * VIEW.f;
   ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.restore();
 }
 function pathAt(pts, s) { // điểm trên đường gấp khúc khép kín (px) theo tỉ lệ độ dài
@@ -518,51 +518,51 @@ function passFlash(a, b, te, c) { // ShowPassingFlash
   if (dist(p, q) < 1) return;
   const g = ctx.createLinearGradient(p.x, p.y, q.x, q.y);
   g.addColorStop(0, rgba(c, 0)); g.addColorStop(.6, rgba(c, 1)); g.addColorStop(1, 'rgba(255,255,255,1)');
-  ctx.save(); ctx.lineCap = 'round'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 32 * VIEW.f;
-  ctx.strokeStyle = g; ctx.lineWidth = 17 * VIEW.f; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.lineCap = 'round'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 12 * VIEW.f;
+  ctx.strokeStyle = g; ctx.lineWidth = 11 * VIEW.f; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); ctx.restore();
 }
 function circumscribe(pts, te, c) { // Circumscribe: nét sáng chạy vòng quanh hình
   if (te <= 0 || te >= 1) return;
   const g = centroidPx(pts), o = 16 * VIEW.f;
   const off = pts.map(p => { const d = dist(p, g) || 1; return {x: p.x + (p.x - g.x) / d * o, y: p.y + (p.y - g.y) / d * o}; });
   const h = .45, s1 = clamp(te * (1 + h)), s0 = clamp(te * (1 + h) - h);
-  ctx.save(); ctx.strokeStyle = rgba(c, 1); ctx.lineWidth = 7 * VIEW.f; ctx.shadowColor = rgba(c, 1); ctx.shadowBlur = 24; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.save(); ctx.strokeStyle = rgba(c, 1); ctx.lineWidth = 4.5 * VIEW.f; ctx.shadowColor = rgba(c, .8); ctx.shadowBlur = 8; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   ctx.beginPath(); for (let k = 0; k <= 60; k++) { const p = pathAt(off, s0 + (s1 - s0) * k / 60); k ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); }
   ctx.stroke(); ctx.restore();
 }
 function flashBurst(p, te, c) { // Flash: tia sáng toả ra
   if (te <= 0 || te >= 1) return;
-  const f = VIEW.f, r0 = (18 + 80 * ease(te)) * f, r1 = r0 + 34 * (1 - te) * f;
-  ctx.save(); ctx.strokeStyle = rgba(c, 1 - te * .8); ctx.lineWidth = 5 * f; ctx.lineCap = 'round'; ctx.shadowColor = rgba(c, 1); ctx.shadowBlur = 14;
-  for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(p.x + r0 * Math.cos(a), p.y + r0 * Math.sin(a)); ctx.lineTo(p.x + r1 * Math.cos(a), p.y + r1 * Math.sin(a)); ctx.stroke(); }
+  const f = VIEW.f, r0 = (16 + 34 * ease(te)) * f, r1 = r0 + 14 * (1 - te) * f;
+  ctx.save(); ctx.strokeStyle = rgba(c, .8 * (1 - te)); ctx.lineWidth = 3 * f; ctx.lineCap = 'round';
+  for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(p.x + r0 * Math.cos(a), p.y + r0 * Math.sin(a)); ctx.lineTo(p.x + r1 * Math.cos(a), p.y + r1 * Math.sin(a)); ctx.stroke(); }
   ctx.restore();
 }
 function focusOn(p, te, c) { // FocusOn: vòng sáng thu nhỏ dần vào điểm
   if (te <= 0 || te >= 1) return;
-  const r = lerp(230, 18, ease(te)) * VIEW.f;
+  const r = lerp(110, 18, ease(te)) * VIEW.f;
   ctx.save(); ctx.fillStyle = rgba(c, .14); ctx.strokeStyle = rgba(c, .25 + .7 * (1 - te)); ctx.lineWidth = 3 * VIEW.f;
   ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7); ctx.fill(); ctx.stroke(); ctx.restore();
 }
 function sector(V, a, b, r, al, c, right) {
   const w = W(V), R = Math.max(0, r) * VIEW.s;
   ctx.save(); ctx.beginPath(); ctx.moveTo(w.x, w.y); ctx.arc(w.x, w.y, R, -rad(a), -rad(b), true); ctx.closePath();
-  ctx.fillStyle = rgba(c, .55 * al); ctx.fill(); ctx.strokeStyle = rgba(c, al); ctx.lineWidth = 4 * VIEW.f; ctx.shadowColor = rgba(c, 1); ctx.shadowBlur = 20; ctx.stroke(); ctx.restore();
+  ctx.fillStyle = rgba(c, .38 * al); ctx.fill(); ctx.strokeStyle = rgba(c, al); ctx.lineWidth = 3 * VIEW.f; ctx.shadowColor = rgba(c, .7); ctx.shadowBlur = 6; ctx.stroke(); ctx.restore();
   if (right) { ctx.save(); ctx.globalAlpha = al; drawRA(V, a, b, COL.glow); ctx.restore(); }
 }
 function drawHL(key, j, T, soft) {
   const h = parseHL(key), t = T - j * .3; if (t < 0) return;
-  ctx.save(); if (soft) ctx.globalAlpha = .45;
-  const c = HLC[h.k] || HLC.y, pulse = .65 + .35 * Math.sin(clock * 5), f = VIEW.f, P = h.P.map(W);
+  ctx.save(); if (soft) ctx.globalAlpha = .3;
+  const c = HLC[h.k] || HLC.y, pulse = .9 + .1 * Math.sin(clock * 2.2), f = VIEW.f, P = h.P.map(W);
   if (h.t === 's') {
     glowLine(P[0], lerpP(P[0], P[1], ease(clamp(t / .5))), c, pulse);
     const te = (t - .45) / .8; passFlash(P[0], P[1], te, c);
-    if (!soft && te > 0 && te < 1 && Math.random() < .7) { const hp = lerpP(P[0], P[1], clamp(te * 1.3)); FX.parts.push({x: hp.x, y: hp.y, vx: (Math.random() - .5) * 120, vy: (Math.random() - .5) * 120, drag: 3, life: .5, t: 0, r: 3.5 * f, col: c, type: 'star', rot: 0, vr: 8}); }
+    if (!soft && te > 0 && te < 1 && Math.random() < .4) { const hp = lerpP(P[0], P[1], clamp(te * 1.3)); FX.parts.push({x: hp.x, y: hp.y, vx: (Math.random() - .5) * 110, vy: (Math.random() - .5) * 110, drag: 3, life: .45, t: 0, r: 3 * f, col: c, type: 'star', rot: 0, vr: 8}); }
   } else if (h.t === 'p') {
-    const sc = 1 + .2 * Math.sin(Math.PI * clamp(t / .7)), g = centroidPx(P);
+    const sc = 1 + .08 * Math.sin(Math.PI * clamp(t / .7)), g = centroidPx(P);
     const Q = P.map(p => ({x: g.x + (p.x - g.x) * sc, y: g.y + (p.y - g.y) * sc}));
     ctx.save(); ctx.beginPath(); Q.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath();
-    ctx.fillStyle = rgba(c, .22 * pulse + .08); ctx.fill();
-    ctx.strokeStyle = rgba(c, .98); ctx.lineWidth = 7 * f; ctx.lineJoin = 'round'; ctx.shadowColor = rgba(c, 1); ctx.shadowBlur = 22 * f; ctx.stroke(); ctx.restore();
+    ctx.fillStyle = rgba(c, .2); ctx.fill();
+    ctx.strokeStyle = rgba(c, .9); ctx.lineWidth = 4.5 * f; ctx.lineJoin = 'round'; ctx.shadowColor = rgba(c, .6); ctx.shadowBlur = 6 * f; ctx.stroke(); ctx.restore();
     circumscribe(P, (t - .25) / 1.3, c);
   } else if (h.t === 't') {
     focusOn(P[0], t / .55, c); flashBurst(P[0], (t - .45) / .55, c);
@@ -571,26 +571,33 @@ function drawHL(key, j, T, soft) {
   } else if (h.t === 'r' || h.t === 'a') {
     const [a, b] = angPair(h.P[1], h.P[0], h.P[2]), g = easeOutBack(clamp(t / .55));
     // nảy bán kính tại chỗ – hình quạt luôn nằm TRONG góc, không vượt ra ngoài hai cạnh
-    const bump = (t > .55 && t < 1.6) ? 1 + .2 * Math.sin((t - .55) * 18) * (1.6 - t) : 1;
+    const bump = (t > .55 && t < 1.6) ? 1 + .08 * Math.sin((t - .55) * 14) * (1.6 - t) : 1;
     sector(h.P[1], a, b, (h.t === 'r' ? .6 : .95) * g * bump, pulse, c, h.t === 'r');
   } else { // 'e': Transform đoạn thứ nhất chồng lên đoạn thứ hai; 'l': tịnh tiến song song
     const g = ease(clamp(t / .5));
     glowLine(P[0], lerpP(P[0], P[1], g), c, pulse);
     glowLine(P[2], lerpP(P[2], P[3], g), h.t === 'e' ? HLC.p : HLC.g, pulse);
-    if (t > .6 && !soft) {
+    if (t > .6 && t < 6.6 && !soft) { // chồng hình 2 lần rồi dừng
       const u = ((t - .6) % 3.2) / 3.2; let k = 1, al = 1;
       if (u < .45) k = ease(u / .45); else if (u > .7) al = clamp(1 - (u - .7) / .2);
       let a1, b1;
       if (h.t === 'e') { a1 = lerpP(P[0], P[2], k); b1 = lerpP(P[1], P[3], k); }
       else { const pr = W(projL(h.P[0], h.P[2], h.P[3])), o = {x: pr.x - P[0].x, y: pr.y - P[0].y}; a1 = {x: P[0].x + o.x * k, y: P[0].y + o.y * k}; b1 = {x: P[1].x + o.x * k, y: P[1].y + o.y * k}; }
-      if (al > 0) { ctx.save(); ctx.globalAlpha = al; glowLine(a1, b1, '255,255,255', 1, 11); glowLine(a1, b1, c, 1, 5); ctx.restore(); }
+      if (al > 0) { ctx.save(); ctx.globalAlpha = al; glowLine(a1, b1, '255,255,255', 1, 7); glowLine(a1, b1, c, 1, 3.5); ctx.restore(); }
     }
   }
   ctx.restore();
 }
-function hlBoom(key) { // kích hoạt nhấn mạnh: sóng xung kích + tia sáng + giật phóng + tiếng "bùm"
-  const h = parseHL(key), c = W(hlCenter(key)), col = HLC[h.k] || HLC.y;
-  fxRing(c.x, c.y, col, h.t === 'p' ? 250 : 170); fxSpark(c.x, c.y, 30, col); fxPunch(.04); SND.impact(); if (!MAN.act) startAct('lunge');
+// Nhấn mạnh TUỲ CHỖ: dòng kết luận (⇒, "Vậy", gốc sơ đồ) bùng mạnh; ý phụ vừa phải. Mỗi loại đối tượng một kiểu riêng.
+function strongBeat(b) { return !!((b.line && /⇒|Vậy/.test(b.line)) || (b.node && PLAY.cur >= 0 && TL[PLAY.cur].bi === 0)); }
+function hlBoom(key, strong) {
+  const h = parseHL(key), c = W(hlCenter(key)), col = HLC[h.k] || HLC.y, P = h.P.map(W);
+  if (strong) { fxRing(c.x, c.y, col, h.t === 'p' ? 230 : 150); fxSpark(c.x, c.y, 30, col); fxPunch(.03); SND.impact(); }
+  else { FX.rings.push({x: c.x, y: c.y, col, t: 0, life: .6, max: h.t === 'p' ? 120 : 80}); fxSpark(c.x, c.y, 12, col); SND.whoosh(); }
+  if (h.t === 'p') P.forEach(v => fxSpark(v.x, v.y, strong ? 10 : 5, col));                       // hình: tia lửa bắn từ các đỉnh
+  else if (h.t === 'e' || h.t === 'l') [lerpP(P[0], P[1], .5), lerpP(P[2], P[3], .5)].forEach(m => fxSpark(m.x, m.y, strong ? 12 : 6, col)); // hai đoạn: tia lửa ở trung điểm mỗi đoạn
+  else if (h.t === 'r' || h.t === 'a') fxSpark(P[1].x, P[1].y, strong ? 18 : 9, col);            // góc: tia lửa từ đỉnh góc
+  if (!MAN.act) startAct('lunge');
 }
 function hlCenter(key) { const h = parseHL(key), s = h.P.reduce((a, b) => ({x: a.x + b.x, y: a.y + b.y}), {x: 0, y: 0}); return {x: s.x / h.P.length, y: s.y / h.P.length}; }
 function tick(P, Q, n) {
@@ -675,19 +682,23 @@ function updateMan(dt, grip, finger, mode, approach) {
   let tx, ty;
   const home = idleX(); // luôn đứng NGOÀI mép trái hình, chỉ vươn tay (tay tự dài ra) vào vẽ / chỉ
   if (pos) {
-    tx = home + clamp((pos.x - home) * .02, -.012 * ch, .012 * ch);
+    tx = clamp(pos.x - .17 * ch, home, VIEW.cw - .1 * ch);                   // bước tới đứng cạnh chỗ vẽ / chỗ chỉ
     const hi = pos.y + .32 * ch < .51 * ch; MAN.flyT = hi ? 1 : 0;                // chỗ cao: bật lên lơ lửng như siêu anh hùng
     ty = hi ? clamp(pos.y + .22 * ch, .28 * ch, .51 * ch) + .007 * ch * Math.sin(clock * 5) : clamp(pos.y + .32 * ch, .51 * ch, .57 * ch);
   } else { MAN.flyT = 0; tx = home; ty = .51 * ch + .005 * ch * Math.sin(clock * 1.6); }
   const k = 1 - Math.exp(-dt * (PLAY.fast ? 18 : 7)), ox = MAN.sx, oy = MAN.sy;
-  MAN.sx += (tx - MAN.sx) * k; MAN.sy += (ty - MAN.sy) * k;
+  const vmax = (PLAY.fast ? 3 : .75) * ch * dt, ddx = tx - MAN.sx;                 // đi bộ: tốc độ có giới hạn, chân bước đều
+  MAN.sx += Math.sign(ddx) * Math.min(Math.abs(ddx) * Math.min(1, dt * 6), vmax); MAN.sy += (ty - MAN.sy) * k;
+  { const fl = Math.min(...Object.values(FIG.P).map(P => W(P).x)) - .06 * ch, fr = Math.max(...Object.values(FIG.P).map(P => W(P).x)) + .06 * ch;
+    const inside = MAN.sx + .07 * ch > fl && MAN.sx - .07 * ch < fr;          // trong vùng hình: mờ đi để không che
+    MAN.fade = (MAN.fade === undefined ? 1 : MAN.fade) + ((inside ? .42 : 1) - (MAN.fade === undefined ? 1 : MAN.fade)) * Math.min(1, dt * 5); }
   MAN.fly = (MAN.fly || 0) + ((MAN.flyT || 0) - (MAN.fly || 0)) * Math.min(1, dt * 6);
   // chân ngắn: với chỗ cao thì đứng lên bục gỗ
   const need = 0; // không cần bục: chỗ cao thì bay lên
   MAN.stool = (MAN.stool || 0) + (need - (MAN.stool || 0)) * Math.min(1, dt * 10);
   const vx = (MAN.sx - ox) / Math.max(dt, 1e-3);
-  MAN.phase += (MAN.sx - ox) / (.05 * ch);
-  MAN.walk += ((Math.abs(vx) > .08 * ch ? 1 : 0) - MAN.walk) * Math.min(1, dt * 8);
+  MAN.phase += Math.abs(MAN.sx - ox) / (.035 * ch);
+  MAN.walk += ((Math.abs(vx) > .04 * ch ? 1 : 0) - MAN.walk) * Math.min(1, dt * 8);
   const jt = mode === 'cheer' ? Math.abs(Math.sin(clock * 6.5)) * .05 * ch : 0;
   MAN.jump += (jt - MAN.jump) * Math.min(1, dt * 14);
   const S = {x: MAN.sx, y: MAN.sy - MAN.jump};
@@ -850,7 +861,7 @@ function drawMan(part) {
     drawHand(E, ang, pose, ts, finger ? dist(E, finger) / (.001 * u) - 22 : 24);
   };
   const xf = manXf(S, ground, u);
-  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; if (part !== 'ghost') ctx.globalAlpha *= (MAN.fade === undefined ? 1 : MAN.fade);
   if (part === 'front') { // vai theo động tác; tay cầm dụng cụ / chỉ hình giữ đúng vị trí thật
     const H = MAN.hand || {x: S.x, y: S.y + .3 * u};
     drawArm(xf.pt(shF), MAN.handAbs ? H : xf.pt(H), below, MAN.finger, MAN.handPose || 'relax');
@@ -1308,7 +1319,7 @@ function frame(ts) {
   if (hls.length) {
     if (!b.hlPos) b.hlPos = hlPositions(b);
     const prog = speechProg();
-    hls.forEach((k, i) => { if (PLAY.hlAct[i] === undefined && b.hlPos[i] <= prog) { PLAY.hlAct[i] = PLAY.hlT; hlBoom(k); } });
+    hls.forEach((k, i) => { if (PLAY.hlAct[i] === undefined && b.hlPos[i] <= prog) { PLAY.hlAct[i] = PLAY.hlT; hlBoom(k, strongBeat(b)); } });
     hls.forEach((k, i) => { const a = PLAY.hlAct[i]; if (a !== undefined && (curK < 0 || a > PLAY.hlAct[curK] || (a === PLAY.hlAct[curK] && b.hlPos[i] >= b.hlPos[curK]))) curK = i; });
     Object.values(PLAY.hlAct).forEach(a => { t0 = Math.min(t0, a); });
   }
@@ -1353,7 +1364,7 @@ function frame(ts) {
     mks.forEach(m => FIG.MK[m] && FIG.MK[m]());
   }
   if (ready && b.mk) {
-    ctx.save(); ctx.shadowColor = '#ff2d6f'; ctx.shadowBlur = 26 * (1 - clamp(PLAY.hlT / 1.6));
+    ctx.save(); ctx.shadowColor = '#ff2d6f'; ctx.shadowBlur = 10 * (1 - clamp(PLAY.hlT / 1.2));
     for (let r = 0; r < 2; r++) b.mk.forEach(m => FIG.MK[m] && FIG.MK[m]()); ctx.restore();
   }
   if (PLAY.op) PLAY.op.under(p);
