@@ -154,14 +154,19 @@ function itemAlpha(it) {
 function strokeSeg(it, a, b, al = 1) {
   const f = VIEW.f;
   ctx.save(); ctx.globalAlpha = al; ctx.lineCap = 'round';
-  if (it.aux) { ctx.strokeStyle = COL.aux; ctx.lineWidth = 1.7 * f; ctx.setLineDash([7 * f, 6 * f]); }
-  else { ctx.strokeStyle = it.col || COL.ink; ctx.lineWidth = (it.w || 3) * f; if (it.dash) ctx.setLineDash([11 * f, 8 * f]); }
+  const lwd = it.aux ? 1.7 * f : (it.w || 3) * f;
+  ctx.strokeStyle = 'rgba(255,255,255,.92)'; ctx.lineWidth = lwd + 4.5 * f;            // viền sáng: nét luôn nổi rõ, kể cả khi đi qua người
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  if (it.aux) { ctx.strokeStyle = COL.aux; ctx.lineWidth = lwd; ctx.setLineDash([7 * f, 6 * f]); }
+  else { ctx.strokeStyle = it.col || COL.ink; ctx.lineWidth = lwd; if (it.dash) ctx.setLineDash([11 * f, 8 * f]); }
   ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.restore();
 }
 function strokeArc(C, r, a0, a1, al = 1) {
   const c = W(C), f = VIEW.f;
-  ctx.save(); ctx.globalAlpha = al; ctx.strokeStyle = COL.aux; ctx.lineWidth = 1.7 * f;
-  ctx.beginPath(); ctx.arc(c.x, c.y, r * VIEW.s, -rad(a0), -rad(a1), a1 > a0); ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.globalAlpha = al;
+  ctx.strokeStyle = 'rgba(255,255,255,.92)'; ctx.lineWidth = 6 * f;
+  ctx.beginPath(); ctx.arc(c.x, c.y, r * VIEW.s, -rad(a0), -rad(a1), a1 > a0); ctx.stroke();
+  ctx.strokeStyle = COL.aux; ctx.lineWidth = 1.7 * f; ctx.stroke(); ctx.restore();
 }
 function drawLabel(txt, x, y, size, color, italic = true) {
   ctx.save(); ctx.font = `${italic ? 'italic ' : ''}bold ${size}px "Times New Roman", Times, serif`;
@@ -182,14 +187,14 @@ function drawRA(V, d1, d2, col, al = 1) {
   ctx.beginPath(); ctx.moveTo(v.x + u1.x * k, v.y + u1.y * k);
   ctx.lineTo(v.x + (u1.x + u2.x) * k, v.y + (u1.y + u2.y) * k); ctx.lineTo(v.x + u2.x * k, v.y + u2.y * k); ctx.stroke(); ctx.restore();
 }
-function renderItems() {
+function renderItems(mul = 1) {
   for (const it of ITEMS) {
-    const al = itemAlpha(it); if (al <= 0) continue;
+    const al = itemAlpha(it) * mul; if (al <= 0) continue;
     if (it.k === 'seg') strokeSeg(it, W(it.P), W(it.Q), al);
     else if (it.k === 'arc') strokeArc(it.C, it.r, it.a0, it.a1, al);
     else if (it.k === 'ra') drawRA(it.V, it.d1, it.d2, null, al);
   }
-  for (const it of ITEMS) if (it.k === 'pt') drawPoint(it.P, it.name, it.dx, it.dy);
+  for (const it of ITEMS) if (it.k === 'pt') drawPoint(it.P, it.name, it.dx, it.dy, mul);
 }
 
 /* ---------- Dụng cụ (vẽ bằng canvas, có tên thầy) ---------- */
@@ -535,10 +540,14 @@ function gestureFinger(key, T) {
     default: { const tap = Math.abs(Math.sin(u * Math.PI * 3)); return {x: P[0].x - 10 * tap, y: P[0].y - 4 - 20 * tap}; }
   }
 }
-function updateMan(dt, grip, finger, mode) {
-  const ch = VIEW.ch, tgt = grip || finger;
+function updateMan(dt, grip, finger, mode, approach) {
+  const ch = VIEW.ch, tgt = grip || finger, pos = tgt || approach;
   let tx, ty;
-  if (tgt) { tx = tgt.x - (grip ? .13 : .2) * ch; ty = clamp(tgt.y + .1 * ch, .34 * ch, .43 * ch); }
+  if (pos) { // đứng ngoài mép trái hình, vươn tay vào vẽ/chỉ để không che hình
+    const fl = Math.min(...Object.values(FIG.P).map(P => W(P).x));
+    tx = Math.max(pos.x - .27 * ch, Math.min(pos.x - .19 * ch, fl - .1 * ch));
+    ty = clamp(pos.y + .1 * ch, .34 * ch, .43 * ch);
+  }
   else if (!PLAY.drawScene || PLAY.cur < 0) { tx = idleX(); ty = .4 * ch; }
   else { tx = MAN.sx; ty = .4 * ch; }
   const k = 1 - Math.exp(-dt * (PLAY.fast ? 18 : 7)), ox = MAN.sx;
@@ -566,7 +575,7 @@ function updateMan(dt, grip, finger, mode) {
   else if (VOICE.talking && !grip && mode !== 'think') MAN.free = {x: S.x - .1 * ch * fc, y: S.y - .08 * ch + .03 * ch * Math.sin(clock * 4)};
   else MAN.free = null;
 }
-const LOOK = {skin: '#f1b892', skinL: '#c07a52', shirt: '#fafafa', shirtL: '#bfc4cc', shorts: '#1f3a8c', shortsL: '#13265e', shoe: '#ffffff', shoeL: '#b8bcc4', stripe: '#1f3a8c'};
+const LOOK = {skin: '#f1b892', skinL: '#c07a52', suit: '#1c1e24', suitL: '#050608', lapel: '#2b2e36', shirt: '#fbfbfb', shirtL: '#c4c8cf', tie: '#0d0e12', gold: '#d4a017', shoe: '#0b0b0d'};
 // Một đoạn chi có cơ bắp: rộng wa ở A, phình wm tại tỉ lệ tm, thon wb ở B
 function limb(A, B, wa, wm, wb, fill, line, tm) {
   const L = dist(A, B) || 1, u = {x: (B.x - A.x) / L, y: (B.y - A.y) / L}, n = {x: -u.y, y: u.x}, t = tm || .4;
@@ -636,82 +645,97 @@ function drawPhotoHead(cx, chinY, H, fc, open, tilt) {
   ctx.drawImage(HEAD.img, 0, HEAD.split - 1, HEAD.w, HEAD.h - HEAD.split + 1, ox, oy + sp + d - k, Wd, (HEAD.h - HEAD.split + 1) * k);
   ctx.restore();
 }
-function drawMan() {
+// Nhân vật: lực sĩ mặc vest "tổng tài" (vest đen, sơ mi trắng, cà vạt, đồng hồ vàng, giày da)
+function drawMan(part) {
   const u = VIEW.ch, j = MAN.jump, S = {x: MAN.sx, y: MAN.sy - j}, fc = MAN.facing, L = LOOK;
   const hip = {x: S.x, y: S.y + .19 * u};
   const ground = .985 * u - j * .6, th = .225 * u, arm = .163 * u, p = MAN.phase, w = MAN.walk, lw = Math.max(1.2, .0022 * u);
-  ctx.save(); ctx.globalAlpha = MAN.finger ? .92 : 1; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const fwd = (a, b) => ((a.x - b.x) * fc > 0 ? a : b), below = (a, b) => (a.y > b.y ? a : b), back = (a, b) => ((a.x - b.x) * fc < 0 ? a : b);
-  const shF = {x: S.x + .046 * u * fc, y: S.y + .01 * u}, shB = {x: S.x - .046 * u * fc, y: S.y + .01 * u};
-  const amp = .04 * u * w;
-  const legs = [-1, 1].map((sg, i) => {
-    const ph = i ? Math.PI : 0;
-    return {sg, H: {x: hip.x + sg * .024 * u, y: hip.y},
-      foot: {x: hip.x + sg * .03 * u + amp * Math.sin(p + ph), y: ground - .03 * u - .02 * u * w * Math.max(0, Math.cos(p + ph))}};
-  });
-  const drawLeg = l => {
-    const k = ik(l.H, l.foot, th, th, fwd), K = k.J, F = k.E;
-    limb(K, F, .044 * u, .052 * u, .03 * u, L.skin, L.skinL, .3);                        // cẳng chân
-    limb(l.H, K, .062 * u, .064 * u, .046 * u, L.skin, L.skinL, .4);                      // đùi
-    limb(l.H, lerpP(l.H, K, .42), .078 * u, .078 * u, .074 * u, L.shorts, L.shortsL, .5);  // ống quần đùi
-    // tất trắng
-    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#c9ccd3'; ctx.lineWidth = lw;
-    ctx.beginPath(); ctx.roundRect(F.x - .015 * u, F.y - .012 * u, .03 * u, .03 * u, .006 * u); ctx.fill(); ctx.stroke();
-    // giày thể thao trắng sọc xanh
-    const sx = F.x + .012 * u * fc, sy = F.y + .02 * u;
-    ctx.fillStyle = L.shoe; ctx.strokeStyle = L.shoeL;
-    ctx.beginPath(); ctx.moveTo(sx - .03 * u * fc, sy + .012 * u);
-    ctx.quadraticCurveTo(sx - .032 * u * fc, sy - .016 * u, sx - .008 * u * fc, sy - .016 * u);
-    ctx.quadraticCurveTo(sx + .028 * u * fc, sy - .012 * u, sx + .036 * u * fc, sy + .006 * u);
-    ctx.lineTo(sx + .036 * u * fc, sy + .012 * u); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#e9ebef'; ctx.fillRect(Math.min(sx - .031 * u * fc, sx + .037 * u * fc), sy + .008 * u, .068 * u, .007 * u); // đế
-    ctx.strokeStyle = L.stripe; ctx.lineWidth = Math.max(1.5, .004 * u);
-    ctx.beginPath(); ctx.moveTo(sx - .02 * u * fc, sy + .004 * u); ctx.quadraticCurveTo(sx + .004 * u * fc, sy - .002 * u, sx + .018 * u * fc, sy - .012 * u); ctx.stroke(); // sọc
-    ctx.strokeStyle = '#9aa0aa'; ctx.lineWidth = Math.max(1, .0018 * u);
-    for (let q = 0; q < 3; q++) { const lx = sx + (.002 + q * .006) * u * fc; ctx.beginPath(); ctx.moveTo(lx - .003 * u, sy - .013 * u + q * .002 * u); ctx.lineTo(lx + .003 * u, sy - .009 * u + q * .002 * u); ctx.stroke(); } // dây giày
-  };
-  const drawArm = (Sh, T, pick, finger, pose) => {
+  const shF = {x: S.x + .068 * u * fc, y: S.y + .012 * u}, shB = {x: S.x - .068 * u * fc, y: S.y + .012 * u};
+  const drawArm = (Sh, T, pick, finger, pose, watch) => {
     const k = ik(Sh, T, arm, arm, pick), J = k.J, E = k.E;
-    limb(J, E, .03 * u, .032 * u, .022 * u, L.skin, L.skinL, .3);                        // cẳng tay
-    limb(Sh, J, .036 * u, .038 * u, .03 * u, L.skin, L.skinL, .45);                      // cánh tay
-    limb(Sh, lerpP(Sh, J, .42), .062 * u, .06 * u, .054 * u, L.shirt, L.shirtL, .5);     // tay áo ngắn
+    limb(J, E, .05 * u, .056 * u, .04 * u, L.suit, L.suitL, .3);                         // cẳng tay (tay áo vest)
+    limb(Sh, J, .068 * u, .08 * u, .05 * u, L.suit, L.suitL, .45);                       // bắp tay to căng tay áo
+    musc(Sh, J, .3, .7, .022 * u);
+    ctx.fillStyle = L.suit; ctx.strokeStyle = L.suitL; ctx.lineWidth = lw;                // vai độn
+    ctx.beginPath(); ctx.arc(Sh.x, Sh.y + .002 * u, .04 * u, 0, 7); ctx.fill(); ctx.stroke();
+    const cu = lerpP(J, E, .9);                                                          // măng sét sơ mi
+    limb(cu, E, .036 * u, .036 * u, .03 * u, L.shirt, L.shirtL, .5);
+    if (watch) { const wv = lerpP(J, E, .84); ctx.fillStyle = L.gold; ctx.strokeStyle = '#8a6a00'; ctx.beginPath(); ctx.arc(wv.x, wv.y, .012 * u, 0, 7); ctx.fill(); ctx.stroke(); }
     const ang = pose === 'point' && finger ? Math.atan2(finger.y - E.y, finger.x - E.x) : Math.atan2(E.y - J.y, E.x - J.x);
     const c = Math.cos(ang), ts = Math.abs(c) > .3 ? Math.sign(c) : fc;
     drawHand(E, ang, pose, ts, finger ? dist(E, finger) / (.001 * u) - 22 : 24);
   };
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (part === 'front') { // tay trước: cầm dụng cụ / chỉ hình / giơ cao / chống cằm
+    drawArm(shF, MAN.hand || {x: S.x, y: S.y + .3 * u}, below, MAN.finger, MAN.handPose || 'relax', true);
+    ctx.restore(); return;
+  }
+  const amp = .04 * u * w;
+  const legs = [-1, 1].map((sg, i) => {
+    const ph = i ? Math.PI : 0;
+    return {sg, H: {x: hip.x + sg * .03 * u, y: hip.y},
+      foot: {x: hip.x + sg * .034 * u + amp * Math.sin(p + ph), y: ground - .03 * u - .02 * u * w * Math.max(0, Math.cos(p + ph))}};
+  });
+  const drawLeg = l => {
+    const k = ik(l.H, l.foot, th, th, fwd), K = k.J, F = k.E;
+    limb(K, F, .058 * u, .064 * u, .046 * u, L.suit, L.suitL, .3);                       // ống quần âu (bắp chân)
+    limb(l.H, K, .082 * u, .086 * u, .06 * u, L.suit, L.suitL, .4);                      // đùi lực sĩ
+    ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = Math.max(1, .002 * u);     // li quần
+    ctx.beginPath(); ctx.moveTo(l.H.x, l.H.y + .02 * u); ctx.lineTo(K.x, K.y); ctx.lineTo(F.x, F.y); ctx.stroke();
+    const sx = F.x + .014 * u * fc, sy = F.y + .02 * u;                                  // giày da đen bóng
+    ctx.fillStyle = L.shoe; ctx.strokeStyle = '#000'; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.moveTo(sx - .03 * u * fc, sy + .012 * u);
+    ctx.quadraticCurveTo(sx - .032 * u * fc, sy - .014 * u, sx - .006 * u * fc, sy - .014 * u);
+    ctx.quadraticCurveTo(sx + .03 * u * fc, sy - .01 * u, sx + .042 * u * fc, sy + .008 * u);
+    ctx.lineTo(sx + .042 * u * fc, sy + .012 * u); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.beginPath(); ctx.ellipse(sx + .018 * u * fc, sy - .006 * u, .01 * u, .003 * u, -.2 * fc, 0, 7); ctx.fill();
+  };
   // tay sau, hai chân
   const fa = MAN.free || {x: shB.x - .02 * u * fc + .03 * u * w * Math.sin(p), y: S.y + .27 * u};
-  drawArm(shB, fa, MAN.free ? below : back, null, MAN.freePose || 'relax');
+  drawArm(shB, fa, MAN.free ? below : back, null, MAN.freePose || 'relax', false);
   drawLeg(legs.find(l => l.sg === -fc)); drawLeg(legs.find(l => l.sg === fc));
-  // quần đùi xanh navy
-  const qw = .056 * u;
-  ctx.fillStyle = L.shorts; ctx.strokeStyle = L.shortsL; ctx.lineWidth = lw;
-  ctx.beginPath(); ctx.moveTo(S.x - qw, S.y + .14 * u); ctx.lineTo(S.x + qw, S.y + .14 * u);
-  ctx.lineTo(S.x + qw + .006 * u, hip.y + .03 * u); ctx.lineTo(S.x - qw - .006 * u, hip.y + .03 * u); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.moveTo(S.x, S.y + .15 * u); ctx.lineTo(S.x, hip.y + .01 * u); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(S.x + .026 * u * fc, S.y + .145 * u); ctx.quadraticCurveTo(S.x + .036 * u * fc, S.y + .17 * u, S.x + qw * fc, S.y + .175 * u); ctx.stroke(); // túi quần
-  // áo phông trắng
-  const sw = .058 * u, hw = .06 * u, hy = S.y + .158 * u;
-  ctx.beginPath(); ctx.moveTo(S.x - sw, S.y - .006 * u);
-  ctx.quadraticCurveTo(S.x - sw - .006 * u, S.y + .08 * u, S.x - hw, hy);
-  ctx.quadraticCurveTo(S.x, hy + .008 * u, S.x + hw, hy);
-  ctx.quadraticCurveTo(S.x + sw + .006 * u, S.y + .08 * u, S.x + sw, S.y - .006 * u);
-  ctx.quadraticCurveTo(S.x, S.y - .02 * u, S.x - sw, S.y - .006 * u);
-  ctx.fillStyle = L.shirt; ctx.fill(); ctx.strokeStyle = L.shirtL; ctx.lineWidth = lw; ctx.stroke();
-  ctx.strokeStyle = 'rgba(150,158,170,.45)'; ctx.lineWidth = Math.max(1, .0022 * u);                    // nếp áo
-  ctx.beginPath(); ctx.moveTo(S.x - .03 * u, S.y + .09 * u); ctx.quadraticCurveTo(S.x - .02 * u, S.y + .12 * u, S.x - .034 * u, hy - .004 * u); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(S.x + .028 * u, S.y + .1 * u); ctx.quadraticCurveTo(S.x + .02 * u, S.y + .13 * u, S.x + .03 * u, hy - .004 * u); ctx.stroke();
-  // cổ + cổ áo tròn
-  limb({x: S.x, y: S.y + .004 * u}, {x: S.x, y: S.y - .03 * u}, .04 * u, .04 * u, .038 * u, L.skin, L.skinL, .5);
-  ctx.strokeStyle = L.shirtL; ctx.lineWidth = Math.max(1.5, .004 * u);
-  ctx.beginPath(); ctx.ellipse(S.x, S.y - .006 * u, .024 * u, .012 * u, 0, .05 * Math.PI, .95 * Math.PI); ctx.stroke();
+  // thân chữ V: vai rộng, ngực nở, eo thon – áo vest
+  const sw = .085 * u, cw = .09 * u, ww = .052 * u, hw = .06 * u, hy = hip.y + .045 * u;
+  const jacket = () => {
+    ctx.beginPath(); ctx.moveTo(S.x - sw, S.y - .004 * u);
+    ctx.quadraticCurveTo(S.x - cw - .006 * u, S.y + .06 * u, S.x - ww, S.y + .15 * u);
+    ctx.lineTo(S.x - hw, hy); ctx.lineTo(S.x + hw, hy); ctx.lineTo(S.x + ww, S.y + .15 * u);
+    ctx.quadraticCurveTo(S.x + cw + .006 * u, S.y + .06 * u, S.x + sw, S.y - .004 * u);
+    ctx.quadraticCurveTo(S.x, S.y - .024 * u, S.x - sw, S.y - .004 * u);
+  };
+  jacket(); ctx.fillStyle = L.suit; ctx.fill(); ctx.strokeStyle = L.suitL; ctx.lineWidth = lw; ctx.stroke();
+  // sơ mi trắng hình chữ V + cà vạt
+  ctx.fillStyle = L.shirt; ctx.beginPath(); ctx.moveTo(S.x - .03 * u, S.y - .012 * u); ctx.lineTo(S.x + .03 * u, S.y - .012 * u); ctx.lineTo(S.x, S.y + .11 * u); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = L.tie; ctx.beginPath(); ctx.moveTo(S.x - .008 * u, S.y - .006 * u); ctx.lineTo(S.x + .008 * u, S.y - .006 * u);
+  ctx.lineTo(S.x + .012 * u, S.y + .09 * u); ctx.lineTo(S.x, S.y + .108 * u); ctx.lineTo(S.x - .012 * u, S.y + .09 * u); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(S.x - .003 * u, S.y + .01 * u, .002 * u, .07 * u);
+  ctx.fillStyle = L.gold; ctx.fillRect(S.x - .014 * u, S.y + .055 * u, .028 * u, .004 * u);     // kẹp cà vạt
+  // ve áo (lapel) bản to
+  ctx.fillStyle = L.lapel; ctx.strokeStyle = L.suitL;
+  [-1, 1].forEach(sg => {
+    ctx.beginPath(); ctx.moveTo(S.x + sg * .03 * u, S.y - .014 * u); ctx.lineTo(S.x + sg * .052 * u, S.y + .004 * u);
+    ctx.lineTo(S.x + sg * .036 * u, S.y + .03 * u); ctx.lineTo(S.x + sg * .046 * u, S.y + .036 * u);
+    ctx.lineTo(S.x + sg * .006 * u, S.y + .12 * u); ctx.lineTo(S.x + sg * .002 * u, S.y + .11 * u); ctx.closePath(); ctx.fill(); ctx.stroke();
+  });
+  // cơ ngực căng áo, cúc áo, khăn cài túi
+  ctx.strokeStyle = 'rgba(255,255,255,.13)'; ctx.lineWidth = Math.max(1, .0028 * u);
+  ctx.beginPath(); ctx.arc(S.x - .042 * u, S.y + .04 * u, .03 * u, .2 * Math.PI, .8 * Math.PI); ctx.stroke();
+  ctx.beginPath(); ctx.arc(S.x + .042 * u, S.y + .04 * u, .03 * u, .2 * Math.PI, .8 * Math.PI); ctx.stroke();
+  ctx.fillStyle = '#3a3d46'; [.13, .16].forEach(t => { ctx.beginPath(); ctx.arc(S.x + .006 * u, S.y + t * u, .0055 * u, 0, 7); ctx.fill(); });
+  ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.beginPath(); ctx.moveTo(S.x + .002 * u, S.y + .12 * u); ctx.lineTo(S.x + .004 * u, hy); ctx.stroke();
+  ctx.fillStyle = L.shirt; const pq = {x: S.x - .055 * u * fc, y: S.y + .058 * u};
+  ctx.beginPath(); ctx.moveTo(pq.x - .012 * u, pq.y); ctx.lineTo(pq.x - .006 * u, pq.y - .012 * u); ctx.lineTo(pq.x, pq.y - .004 * u); ctx.lineTo(pq.x + .006 * u, pq.y - .012 * u); ctx.lineTo(pq.x + .012 * u, pq.y); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.2)'; ctx.beginPath(); ctx.moveTo(pq.x - .016 * u, pq.y); ctx.lineTo(pq.x + .016 * u, pq.y); ctx.stroke();
+  // cổ lực sĩ + cổ áo sơ mi
+  limb({x: S.x, y: S.y - .004 * u}, {x: S.x, y: S.y - .03 * u}, .052 * u, .054 * u, .05 * u, L.skin, L.skinL, .5);
+  ctx.fillStyle = L.shirt; ctx.strokeStyle = L.shirtL; ctx.lineWidth = lw;
+  [-1, 1].forEach(sg => { ctx.beginPath(); ctx.moveTo(S.x, S.y - .002 * u); ctx.lineTo(S.x + sg * .03 * u, S.y - .02 * u); ctx.lineTo(S.x + sg * .022 * u, S.y + .012 * u); ctx.closePath(); ctx.fill(); ctx.stroke(); });
   // đầu ảnh chân dung
   if (!MAN.jaw) MAN.jaw = 0;
   MAN.jaw += ((VOICE.talking ? .25 + .75 * Math.abs(Math.sin(clock * 12)) : 0) - MAN.jaw) * .5;
   const tilt = (MAN.finger ? clamp((MAN.finger.x - S.x) / u, -.3, .3) * .12 : 0) + (VOICE.talking ? .035 * Math.sin(clock * 3.2) : 0);
-  drawPhotoHead(S.x + .004 * u * fc, S.y - .012 * u, .22 * u, fc, MAN.jaw, tilt);
-  // tay trước: cầm dụng cụ / chỉ hình / giơ cao / chống cằm
-  drawArm(shF, MAN.hand || {x: S.x, y: S.y + .3 * u}, below, MAN.finger, MAN.handPose || 'relax');
+  drawPhotoHead(S.x + .004 * u * fc, S.y - .022 * u, .22 * u, fc, MAN.jaw, tilt);
   ctx.restore();
 }
 
@@ -1045,7 +1069,7 @@ let clock = 0, lastTs = null;
 function frame(ts) {
   const dt = lastTs === null ? 0 : Math.min(.05, (ts - lastTs) / 1000); lastTs = ts; clock += dt;
   if (!PLAY.paused && PLAY.cur >= 0) {
-    if (!PLAY.op && PLAY.opsQ.length) { PLAY.op = PLAY.opsQ.shift(); PLAY.opT = 0; sfxStartOp(PLAY.op); }
+    if (!PLAY.op && PLAY.opsQ.length && (PLAY.spoke || PLAY.fast)) { PLAY.op = PLAY.opsQ.shift(); PLAY.opT = 0; sfxStartOp(PLAY.op); } // đọc xong mới vẽ
     if (PLAY.op) {
       PLAY.opT += dt * (PLAY.fast ? 4 : 1);
       if (PLAY.opT >= PLAY.op.dur) {
@@ -1056,39 +1080,16 @@ function frame(ts) {
     if (PLAY.opsDone) PLAY.hlT += dt;
     if (VOICE.talking) PLAY.speakT += dt;
   }
-  const s = VIEW.dpr || 1;
-  ctx.setTransform(s, 0, 0, s, 0, 0);
-  ctx.fillStyle = '#fbfaf3'; ctx.fillRect(0, 0, VIEW.cw, VIEW.ch);
-  ctx.strokeStyle = 'rgba(47,111,222,.07)'; ctx.lineWidth = 1;
-  for (let x = VIEW.ox % VIEW.s; x < VIEW.cw; x += VIEW.s) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, VIEW.ch); ctx.stroke(); }
-  for (let y = VIEW.oy % VIEW.s; y < VIEW.ch; y += VIEW.s) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(VIEW.cw, y); ctx.stroke(); }
-  renderItems();
-  const mks = mkActive();
-  mks.forEach(m => FIG.MK[m] && FIG.MK[m]());
+  // ---- trạng thái beat, nhấn mạnh theo lời đọc ----
   const b = PLAY.cur >= 0 ? TL[PLAY.cur].b : null, ready = b && PLAY.opsDone;
   const hls = ready ? (b.hl || []) : [];
-  // đọc tới đối tượng nào thì đối tượng đó mới được nhấn mạnh
   let curK = -1, t0 = 1e9;
   if (hls.length) {
     if (!b.hlPos) b.hlPos = hlPositions(b);
     const prog = speechProg();
-    hls.forEach((k, i) => {
-      if (PLAY.hlAct[i] === undefined && b.hlPos[i] <= prog) { PLAY.hlAct[i] = PLAY.hlT; SND.whoosh(); }
-    });
+    hls.forEach((k, i) => { if (PLAY.hlAct[i] === undefined && b.hlPos[i] <= prog) { PLAY.hlAct[i] = PLAY.hlT; SND.whoosh(); } });
     hls.forEach((k, i) => { const a = PLAY.hlAct[i]; if (a !== undefined && (curK < 0 || a > PLAY.hlAct[curK] || (a === PLAY.hlAct[curK] && b.hlPos[i] >= b.hlPos[curK]))) curK = i; });
     Object.values(PLAY.hlAct).forEach(a => { t0 = Math.min(t0, a); });
-  }
-  if (curK >= 0) {
-    // làm mờ phần còn lại, đưa đối tượng được nhấn mạnh lên trước (kiểu Manim)
-    ctx.fillStyle = `rgba(251,250,243,${.5 * clamp((PLAY.hlT - t0) / .4)})`; ctx.fillRect(0, 0, VIEW.cw, VIEW.ch);
-    hls.forEach((k, i) => { if (PLAY.hlAct[i] !== undefined && i !== curK) drawHL(k, 0, PLAY.hlT - PLAY.hlAct[i], true); });
-    drawHL(hls[curK], 0, PLAY.hlT - PLAY.hlAct[curK], false);
-    ITEMS.forEach(it => { if (it.k === 'pt') drawPoint(it.P, it.name, it.dx, it.dy); });
-    mks.forEach(m => FIG.MK[m] && FIG.MK[m]());
-  }
-  if (ready && b.mk) { // kí hiệu mới xuất hiện: phát sáng
-    ctx.save(); ctx.shadowColor = '#ff2d6f'; ctx.shadowBlur = 26 * (1 - clamp(PLAY.hlT / 1.6));
-    for (let r = 0; r < 2; r++) b.mk.forEach(m => FIG.MK[m] && FIG.MK[m]()); ctx.restore();
   }
   const p = PLAY.op ? clamp(PLAY.opT / PLAY.op.dur) : 0;
   let lvl = 0, stype = 'pen';
@@ -1099,14 +1100,40 @@ function frame(ts) {
     else if (kd === 'erase') { lvl = .42 * Math.abs(Math.sin(p * 30)); stype = 'erase'; }
   }
   sfxScratch(lvl, stype);
-  if (PLAY.op) PLAY.op.under(p);
-  const grip = PLAY.op ? PLAY.op.grip(p) : null;
+  const s = VIEW.dpr || 1;
+  ctx.setTransform(s, 0, 0, s, 0, 0);
+  // ---- người: tính tư thế trước (op.under phải chạy trước grip để dụng cụ khởi tạo) ----
+  let grip = null;
+  if (PLAY.op) { ctx.save(); ctx.globalAlpha = 0; PLAY.op.under(p); ctx.restore(); grip = PLAY.op.grip(p); }
   const cheer = !!(ready && b.line && /Vậy/.test(b.line));
   if (cheer && PLAY.cheerSound !== PLAY.cur) { PLAY.cheerSound = PLAY.cur; SND.jingle(); }
   const finger = !PLAY.op && !cheer && curK >= 0 ? gestureFinger(hls[curK], PLAY.hlT - PLAY.hlAct[curK]) : null;
   const mode = cheer ? 'cheer' : (!PLAY.drawScene && PLAY.cur >= 0 && curK < 0 ? 'think' : '');
-  updateMan(dt, grip, finger, mode);
-  drawMan();
+  let approach = null; // đang đọc: đi sẵn tới chỗ sắp vẽ
+  if (!PLAY.op && PLAY.opsQ.length && PLAY.opsQ[0].kind !== 'erase') { try { ctx.save(); ctx.globalAlpha = 0; PLAY.opsQ[0].under(0); ctx.restore(); approach = PLAY.opsQ[0].grip(0); } catch (e) { approach = null; } }
+  updateMan(dt, grip, finger, mode, approach);
+  // ---- vẽ: nền → người (phía sau) → nét hình → nhấn mạnh → dụng cụ → tay cầm → bút ----
+  ctx.fillStyle = '#fbfaf3'; ctx.fillRect(0, 0, VIEW.cw, VIEW.ch);
+  ctx.strokeStyle = 'rgba(47,111,222,.07)'; ctx.lineWidth = 1;
+  for (let x = VIEW.ox % VIEW.s; x < VIEW.cw; x += VIEW.s) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, VIEW.ch); ctx.stroke(); }
+  for (let y = VIEW.oy % VIEW.s; y < VIEW.ch; y += VIEW.s) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(VIEW.cw, y); ctx.stroke(); }
+  drawMan('body');
+  const dimA = curK >= 0 ? 1 - .55 * clamp((PLAY.hlT - t0) / .4) : 1;
+  renderItems(dimA);
+  const mks = mkActive();
+  ctx.save(); ctx.globalAlpha = dimA; mks.forEach(m => FIG.MK[m] && FIG.MK[m]()); ctx.restore();
+  if (curK >= 0) {
+    hls.forEach((k, i) => { if (PLAY.hlAct[i] !== undefined && i !== curK) drawHL(k, 0, PLAY.hlT - PLAY.hlAct[i], true); });
+    drawHL(hls[curK], 0, PLAY.hlT - PLAY.hlAct[curK], false);
+    ITEMS.forEach(it => { if (it.k === 'pt') drawPoint(it.P, it.name, it.dx, it.dy); });
+    mks.forEach(m => FIG.MK[m] && FIG.MK[m]());
+  }
+  if (ready && b.mk) {
+    ctx.save(); ctx.shadowColor = '#ff2d6f'; ctx.shadowBlur = 26 * (1 - clamp(PLAY.hlT / 1.6));
+    for (let r = 0; r < 2; r++) b.mk.forEach(m => FIG.MK[m] && FIG.MK[m]()); ctx.restore();
+  }
+  if (PLAY.op) PLAY.op.under(p);
+  drawMan('front');
   if (PLAY.op) PLAY.op.over(p);
   requestAnimationFrame(frame);
 }
