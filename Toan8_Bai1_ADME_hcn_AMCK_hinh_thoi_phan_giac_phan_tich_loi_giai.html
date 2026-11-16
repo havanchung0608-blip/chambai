@@ -736,8 +736,9 @@ function updateMan(dt, grip, finger, mode, approach) {
   let tx, ty;
   const home = idleX(); // luôn đứng NGOÀI mép trái hình, chỉ vươn tay (tay tự dài ra) vào vẽ / chỉ
   if (pos) {
-    tx = clamp(pos.x - .17 * ch, home, VIEW.cw - .1 * ch);                   // bước tới đứng cạnh chỗ vẽ / chỗ chỉ
-    const hi = pos.y + .32 * ch < .51 * ch; MAN.flyT = hi ? 1 : 0;                // chỗ cao: bật lên lơ lửng như siêu anh hùng
+    const mm = MAN.moveMode || 'stay';                                           // tuỳ tình huống: đứng yên vươn tay / đi tới / về chỗ cũ
+    tx = mm === 'walk' ? clamp(pos.x - .17 * ch, home, VIEW.cw - .1 * ch) : mm === 'home' ? home : MAN.sx;
+    const hi = mm === 'walk' && pos.y + .32 * ch < .51 * ch; MAN.flyT = hi ? 1 : 0; // chỉ khi đi tới mới bật bay lên chỗ cao
     ty = hi ? clamp(pos.y + .22 * ch, .28 * ch, .51 * ch) + .007 * ch * Math.sin(clock * 5) : clamp(pos.y + .32 * ch, .51 * ch, .57 * ch);
   } else { MAN.flyT = 0; tx = home; ty = .51 * ch + .005 * ch * Math.sin(clock * 1.6); }
   const k = 1 - Math.exp(-dt * (PLAY.fast ? 18 : 7)), ox = MAN.sx, oy = MAN.sy;
@@ -1137,6 +1138,7 @@ function showBeat(i, jump) {
   PLAY.cur = i; PLAY.hlT = 0; PLAY.hlAct = {}; PLAY.speakT = 0; PLAY.hlN = 0;
   const {si, b} = TL[i];
   PLAY.drawScene = si === 0;
+  if (!PLAY.fast) { const r = Math.random(); MAN.moveMode = r < .55 ? 'stay' : r < .85 ? 'walk' : 'home'; } // lâu lâu đổi trạng thái di chuyển
   if (PLAY.lastSi !== si) { if (PLAY.lastSi !== undefined) startAct('turn'); PLAY.lastSi = si; }   // sang cảnh mới: xoay người
   else if ((b.line || b.node) && !(b.ops && b.ops.length) && Math.random() < .7) startAct(pickGesture()); // đổi động tác giữa các bước
   PLAY.opsQ = (b.ops || []).slice(); PLAY.op = null; PLAY.opsDone = PLAY.opsQ.length === 0;
