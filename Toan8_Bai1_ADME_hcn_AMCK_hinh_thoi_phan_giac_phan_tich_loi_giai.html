@@ -246,11 +246,11 @@ const fxShake = a => { FX.shake = Math.max(FX.shake, a * VIEW.f); };
 const fxPunch = a => { FX.punch = Math.max(FX.punch, a); };
 
 /* ---------- Dụng cụ (vẽ bằng canvas, tên Thầy in đậm dọc thân) ---------- */
-function toolText(txt, c, ang, size, color) { // chữ luôn đọc xuôi
+function toolText(txt, c, ang, size, color, outline) { // chữ luôn đọc xuôi
   let a = ang; if (Math.cos(a) < 0) a += Math.PI;
   ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(a);
   ctx.font = `bold ${Math.round(size)}px "Times New Roman"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.lineWidth = Math.max(2, size * .18); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.strokeText(txt, 0, 0);
+  ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(2, size * (outline ? .28 : .18)); ctx.strokeStyle = outline || 'rgba(255,255,255,.85)'; ctx.strokeText(txt, 0, 0);
   ctx.fillStyle = color; ctx.fillText(txt, 0, 0); ctx.restore();
 }
 function pencilDir() { return {x: -0.5, y: -0.866}; }
@@ -327,8 +327,8 @@ function compassGeo(N, P, sideSign) {
 }
 function drawCompass(g, al = 1) {
   ctx.save(); ctx.globalAlpha = al; ctx.lineCap = 'round';
-  const w = Math.max(7, .013 * VIEW.ch);
-  ctx.strokeStyle = '#55657d'; ctx.lineWidth = w;
+  const w = Math.max(10, .019 * VIEW.ch);
+  ctx.strokeStyle = '#2f3b4f'; ctx.lineWidth = w;
   ctx.beginPath(); ctx.moveTo(g.H.x, g.H.y); ctx.lineTo(g.N.x, g.N.y); ctx.stroke();
   ctx.strokeStyle = '#222'; ctx.lineWidth = 2.5; const nv = {x: g.N.x - g.H.x, y: g.N.y - g.H.y}, nl = Math.hypot(nv.x, nv.y);
   ctx.beginPath(); ctx.moveTo(g.N.x - nv.x / nl * 12, g.N.y - nv.y / nl * 12); ctx.lineTo(g.N.x, g.N.y); ctx.stroke();
@@ -340,7 +340,7 @@ function drawCompass(g, al = 1) {
   ctx.strokeStyle = '#3d4a5f'; ctx.lineWidth = w * .8; ctx.beginPath(); ctx.moveTo(g.H.x, g.H.y); ctx.lineTo(g.T.x, g.T.y); ctx.stroke();
   ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(g.H.x, g.H.y, w * 1.2, 0, 7); ctx.fill();
   ctx.fillStyle = '#3d4a5f'; ctx.beginPath(); ctx.arc(g.T.x, g.T.y, w * .8, 0, 7); ctx.fill();
-  toolText('THẦY CHUNG', lerpP(g.H, g.N, .5), Math.atan2(g.N.y - g.H.y, g.N.x - g.H.x), Math.max(9, w * 1.05), '#ffffff');
+  toolText('THẦY CHUNG', lerpP(g.H, g.N, .5), Math.atan2(g.N.y - g.H.y, g.N.x - g.H.x), Math.max(13, w * 1.15), '#ffd23f', '#111');
   ctx.restore();
 }
 function drawEraser(c) {
@@ -447,24 +447,45 @@ function CMP(C, r, a0, a1, o = {}) { // compa KÉO VÈO TỪ NGOÀI VÀO (tay d�
   };
 }
 // Thước đo góc: XOAY BAY VÀO, đáp "keng"; vạch 0 trùng tia gốc baseDeg, đánh dấu điểm ứng với deg độ (ccw: quay ngược chiều kim đồng hồ)
-function drawProtractor(V, baseDeg, ccw, R, al, offs, rot, markDeg) {
-  const sg = ccw ? 1 : -1, ca = d => -rad(baseDeg + sg * d);
+function drawProtractor(V, baseDeg, ccw, R, al, offs, rot, markDeg, markLabel) {
+  const sg = ccw ? 1 : -1, ca = d => -rad(baseDeg + sg * d), f = VIEW.f, P = (a, r) => ({x: V.x + r * Math.cos(a), y: V.y + r * Math.sin(a)});
   ctx.save(); ctx.globalAlpha = al;
   if (offs) { ctx.translate(V.x + offs.x, V.y + offs.y); ctx.rotate(rot || 0); ctx.translate(-V.x, -V.y); }
-  ctx.beginPath(); ctx.moveTo(V.x + R * Math.cos(ca(0)), V.y + R * Math.sin(ca(0))); ctx.arc(V.x, V.y, R, ca(0), ca(180), ccw); ctx.closePath();
-  ctx.shadowColor = 'rgba(120,90,0,.3)'; ctx.shadowBlur = 12; ctx.fillStyle = 'rgba(255,246,200,.62)'; ctx.fill();
-  ctx.shadowBlur = 0; ctx.strokeStyle = '#a07800'; ctx.lineWidth = 2; ctx.stroke();
-  ctx.strokeStyle = '#5a4300'; ctx.lineWidth = 1;
-  for (let d = 0; d <= 180; d += 5) { const a = ca(d), L = d % 10 === 0 ? R * .12 : R * .06; ctx.beginPath(); ctx.moveTo(V.x + R * Math.cos(a), V.y + R * Math.sin(a)); ctx.lineTo(V.x + (R - L) * Math.cos(a), V.y + (R - L) * Math.sin(a)); ctx.stroke(); }
-  ctx.fillStyle = '#5a4300'; ctx.font = `bold ${Math.round(R * .085)}px "Times New Roman"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  for (let d = 0; d <= 180; d += 30) { const a = ca(d); ctx.fillText(String(d), V.x + R * .78 * Math.cos(a), V.y + R * .78 * Math.sin(a)); }
-  ctx.beginPath(); ctx.arc(V.x, V.y, R * .3, ca(0), ca(180), ccw); ctx.stroke();
-  const am = ca(90); toolText('THẦY HÀ VĂN CHUNG', {x: V.x + R * .55 * Math.cos(am), y: V.y + R * .55 * Math.sin(am)}, am + Math.PI / 2, R * .095, '#8a1c1c');
-  if (markDeg !== undefined) { const a = -rad(markDeg); ctx.strokeStyle = '#e8173c'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(V.x + R * .62 * Math.cos(a), V.y + R * .62 * Math.sin(a)); ctx.lineTo(V.x + R * 1.08 * Math.cos(a), V.y + R * 1.08 * Math.sin(a)); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(P(ca(0), R).x, P(ca(0), R).y); ctx.arc(V.x, V.y, R, ca(0), ca(180), ccw); ctx.closePath();
+  ctx.shadowColor = 'rgba(120,90,0,.35)'; ctx.shadowBlur = 14; ctx.fillStyle = 'rgba(255,247,205,.72)'; ctx.fill();
+  ctx.shadowBlur = 0; ctx.strokeStyle = '#8a6400'; ctx.lineWidth = 2.5; ctx.stroke();
+  // vạch chia: 1° ngắn, 5° vừa, 10° dài và đậm
+  for (let d = 0; d <= 180; d++) {
+    const a = ca(d), L = d % 10 === 0 ? R * .14 : d % 5 === 0 ? R * .085 : R * .045;
+    ctx.strokeStyle = d % 10 === 0 ? '#2b1d00' : '#5a4300'; ctx.lineWidth = d % 10 === 0 ? 2.2 : d % 5 === 0 ? 1.4 : .8;
+    const p1 = P(a, R), p2 = P(a, R - L); ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+  }
+  // số: mỗi 10° một số, mốc 30° in to hơn; số xoay theo cung cho dễ đọc
+  for (let d = 0; d <= 180; d += 30) { // số mốc 30° to, đậm, không chen chúc
+    const big = true, a = ca(d), q = P(a, R * .72), sz = Math.max(19 * f, R * .15);
+    let ta = a + Math.PI / 2; if (Math.cos(ta) < 0) ta += Math.PI;
+    ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(ta); ctx.font = `bold ${Math.round(sz)}px "Times New Roman"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,250,225,.95)'; ctx.strokeText(String(d), 0, 0); ctx.fillStyle = big ? '#7a0a0a' : '#2b1d00'; ctx.fillText(String(d), 0, 0); ctx.restore();
+  }
+  ctx.strokeStyle = '#8a6400'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(V.x, V.y, R * .3, ca(0), ca(180), ccw); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(P(ca(0), R * .3).x, P(ca(0), R * .3).y); ctx.lineTo(P(ca(180), R * .3).x, P(ca(180), R * .3).y); ctx.stroke();
+  ctx.fillStyle = '#e8173c'; ctx.beginPath(); ctx.arc(V.x, V.y, 4 * f, 0, 7); ctx.fill();                       // tâm thước
+  const am = ca(90); toolText('THẦY HÀ VĂN CHUNG', P(am, R * .5), am + Math.PI / 2, Math.max(12 * f, R * .085), '#8a1c1c');
+  if (markDeg !== undefined) { // vạch đỏ đúng số đo + số đo to bên ngoài
+    const a = -rad(markDeg), p1 = P(a, R * .3), p2 = P(a, R * 1.1);
+    ctx.strokeStyle = '#e8173c'; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+    if (markLabel !== undefined) {
+      const q = P(a, R * 1.28), sz = Math.max(22 * f, R * .2);
+      ctx.font = `bold ${Math.round(sz)}px "Times New Roman"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const tw = ctx.measureText(markLabel + '°').width + sz * .5;
+      ctx.fillStyle = '#e8173c'; ctx.beginPath(); ctx.roundRect(q.x - tw / 2, q.y - sz * .65, tw, sz * 1.3, sz * .3); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.fillText(markLabel + '°', q.x, q.y + 1);
+    }
+  }
   ctx.restore();
 }
 function PRO(V, baseDeg, deg, ccw = true, o = {}) {
-  const LT = .2, tgt = baseDeg + (ccw ? 1 : -1) * deg, Rw = o.r || 1.7, mark = G.dir(V, tgt, Rw * 1.04);
+  const LT = .2, tgt = baseDeg + (ccw ? 1 : -1) * deg, Rw = o.r || 2.6, mark = G.dir(V, tgt, Rw * 1.1);
   let landed = false;
   const tipAt = p => { const m = W(mark), b = p < .55 ? 14 : p < .75 ? Math.sin((p - .55) / .2 * Math.PI) * 12 : 0; return {x: m.x, y: m.y - b}; };
   return {
@@ -475,7 +496,7 @@ function PRO(V, baseDeg, deg, ccw = true, o = {}) {
       if (p < LT) { const e = ease(p / LT); off = {x: (1 - e) * VIEW.cw * .7, y: -(1 - e) * VIEW.ch * .8}; rot = (1 - e) * Math.PI * 4; }
       else if (p > .9) { const e = (p - .9) / .1; off = {x: e * e * VIEW.cw * .7, y: -e * e * VIEW.ch * .8}; rot = -e * Math.PI * 2; }
       if (!landed && p >= LT) { landed = true; fxSpark(v.x, v.y, 22, '255,200,60'); fxShake(6); SND.clang(); MAN.sq = 1; }
-      drawProtractor(v, baseDeg, ccw, Rw * VIEW.s, 1, off, rot, p > .35 ? tgt : undefined);
+      drawProtractor(v, baseDeg, ccw, Rw * VIEW.s, 1, off, rot, p > .35 ? tgt : undefined, p > .35 ? deg : undefined);
       if (p > .66) { const m = W(mark); ctx.fillStyle = COL.aux; ctx.beginPath(); ctx.arc(m.x, m.y, 3.5 * VIEW.f, 0, 7); ctx.fill(); }
     },
     over(p) { drawPencil(tipAt(p)); },

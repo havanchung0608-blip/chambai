@@ -32,6 +32,7 @@ Mọi phần dưới đây là engine, KHÔNG viết lại; chỉ cần giữ ng
 **Dựng hình như phim hành động**
 - ĐỌC XONG MỚI VẼ: op của một beat chỉ bắt đầu khi `say` đã đọc xong; lúc đọc nhân vật đi sẵn tới chỗ sắp vẽ.
 - Dụng cụ xuất hiện: thước RƠI TỪ TRÊN TRỜI xuống đập "rầm" (bụi, rung màn hình); ê ke XOAY TÍT bay vào đáp "keng" (tia sáng); compa bị KÉO VÈO TỪ NGOÀI VÀO (vệt mờ), các cung sau compa lướt sang; tẩy lao vào chà ra vụn; chấm điểm có tia lửa nhỏ.
+- Thước đo góc TO (bán kính mặc định 2,6 đơn vị), vạch 1°/5°/10° rõ nét, SỐ MỐC 0–30–60–90–120–150–180 in to đậm (không ghi số mỗi 10° vì bị chen chúc); khi đánh dấu có vạch đỏ đúng số đo và SỐ ĐO TO trong ô đỏ (ví dụ 50°). Compa chân to, tên "THẦY CHUNG" chữ VÀNG ĐẬM VIỀN ĐEN cho nổi rõ.
 - Tên thầy IN ĐẬM DỌC THÂN dụng cụ: "THẦY HÀ VĂN CHUNG" (thước, cạnh huyền ê ke), "THẦY CHUNG" (chân compa, tẩy), "2B · THẦY CHUNG" (bút); chữ luôn đọc xuôi (`toolText`).
 - Màu hình nổi bật, nét dày 4·f, phát sáng nhẹ: cạnh chính `#0b2e83`; đường vuông góc `#d81b60`; phân giác/đường đặc biệt `#ff6f00`; đường chéo/nối thêm `#1e88e5` nét đứt; cạnh hình mới `#ef6c00` nét đứt; đoạn đối xứng `#8e24aa`. Điểm: vòng trắng tâm đỏ. Truyền `{col, w, dash}` vào `R`/`EKE`.
 
