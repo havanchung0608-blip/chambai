@@ -85,7 +85,7 @@
     <button id="bSfx">🎵 Âm thanh</button>
     <button id="bAgain">🔁 Đọc lại</button>
     <select id="vSel" title="Chọn giọng đọc"></select>
-    <label>Tốc độ <input id="vRate" type="range" min="0.6" max="1.4" step="0.05" value="0.95"></label>
+    <label>Tốc độ <input id="vRate" type="range" min="0.6" max="1.4" step="0.05" value="0.85"></label>
   </div>
 </div>
 <div id="sig">Thầy Hà Văn Chung – SĐT 0988938901</div>
@@ -549,14 +549,55 @@ function sector(V, a, b, r, al, c, right) {
   ctx.fillStyle = rgba(c, .38 * al); ctx.fill(); ctx.strokeStyle = rgba(c, al); ctx.lineWidth = 3 * VIEW.f; ctx.shadowColor = rgba(c, .7); ctx.shadowBlur = 6; ctx.stroke(); ctx.restore();
   if (right) { ctx.save(); ctx.globalAlpha = al; drawRA(V, a, b, COL.glow); ctx.restore(); }
 }
-function drawHL(key, j, T, soft) {
+// ---- các kiểu nhấn mạnh bổ sung ----
+function waveSeg(a, b, t, c) { // ApplyWave: sóng chạy dọc đoạn
+  const L = dist(a, b) || 1, u = {x: (b.x - a.x) / L, y: (b.y - a.y) / L}, n = {x: -u.y, y: u.x}, amp = 15 * VIEW.f * Math.max(0, 1 - t / 1.8);
+  ctx.save(); ctx.strokeStyle = rgba(c, .95); ctx.lineWidth = 7 * VIEW.f; ctx.lineCap = 'round'; ctx.shadowColor = rgba(c, .8); ctx.shadowBlur = 10;
+  ctx.beginPath(); for (let k = 0; k <= 48; k++) { const q = k / 48, w = amp * Math.sin(Math.PI * q) * Math.sin(2 * Math.PI * (q * 2 - t * 2.4)); const x = a.x + u.x * L * q + n.x * w, y = a.y + u.y * L * q + n.y * w; k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+  ctx.stroke(); ctx.restore();
+}
+function capsule(a, b, te, c) { // Circumscribe dạng viên thuốc bao quanh đoạn
+  if (te <= 0) return;
+  const L = dist(a, b), r = 17 * VIEW.f, per = 2 * L + 2 * Math.PI * r;
+  ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(Math.atan2(b.y - a.y, b.x - a.x));
+  ctx.strokeStyle = rgba(c, .95); ctx.lineWidth = 4 * VIEW.f; ctx.shadowColor = rgba(c, .8); ctx.shadowBlur = 8; ctx.setLineDash([per * clamp(te), per]);
+  ctx.beginPath(); ctx.roundRect(-r, -r, L + 2 * r, 2 * r, r); ctx.stroke(); ctx.restore();
+}
+function pulseRings(p, t, c) { // các vòng sóng lan lần lượt
+  for (let k = 0; k < 3; k++) { const q = (t - k * .22) / .8; if (q <= 0 || q >= 1) continue;
+    ctx.save(); ctx.strokeStyle = rgba(c, 1 - q); ctx.lineWidth = 4 * VIEW.f * (1 - q) + 1; ctx.beginPath(); ctx.arc(p.x, p.y, (10 + 60 * ease(q)) * VIEW.f, 0, 7); ctx.stroke(); ctx.restore(); }
+}
+function targetLock(p, t, c) { // khung ngắm khoá mục tiêu
+  const k = ease(clamp(t / .6)), R = lerp(75, 20, k) * VIEW.f, rot = (1 - k) * Math.PI, L = 9 * VIEW.f;
+  ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(rot); ctx.strokeStyle = rgba(c, .95); ctx.lineWidth = 3.5 * VIEW.f; ctx.lineCap = 'round';
+  for (let q = 0; q < 4; q++) { ctx.rotate(Math.PI / 2); ctx.beginPath(); ctx.moveTo(R, R - L); ctx.lineTo(R, R); ctx.lineTo(R - L, R); ctx.stroke(); }
+  ctx.restore();
+}
+function polyPath(P) { ctx.beginPath(); P.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); }
+function drawHL(key, j, T, soft, seed = 0) {
   const h = parseHL(key), t = T - j * .3; if (t < 0) return;
   ctx.save(); if (soft) ctx.globalAlpha = .3;
   const c = HLC[h.k] || HLC.y, pulse = .9 + .1 * Math.sin(clock * 2.2), f = VIEW.f, P = h.P.map(W);
   if (h.t === 's') {
-    glowLine(P[0], lerpP(P[0], P[1], ease(clamp(t / .5))), c, pulse);
-    const te = (t - .45) / .8; passFlash(P[0], P[1], te, c);
+    const v = soft ? 0 : seed % 4;
+    if (v === 1) { glowLine(P[0], P[1], c, .45, 6); waveSeg(P[0], P[1], t, c); }                       // sóng chạy dọc đoạn
+    else if (v === 2) { glowLine(P[0], lerpP(P[0], P[1], ease(clamp(t / .5))), c, pulse); capsule(P[0], P[1], t / .9, c); } // viền viên thuốc bao quanh
+    else if (v === 3) glowLine(P[0], P[1], c, pulse, 9 * (1 + 1.3 * Math.sin(Math.PI * clamp(t / .6)))); // phình dày rồi thu lại
+    else glowLine(P[0], lerpP(P[0], P[1], ease(clamp(t / .5))), c, pulse);
+    const te = v === 0 ? (t - .45) / .8 : -1; passFlash(P[0], P[1], te, c);
     if (!soft && te > 0 && te < 1 && Math.random() < .4) { const hp = lerpP(P[0], P[1], clamp(te * 1.3)); FX.parts.push({x: hp.x, y: hp.y, vx: (Math.random() - .5) * 110, vy: (Math.random() - .5) * 110, drag: 3, life: .45, t: 0, r: 3 * f, col: c, type: 'star', rot: 0, vr: 8}); }
+  } else if (h.t === 'p' && !soft && seed % 3 === 1) { // tô màu quét ngang hình
+    const xs = P.map(p => p.x), x0 = Math.min(...xs), x1 = Math.max(...xs), ys = P.map(p => p.y);
+    ctx.save(); polyPath(P); ctx.clip(); ctx.fillStyle = rgba(c, .3);
+    ctx.fillRect(x0, Math.min(...ys), (x1 - x0) * ease(clamp(t / .8)), Math.max(...ys) - Math.min(...ys));
+    const ex = x0 + (x1 - x0) * ease(clamp(t / .8)); if (t < .8) { ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(ex - 6 * f, Math.min(...ys), 6 * f, Math.max(...ys) - Math.min(...ys)); }
+    ctx.restore(); polyPath(P); ctx.save(); ctx.strokeStyle = rgba(c, .9); ctx.lineWidth = 4.5 * f; ctx.lineJoin = 'round'; ctx.stroke(); ctx.restore();
+  } else if (h.t === 'p' && !soft && seed % 3 === 2) { // các cạnh sáng lần lượt
+    const n = P.length, q = clamp(t / 1.1) * n;
+    ctx.save(); polyPath(P); ctx.fillStyle = rgba(c, .16 * clamp(t / 1.1)); ctx.fill();
+    ctx.strokeStyle = rgba(c, .95); ctx.lineWidth = 6 * f; ctx.lineCap = 'round'; ctx.shadowColor = rgba(c, .8); ctx.shadowBlur = 10;
+    for (let e = 0; e < n; e++) { const r = clamp(q - e); if (r <= 0) break; const a = P[e], b = lerpP(P[e], P[(e + 1) % n], r); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+    ctx.restore();
   } else if (h.t === 'p') {
     const sc = 1 + .08 * Math.sin(Math.PI * clamp(t / .7)), g = centroidPx(P);
     const Q = P.map(p => ({x: g.x + (p.x - g.x) * sc, y: g.y + (p.y - g.y) * sc}));
@@ -565,14 +606,26 @@ function drawHL(key, j, T, soft) {
     ctx.strokeStyle = rgba(c, .9); ctx.lineWidth = 4.5 * f; ctx.lineJoin = 'round'; ctx.shadowColor = rgba(c, .6); ctx.shadowBlur = 6 * f; ctx.stroke(); ctx.restore();
     circumscribe(P, (t - .25) / 1.3, c);
   } else if (h.t === 't') {
-    focusOn(P[0], t / .55, c); flashBurst(P[0], (t - .45) / .55, c);
+    const v = soft ? 0 : seed % 3;
+    if (v === 1) pulseRings(P[0], t, c); else if (v === 2) targetLock(P[0], t, c);
+    else { focusOn(P[0], t / .55, c); flashBurst(P[0], (t - .45) / .55, c); }
     ctx.save(); ctx.fillStyle = rgba(c, .3 * pulse); ctx.strokeStyle = rgba(c, pulse); ctx.lineWidth = 3.5 * f;
     ctx.beginPath(); ctx.arc(P[0].x, P[0].y, 15 * f * ease(clamp(t / .55)), 0, 7); ctx.fill(); ctx.stroke(); ctx.restore();
   } else if (h.t === 'r' || h.t === 'a') {
     const [a, b] = angPair(h.P[1], h.P[0], h.P[2]), g = easeOutBack(clamp(t / .55));
     // nảy bán kính tại chỗ – hình quạt luôn nằm TRONG góc, không vượt ra ngoài hai cạnh
     const bump = (t > .55 && t < 1.6) ? 1 + .08 * Math.sin((t - .55) * 14) * (1.6 - t) : 1;
-    sector(h.P[1], a, b, (h.t === 'r' ? .6 : .95) * g * bump, pulse, c, h.t === 'r');
+    const v = soft ? 0 : seed % 3, R0 = h.t === 'r' ? .6 : .95;
+    if (v === 1) { // quét cung từ cạnh này sang cạnh kia, có mũi tên
+      const e2 = a + (b - a) * ease(clamp(t / .7)); sector(h.P[1], a, e2, R0, pulse, c, h.t === 'r' && t > .7);
+      const wv = W(h.P[1]), R = (R0 + .18) * VIEW.s; ctx.save(); ctx.strokeStyle = rgba(c, 1); ctx.lineWidth = 3.5 * f; ctx.beginPath(); ctx.arc(wv.x, wv.y, R, -rad(a), -rad(e2), true); ctx.stroke();
+      const tip = {x: wv.x + R * Math.cos(-rad(e2)), y: wv.y + R * Math.sin(-rad(e2))}, ta = -rad(e2) - Math.PI / 2;
+      ctx.fillStyle = rgba(c, 1); ctx.beginPath(); ctx.moveTo(tip.x + 9 * f * Math.cos(ta), tip.y + 9 * f * Math.sin(ta)); ctx.lineTo(tip.x + 6 * f * Math.cos(ta + 2.3), tip.y + 6 * f * Math.sin(ta + 2.3)); ctx.lineTo(tip.x + 6 * f * Math.cos(ta - 2.3), tip.y + 6 * f * Math.sin(ta - 2.3)); ctx.fill(); ctx.restore();
+    } else if (v === 2) { // hai cung đồng tâm nở ra
+      sector(h.P[1], a, b, R0 * ease(clamp(t / .5)), pulse * .8, c, h.t === 'r');
+      const wv = W(h.P[1]); ctx.save(); ctx.strokeStyle = rgba(c, .9); ctx.lineWidth = 2.5 * f;
+      [1.25, 1.45].forEach((m, q) => { const kk = ease(clamp((t - .15 * q) / .5)); if (kk > 0) { ctx.beginPath(); ctx.arc(wv.x, wv.y, R0 * m * kk * VIEW.s, -rad(a), -rad(b), true); ctx.stroke(); } }); ctx.restore();
+    } else sector(h.P[1], a, b, R0 * g * bump, pulse, c, h.t === 'r');
   } else { // 'e': Transform đoạn thứ nhất chồng lên đoạn thứ hai; 'l': tịnh tiến song song
     const g = ease(clamp(t / .5));
     glowLine(P[0], lerpP(P[0], P[1], g), c, pulse);
@@ -592,8 +645,9 @@ function drawHL(key, j, T, soft) {
 function strongBeat(b) { return !!((b.line && /⇒|Vậy/.test(b.line)) || (b.node && PLAY.cur >= 0 && TL[PLAY.cur].bi === 0)); }
 function hlBoom(key, strong) {
   const h = parseHL(key), c = W(hlCenter(key)), col = HLC[h.k] || HLC.y, P = h.P.map(W);
-  if (strong) { fxRing(c.x, c.y, col, h.t === 'p' ? 230 : 150); fxSpark(c.x, c.y, 30, col); fxPunch(.03); SND.impact(); }
-  else { FX.rings.push({x: c.x, y: c.y, col, t: 0, life: .6, max: h.t === 'p' ? 120 : 80}); fxSpark(c.x, c.y, 12, col); SND.whoosh(); }
+  if (strong) { fxRing(c.x, c.y, col, h.t === 'p' ? 230 : 150); fxSpark(c.x, c.y, 30, col); fxPunch(.03); }
+  else { FX.rings.push({x: c.x, y: c.y, col, t: 0, life: .6, max: h.t === 'p' ? 120 : 80}); fxSpark(c.x, c.y, 12, col); }
+  SND.hl(h.t, PLAY.hlN = (PLAY.hlN || 0) + 1, strong);
   if (h.t === 'p') P.forEach(v => fxSpark(v.x, v.y, strong ? 10 : 5, col));                       // hình: tia lửa bắn từ các đỉnh
   else if (h.t === 'e' || h.t === 'l') [lerpP(P[0], P[1], .5), lerpP(P[2], P[3], .5)].forEach(m => fxSpark(m.x, m.y, strong ? 12 : 6, col)); // hai đoạn: tia lửa ở trung điểm mỗi đoạn
   else if (h.t === 'r' || h.t === 'a') fxSpark(P[1].x, P[1].y, strong ? 18 : 9, col);            // góc: tia lửa từ đỉnh góc
@@ -687,7 +741,7 @@ function updateMan(dt, grip, finger, mode, approach) {
     ty = hi ? clamp(pos.y + .22 * ch, .28 * ch, .51 * ch) + .007 * ch * Math.sin(clock * 5) : clamp(pos.y + .32 * ch, .51 * ch, .57 * ch);
   } else { MAN.flyT = 0; tx = home; ty = .51 * ch + .005 * ch * Math.sin(clock * 1.6); }
   const k = 1 - Math.exp(-dt * (PLAY.fast ? 18 : 7)), ox = MAN.sx, oy = MAN.sy;
-  const vmax = (PLAY.fast ? 3 : .75) * ch * dt, ddx = tx - MAN.sx;                 // đi bộ: tốc độ có giới hạn, chân bước đều
+  const vmax = (PLAY.fast ? 3 : 1) * ch * dt, ddx = tx - MAN.sx;                 // đi bộ: tốc độ có giới hạn, chân bước đều
   MAN.sx += Math.sign(ddx) * Math.min(Math.abs(ddx) * Math.min(1, dt * 6), vmax); MAN.sy += (ty - MAN.sy) * k;
   { const fl = Math.min(...Object.values(FIG.P).map(P => W(P).x)) - .06 * ch, fr = Math.max(...Object.values(FIG.P).map(P => W(P).x)) + .06 * ch;
     const inside = MAN.sx + .07 * ch > fl && MAN.sx - .07 * ch < fr;          // trong vùng hình: mờ đi để không che
@@ -962,8 +1016,8 @@ function fmt(s) {
 
 /* ---------- Giọng đọc tiếng Việt – GIỌNG NỮ MẶC ĐỊNH ---------- */
 const AUDIO_CLIPS = {};
-const VOICE = {on: true, rate: .95, v: null, pitch: 1, token: 0, list: [], audio: null};
-try { const r = parseFloat(localStorage.getItem('tc_rate')); if (r >= .6 && r <= 1.4) VOICE.rate = r; } catch (e) {}
+const VOICE = {on: true, rate: .85, v: null, pitch: 1, token: 0, list: [], audio: null};
+try { const r = parseFloat(localStorage.getItem('tc_rate_v2')); if (r >= .6 && r <= 1.4) VOICE.rate = r; } catch (e) {}
 function vRank(v) {
   const n = (v.name + ' ' + (v.voiceURI || '')).toLowerCase();
   if (!/^vi/i.test(v.lang || '') && !/vietnam|tiếng việt/.test(n)) return -1;
@@ -1080,7 +1134,7 @@ function showBeat(i, jump) {
   if (i >= TL.length) { PLAY.cur = TL.length - 1; stopSpeak(); updateButtons(); return; }
   if (jump || i !== PLAY.cur + 1) { PLAY.op = null; PLAY.opsQ = []; applyInstant(i); }
   else finishCurrentOps();
-  PLAY.cur = i; PLAY.hlT = 0; PLAY.hlAct = {}; PLAY.speakT = 0;
+  PLAY.cur = i; PLAY.hlT = 0; PLAY.hlAct = {}; PLAY.speakT = 0; PLAY.hlN = 0;
   const {si, b} = TL[i];
   PLAY.drawScene = si === 0;
   if (PLAY.lastSi !== si) { if (PLAY.lastSi !== undefined) startAct('turn'); PLAY.lastSi = si; }   // sang cảnh mới: xoay người
@@ -1095,7 +1149,8 @@ function checkDone() {
   if (!PLAY.opsDone || !PLAY.spoke || PLAY.paused) return;
   if (PLAY.auto && PLAY.cur < TL.length - 1) {
     const sceneEnd = TL[PLAY.cur + 1].si !== TL[PLAY.cur].si;
-    PLAY.timer = setTimeout(() => showBeat(PLAY.cur + 1), PLAY.fast ? 120 : (sceneEnd ? 1400 : 450));
+    const hasHL = (TL[PLAY.cur].b.hl || []).length > 0;
+    PLAY.timer = setTimeout(() => showBeat(PLAY.cur + 1), PLAY.fast ? 120 : (sceneEnd ? 1800 : hasHL ? 1600 : 700));
   }
 }
 function next() {
@@ -1264,7 +1319,18 @@ function noiseBurst(dur, f0, f1, vol, when) {
   g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + dur * .3); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
   s.connect(bp); bp.connect(g); g.connect(SFX.master); s.start(t, Math.random()); s.stop(t + dur + .05);
 }
+const PENTA = [523, 587, 659, 784, 880, 1047, 1175, 1319, 1568];
 const SND = {
+  hl: (t, n, strong) => { // âm nhấn mạnh theo loại đối tượng; các lần trong một dòng đi lên theo thang ngũ cung
+    const f0 = PENTA[n % PENTA.length];
+    if (t === 's') { noiseBurst(.26, 500, 3800, .06); tone(f0 * .5, .22, 'sine', .08, 0, f0); tone(f0, .4, 'triangle', .06, .12); }             // vút lên + nốt
+    else if (t === 't') { tone(f0 * 2, .7, 'sine', .07); tone(f0 * 5.4, .35, 'sine', .02); tone(f0 * 2.76, .5, 'sine', .025); }               // tiếng chuông "ting"
+    else if (t === 'p') { [1, 1.26, 1.5, 2].forEach((m, i) => tone(f0 * m, .55, 'triangle', .05, i * .06)); noiseBurst(.45, 2000, 7000, .03); } // hợp âm lấp lánh
+    else if (t === 'r' || t === 'a') { tone(260, .18, 'sawtooth', .035, 0, 1100); tone(f0 * 1.5, .45, 'sine', .07, .15); }                    // "dzít" + nốt
+    else if (t === 'e') { tone(f0, .16, 'sine', .08); tone(f0 * 1.5, .32, 'sine', .08, .13); }                                                // hai nốt "khớp"
+    else if (t === 'l') tone(f0 * .75, .45, 'sine', .07, 0, f0 * 1.5);                                                                         // còi trượt
+    if (strong) { tone(58, .6, 'sine', .32, 0, 34); [1, 1.25, 1.5, 2].forEach(m => tone(392 * m, 1.3, 'triangle', .03, .06)); }               // kết luận: trống trầm + hợp âm
+  },
   fall: d => { tone(1900, Math.max(.15, d), 'sine', .05, 0, 240); noiseBurst(Math.max(.15, d), 2600, 500, .05); },           // rít gió khi rơi
   thud: () => { tone(72, .45, 'sine', .42, 0, 36); noiseBurst(.24, 520, 120, .3); tone(330, .1, 'triangle', .15); },          // đập "rầm"
   whirr: d => { tone(140, Math.max(.15, d), 'sawtooth', .035, 0, 560); noiseBurst(Math.max(.15, d), 700, 3200, .05); },     // vù vù xoay
@@ -1359,7 +1425,7 @@ function frame(ts) {
   ctx.save(); ctx.globalAlpha = dimA; mks.forEach(m => FIG.MK[m] && FIG.MK[m]()); ctx.restore();
   if (curK >= 0) {
     hls.forEach((k, i) => { if (PLAY.hlAct[i] !== undefined && i !== curK) drawHL(k, 0, PLAY.hlT - PLAY.hlAct[i], true); });
-    drawHL(hls[curK], 0, PLAY.hlT - PLAY.hlAct[curK], false);
+    drawHL(hls[curK], 0, PLAY.hlT - PLAY.hlAct[curK], false, PLAY.cur + curK * 2);   // đổi kiểu theo từng dòng / từng đối tượng
     ITEMS.forEach(it => { if (it.k === 'pt') drawPoint(it.P, it.name, it.dx, it.dy); });
     mks.forEach(m => FIG.MK[m] && FIG.MK[m]());
   }
@@ -1397,7 +1463,7 @@ function boot() {
   $('#bAgain').onclick = () => { if (PLAY.cur >= 0) { clearTimeout(PLAY.timer); PLAY.spoke = false; speak(TL[PLAY.cur].b.say, () => { PLAY.spoke = true; checkDone(); }); } };
   $('#vSel').onchange = e => { VOICE.v = VOICE.list[+e.target.value] || null; VOICE.pitch = (VOICE.v && vMale(VOICE.v) && VOICE.list.every(vMale)) ? 1.35 : 1; try { localStorage.setItem('tc_voice_nu', VOICE.v ? VOICE.v.name : ''); } catch (er) {} };
   const rt = $('#vRate'); rt.value = VOICE.rate;
-  rt.oninput = () => { VOICE.rate = +rt.value; try { localStorage.setItem('tc_rate', VOICE.rate); } catch (e) {} };
+  rt.oninput = () => { VOICE.rate = +rt.value; try { localStorage.setItem('tc_rate_v2', VOICE.rate); } catch (e) {} };
   document.addEventListener('keydown', e => {
     if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
     if (e.code === 'Space' || e.code === 'ArrowRight') { e.preventDefault(); next(); }
