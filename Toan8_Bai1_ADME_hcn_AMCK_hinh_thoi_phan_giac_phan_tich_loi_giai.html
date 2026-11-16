@@ -221,7 +221,7 @@ function drawPencil(tip) {
   ctx.fillText('2B  Thầy Chung', 0, 1);
   ctx.restore();
 }
-const pencilGrip = tip => { const d = pencilDir(), k = .095 * VIEW.ch; return {x: tip.x + d.x * k, y: tip.y + d.y * k}; };
+const pencilGrip = tip => { const d = pencilDir(), k = .07 * VIEW.ch; return {x: tip.x + d.x * k, y: tip.y + d.y * k}; };
 
 function drawRulerTool(a, b, side, al) {
   if (al <= 0) return;
@@ -545,8 +545,8 @@ function updateMan(dt, grip, finger, mode, approach) {
   let tx, ty;
   if (pos) { // đứng ngoài mép trái hình, vươn tay vào vẽ/chỉ để không che hình
     const fl = Math.min(...Object.values(FIG.P).map(P => W(P).x));
-    tx = Math.max(pos.x - .27 * ch, Math.min(pos.x - .19 * ch, fl - .1 * ch));
-    ty = clamp(pos.y + .1 * ch, .3 * ch, .64 * ch);
+    tx = Math.max(pos.x - .17 * ch, Math.min(pos.x - .12 * ch, fl - .1 * ch));
+    ty = clamp(pos.y + .06 * ch, .25 * ch, .66 * ch);
   }
   else if (!PLAY.drawScene || PLAY.cur < 0) { tx = idleX(); ty = .51 * ch; }
   else { tx = MAN.sx; ty = .51 * ch; }
@@ -565,17 +565,17 @@ function updateMan(dt, grip, finger, mode, approach) {
   MAN.finger = null;
   if (grip) MAN.hand = grip;
   else if (finger) {
-    const d = Math.max(1, dist(S, finger)), r = Math.min(.32 * ch, d), u = {x: (finger.x - S.x) / d, y: (finger.y - S.y) / d};
+    const d = Math.max(1, dist(S, finger)), r = Math.min(.25 * ch, d), u = {x: (finger.x - S.x) / d, y: (finger.y - S.y) / d};
     MAN.finger = {x: S.x + u.x * r, y: S.y + u.y * r};
     MAN.hand = {x: MAN.finger.x - u.x * .048 * ch, y: MAN.finger.y - u.y * .048 * ch};
-  } else if (mode === 'cheer') MAN.hand = {x: S.x + .17 * ch * MAN.facing, y: S.y - .22 * ch + .02 * ch * Math.sin(clock * 13)};
+  } else if (mode === 'cheer') MAN.hand = {x: S.x + .14 * ch * MAN.facing, y: S.y - .15 * ch + .015 * ch * Math.sin(clock * 13)};
   else if (mode === 'think') MAN.hand = {x: S.x + .03 * ch * MAN.facing, y: S.y - .02 * ch}; // nắm tay chống cằm
-  else MAN.hand = {x: S.x + .05 * ch, y: S.y + .28 * ch};
+  else MAN.hand = {x: S.x + .06 * ch * MAN.facing, y: S.y + .2 * ch};
   const fc = MAN.facing;
   MAN.handPose = grip ? 'grip' : finger ? 'point' : mode === 'cheer' ? 'open' : mode === 'think' ? 'fist' : 'relax';
   MAN.freePose = mode === 'cheer' ? 'open' : (VOICE.talking && !grip && mode !== 'think') ? 'open' : 'relax';
-  if (mode === 'cheer') MAN.free = {x: S.x - .17 * ch * fc, y: S.y - .22 * ch + .02 * ch * Math.sin(clock * 13 + 1)};
-  else if (VOICE.talking && !grip && mode !== 'think') MAN.free = {x: S.x - .1 * ch * fc, y: S.y - .08 * ch + .03 * ch * Math.sin(clock * 4)};
+  if (mode === 'cheer') MAN.free = {x: S.x - .14 * ch * fc, y: S.y - .15 * ch + .015 * ch * Math.sin(clock * 13 + 1)};
+  else if (VOICE.talking && !grip && mode !== 'think') MAN.free = {x: S.x - .13 * ch * fc, y: S.y - .03 * ch + .025 * ch * Math.sin(clock * 4)};
   else MAN.free = null;
 }
 const LOOK = {skin: '#f1b892', skinL: '#c07a52', shirt: '#fafafa', shirtL: '#bfc4cc', shorts: '#1f3a8c', shortsL: '#13265e', shoe: '#ffffff', shoeL: '#b8bcc4', stripe: '#1f3a8c'};
@@ -691,15 +691,15 @@ function mouthTarget() {
 function drawMan(part) {
   const u = VIEW.ch, j = MAN.jump, S = {x: MAN.sx, y: MAN.sy - j}, fc = MAN.facing, L = LOOK;
   const st = MAN.stool || 0, hip = {x: S.x, y: S.y + .17 * u};
-  const ground = .985 * u - st - j * .6, th = .14 * u, arm = .163 * u, p = MAN.phase, w = MAN.walk, lw = Math.max(1.2, .0022 * u);
+  const ground = .985 * u - st - j * .6, th = .14 * u, arm = .11 * u, p = MAN.phase, w = MAN.walk, lw = Math.max(1.2, .0022 * u);
   const fwd = (a, b) => ((a.x - b.x) * fc > 0 ? a : b), below = (a, b) => (a.y > b.y ? a : b), back = (a, b) => ((a.x - b.x) * fc < 0 ? a : b);
-  const shF = {x: S.x + .056 * u * fc, y: S.y + .012 * u}, shB = {x: S.x - .056 * u * fc, y: S.y + .012 * u};
+  const shF = {x: S.x + .062 * u * fc, y: S.y + .014 * u}, shB = {x: S.x - .062 * u * fc, y: S.y + .014 * u};
   const drawArm = (Sh, T, pick, finger, pose) => {
     const k = ik(Sh, T, arm, arm, pick), J = k.J, E = k.E;
-    limb(J, E, .04 * u, .047 * u, .024 * u, L.skin, L.skinL, .25);                       // cẳng tay rắn chắc
-    limb(Sh, J, .052 * u, .066 * u, .034 * u, L.skin, L.skinL, .52);                     // bắp tay cuồn cuộn
-    musc(Sh, J, .45, .82, .022 * u); musc(J, E, .06, .38, .013 * u);
-    limb(Sh, lerpP(Sh, J, .38), .074 * u, .072 * u, .066 * u, L.shirt, L.shirtL, .5);    // tay áo căng
+    limb(J, E, .038 * u, .044 * u, .026 * u, L.skin, L.skinL, .25);                      // cẳng tay ngắn, rắn chắc
+    limb(Sh, J, .05 * u, .06 * u, .036 * u, L.skin, L.skinL, .55);                       // bắp tay
+    musc(Sh, J, .5, .85, .02 * u);
+    limb(Sh, lerpP(Sh, J, .5), .07 * u, .07 * u, .066 * u, L.shirt, L.shirtL, .5);       // tay áo phông nam (suông)
     const ang = pose === 'point' && finger ? Math.atan2(finger.y - E.y, finger.x - E.x) : Math.atan2(E.y - J.y, E.x - J.x);
     const c = Math.cos(ang), ts = Math.abs(c) > .3 ? Math.sign(c) : fc;
     drawHand(E, ang, pose, ts, finger ? dist(E, finger) / (.001 * u) - 22 : 24);
@@ -729,7 +729,7 @@ function drawMan(part) {
     limb(K, F, .046 * u, .058 * u, .028 * u, L.skin, L.skinL, .3);                       // bắp chân to
     limb(l.H, K, .07 * u, .074 * u, .048 * u, L.skin, L.skinL, .4);                       // đùi rắn chắc
     musc(K, F, .1, .5, .014 * u); musc(l.H, K, .45, .85, .016 * u);
-    limb(l.H, lerpP(l.H, K, .5), .086 * u, .086 * u, .082 * u, L.shorts, L.shortsL, .5);   // ống quần đùi
+    limb(l.H, lerpP(l.H, K, 1.05), .092 * u, .09 * u, .084 * u, L.shorts, L.shortsL, .5);   // ống quần short nam dài tới gối
     ctx.fillStyle = '#fff'; ctx.strokeStyle = '#c9ccd3'; ctx.lineWidth = lw;
     ctx.beginPath(); ctx.roundRect(F.x - .016 * u, F.y - .012 * u, .032 * u, .03 * u, .006 * u); ctx.fill(); ctx.stroke();
     const sx = F.x + .012 * u * fc, sy = F.y + .02 * u;
@@ -744,28 +744,30 @@ function drawMan(part) {
     ctx.strokeStyle = '#9aa0aa'; ctx.lineWidth = Math.max(1, .0018 * u);
     for (let q = 0; q < 3; q++) { const lx = sx + (.002 + q * .006) * u * fc; ctx.beginPath(); ctx.moveTo(lx - .003 * u, sy - .014 * u + q * .002 * u); ctx.lineTo(lx + .003 * u, sy - .01 * u + q * .002 * u); ctx.stroke(); }
   };
-  const fa = MAN.free || {x: shB.x - .02 * u * fc + .03 * u * w * Math.sin(p), y: S.y + .25 * u};
+  const fa = MAN.free || {x: shB.x - .03 * u * fc + .025 * u * w * Math.sin(p), y: S.y + .2 * u};
   drawArm(shB, fa, MAN.free ? below : back, null, MAN.freePose || 'relax');
   drawLeg(legs.find(l => l.sg === -fc)); drawLeg(legs.find(l => l.sg === fc));
-  // quần đùi xanh navy
-  const qw = .058 * u;
+  // quần short nam: cạp, dây rút, túi chéo
+  const qw = .066 * u;
   ctx.fillStyle = L.shorts; ctx.strokeStyle = L.shortsL; ctx.lineWidth = lw;
-  ctx.beginPath(); ctx.moveTo(S.x - qw, S.y + .125 * u); ctx.lineTo(S.x + qw, S.y + .125 * u);
-  ctx.lineTo(S.x + qw + .008 * u, hip.y + .035 * u); ctx.lineTo(S.x - qw - .008 * u, hip.y + .035 * u); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.moveTo(S.x, S.y + .135 * u); ctx.lineTo(S.x, hip.y + .015 * u); ctx.stroke();
-  // áo phông trắng ôm thân chữ V: vai rộng, ngực nở, eo thon
-  const sw = .072 * u, cw = .078 * u, ww = .05 * u, hy = S.y + .14 * u;
-  ctx.beginPath(); ctx.moveTo(S.x - sw, S.y - .006 * u);
-  ctx.quadraticCurveTo(S.x - cw - .008 * u, S.y + .05 * u, S.x - ww, hy);
-  ctx.quadraticCurveTo(S.x, hy + .008 * u, S.x + ww, hy);
-  ctx.quadraticCurveTo(S.x + cw + .008 * u, S.y + .05 * u, S.x + sw, S.y - .006 * u);
-  ctx.quadraticCurveTo(S.x, S.y - .022 * u, S.x - sw, S.y - .006 * u);
-  ctx.fillStyle = L.shirt; ctx.fill(); ctx.strokeStyle = L.shirtL; ctx.lineWidth = lw; ctx.stroke();
-  ctx.strokeStyle = 'rgba(140,148,160,.5)'; ctx.lineWidth = Math.max(1, .0026 * u);         // cơ ngực, bụng hằn qua áo
-  ctx.beginPath(); ctx.arc(S.x - .028 * u, S.y + .03 * u, .03 * u, .15 * Math.PI, .85 * Math.PI); ctx.stroke();
-  ctx.beginPath(); ctx.arc(S.x + .028 * u, S.y + .03 * u, .03 * u, .15 * Math.PI, .85 * Math.PI); ctx.stroke();
-  for (let r = 0; r < 2; r++) { const y = S.y + .085 * u + r * .024 * u; ctx.beginPath(); ctx.moveTo(S.x - .016 * u, y); ctx.quadraticCurveTo(S.x, y + .005 * u, S.x + .016 * u, y); ctx.stroke(); }
-  ctx.beginPath(); ctx.moveTo(S.x, S.y + .068 * u); ctx.lineTo(S.x, hy - .006 * u); ctx.stroke();
+  ctx.beginPath(); ctx.rect(S.x - qw, S.y + .12 * u, 2 * qw, hip.y + .04 * u - (S.y + .12 * u)); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#17306f'; ctx.fillRect(S.x - qw, S.y + .12 * u, 2 * qw, .016 * u);                       // cạp quần
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(1, .0025 * u);                                         // dây rút
+  ctx.beginPath(); ctx.moveTo(S.x - .006 * u, S.y + .13 * u); ctx.lineTo(S.x - .01 * u, S.y + .155 * u);
+  ctx.moveTo(S.x + .006 * u, S.y + .13 * u); ctx.lineTo(S.x + .01 * u, S.y + .155 * u); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.28)';
+  [-1, 1].forEach(sg => { ctx.beginPath(); ctx.moveTo(S.x + sg * .04 * u, S.y + .137 * u); ctx.lineTo(S.x + sg * (qw - .004 * u), S.y + .17 * u); ctx.stroke(); }); // túi chéo
+  ctx.beginPath(); ctx.moveTo(S.x, S.y + .137 * u); ctx.lineTo(S.x, hip.y + .02 * u); ctx.stroke();
+  // áo phông nam: vai vuông, thân suông, gấu thẳng
+  const sw = .074 * u, hw = .072 * u, hy = S.y + .135 * u;
+  ctx.beginPath(); ctx.moveTo(S.x - sw, S.y - .004 * u);
+  ctx.lineTo(S.x - hw, hy); ctx.lineTo(S.x + hw, hy); ctx.lineTo(S.x + sw, S.y - .004 * u);
+  ctx.quadraticCurveTo(S.x + .03 * u, S.y - .018 * u, S.x, S.y - .018 * u); ctx.quadraticCurveTo(S.x - .03 * u, S.y - .018 * u, S.x - sw, S.y - .004 * u);
+  ctx.closePath(); ctx.fillStyle = L.shirt; ctx.fill(); ctx.strokeStyle = L.shirtL; ctx.lineWidth = lw; ctx.stroke();
+  ctx.strokeStyle = 'rgba(140,148,160,.45)'; ctx.lineWidth = Math.max(1, .0022 * u);                       // nếp áo dọc
+  [-1, 1].forEach(sg => { ctx.beginPath(); ctx.moveTo(S.x + sg * .045 * u, S.y + .05 * u); ctx.lineTo(S.x + sg * .05 * u, hy - .004 * u); ctx.stroke(); });
+  ctx.fillStyle = '#1f3a8c'; ctx.font = `bold ${Math.round(.03 * u)}px "Times New Roman"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('π', S.x - .035 * u * fc, S.y + .035 * u);                                                    // logo ngực
   // cổ to + cổ áo tròn
   limb({x: S.x, y: S.y + .004 * u}, {x: S.x, y: S.y - .03 * u}, .05 * u, .05 * u, .046 * u, L.skin, L.skinL, .5);
   ctx.strokeStyle = L.shirtL; ctx.lineWidth = Math.max(1.5, .004 * u);
