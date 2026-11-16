@@ -54,6 +54,8 @@ Thứ tự tìm file mẫu:
 2. Project doc `mau/MAU_mo_phong_phan_tich_di_len.html` hoặc máy thầy `D:\soạn cho giáo viên thi\toán 7 mô phỏng\Lớp 8\MAU_mo_phong_phan_tich_di_len.html` – bản CŨ (chưa có người que): nếu buộc phải dùng thì phải bổ sung đủ mục 0B.
 3. Nếu không có cả hai: dựng lại engine đúng các mục dưới đây và mục 0B.
 
+**Nhiều bài trong một file**: mỗi bài là một khối `PROBLEMS.push((function () { let FIG, SCENES; ... return {name: 'Bài 2', FIG, SCENES}; })());` đặt trước `boot();` – engine tự hiện nút chọn "Bài 1 | Bài 2 | …" ở thanh trên (mỗi bài đủ tab Đề bài, Phân tích GT, Câu a, b, c). Khi thầy bảo "làm thêm bài vào file đó" thì thêm một khối mới, không tạo file khác. Tên các điểm (A, B, …) là biến cục bộ trong từng khối nên các bài không đụng nhau.
+
 Trong file mẫu người que, khối bài cụ thể bắt đầu từ dòng `/* ===== TOÁN 8 – BÀI 1 ...` (toạ độ điểm, điểm phụ dựng hình, `FIG` gồm `title`, `badge`, `box`, `cen`, `P`, `MK`; `SCENES`; khối kiểm tra) tới trước `boot();`. `FIG.P` phải chứa MỌI điểm có tên (dùng cho nhấn mạnh, tính mép trái hình để nhân vật đứng ngoài). `FIG.box` chừa mép trái khoảng 4 đơn vị cho nhân vật đứng. Engine nằm phía trên – không sửa khi chỉ đổi bài. Với file mẫu này: mỗi kết luận viết NGUYÊN cây trong `tree` của một cảnh (mỗi nút có `say`, `hl`), engine tự sinh beat theo thứ tự đi sâu, tự xếp các ô lá cùng cấp thành một cột có viền vàng và tự co chữ cho thấy trọn cây – KHÔNG cần khối gộp sơ đồ ở 3A.9.
 
 Giữ NGUYÊN toàn bộ phần engine (từ `<style>` tới hết hàm `boot()`, kể cả khối "GIỌNG ĐỌC TIẾNG VIỆT – GIỌNG NỮ MẶC ĐỊNH" nằm ngay trước khối bài), chỉ thay khối "BÀI CỤ THỂ" ở cuối (từ dòng `/* ===== TOÁN ...` tới trước `boot();`): toạ độ điểm, `FIG`, `SCENES`, khối kiểm tra, khối gộp sơ đồ (3A.9). Đổi `<title>`, `FIG.title`, `FIG.badge` ("Toán 7/8/9"). Nếu dùng file mẫu cũ chưa có khối giọng nữ thì chép khối từ Project doc `mau/khoi_giong_doc.js` vào ngay trước `boot();`.
@@ -71,6 +73,7 @@ Các thao tác (op) trong `ops` của một nhịp (beat):
 - `R(P,Q,{col,dash,aux,side,w,away})` – thước (rơi từ trên trời) + bút kẻ đoạn P→Q.
 - `EKE(V,alongDeg,drawDeg,0,{to:Q,back:Q2})` – ê ke đỉnh vuông V nằm trên đường hướng alongDeg, kẻ tới Q (và `back` kẻ tiếp phía bên kia tới Q2).
 - `CMP(C,r,a0,a1,{dur})` – compa tâm C bán kính r vẽ cung từ a0° tới a1° (đường phụ, sẽ bị tẩy).
+- `PRO(V, baseDeg, deg, ccw, {r})` – (file mẫu người que) thước đo góc xoay bay vào, tâm tại V, vạch 0 trùng tia gốc hướng `baseDeg` (ví dụ `G.ang(A,B)`), đánh dấu điểm phụ ứng với `deg` độ theo chiều `ccw` (true = ngược chiều kim đồng hồ); sau đó dùng `R` kẻ tia qua điểm đánh dấu. Dùng khi đề cho số đo góc (vẽ góc 50°, 70°, tia phân giác 35°…).
 - `PRO(V,baseDeg,deg,ccw)` – thước đo góc.
 - `PT('A',A,dx,dy)` – điểm + nhãn (dx,dy pixel, dy dương là xuống dưới; đặt nhãn vào vùng trống phía ngoài hình, không đè đường kẻ – với giao điểm đặt trong góc trống giữa hai đường). `LB`, `ANG`, `RA(V,d1,d2)` (kí hiệu góc vuông), `WAIT(s)`.
 - `ERASE_ALL({dur})` – tẩy mọi đường dựng phụ của cảnh (luôn đặt cuối cảnh Đề bài).

@@ -13,6 +13,9 @@
   #ttl{font-size:clamp(18px,1.6vw,26px);font-weight:bold;color:var(--gold);margin-right:auto}
   .tab{font-family:inherit;font-size:clamp(15px,1.3vw,21px);font-weight:bold;padding:6px 14px;border-radius:999px;border:2px solid #2f6fde;background:transparent;color:var(--ink);cursor:pointer}
   .tab.on{background:#2f6fde;color:#fff}
+  .prob{font-family:inherit;font-size:clamp(15px,1.3vw,21px);font-weight:bold;padding:6px 14px;border-radius:999px;border:2px solid #e8553a;background:transparent;color:var(--ink);cursor:pointer}
+  .prob.on{background:#e8553a;color:#fff}
+  #probs{display:flex;gap:6px;margin-right:10px}
   #main{flex:1;display:grid;grid-template-columns:46% 54%;min-height:0}
   #figP{position:relative;background:#fbfaf3;min-height:0;overflow:hidden}
   #cv{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -69,6 +72,7 @@
 <div id="app">
   <div id="top">
     <div id="ttl">Toán 8 – Bài 1: Hình chữ nhật, hình thoi và đường phân giác</div>
+    <div id="probs"></div>
     <div id="tabs"></div>
   </div>
   <div id="main">
@@ -194,6 +198,7 @@ function renderItems(mul = 1) {
     if (it.k === 'seg') strokeSeg(it, W(it.P), W(it.Q), al);
     else if (it.k === 'arc') strokeArc(it.C, it.r, it.a0, it.a1, al);
     else if (it.k === 'ra') drawRA(it.V, it.d1, it.d2, null, al);
+    else if (it.k === 'apt') { const w = W(it.P); ctx.save(); ctx.globalAlpha = al; ctx.fillStyle = COL.aux; ctx.beginPath(); ctx.arc(w.x, w.y, 3.5 * VIEW.f, 0, 7); ctx.fill(); ctx.restore(); }
   }
   for (const it of ITEMS) if (it.k === 'pt') drawPoint(it.P, it.name, it.dx, it.dy, mul);
 }
@@ -441,6 +446,43 @@ function CMP(C, r, a0, a1, o = {}) { // compa KÉO VÈO TỪ NGOÀI VÀO (tay d�
     commit() { ITEMS.push(it); TOOLMEM.cmp = geo(1); side = null; fresh = null; landed = false; cur = null; }
   };
 }
+// Thước đo góc: XOAY BAY VÀO, đáp "keng"; vạch 0 trùng tia gốc baseDeg, đánh dấu điểm ứng với deg độ (ccw: quay ngược chiều kim đồng hồ)
+function drawProtractor(V, baseDeg, ccw, R, al, offs, rot, markDeg) {
+  const sg = ccw ? 1 : -1, ca = d => -rad(baseDeg + sg * d);
+  ctx.save(); ctx.globalAlpha = al;
+  if (offs) { ctx.translate(V.x + offs.x, V.y + offs.y); ctx.rotate(rot || 0); ctx.translate(-V.x, -V.y); }
+  ctx.beginPath(); ctx.moveTo(V.x + R * Math.cos(ca(0)), V.y + R * Math.sin(ca(0))); ctx.arc(V.x, V.y, R, ca(0), ca(180), ccw); ctx.closePath();
+  ctx.shadowColor = 'rgba(120,90,0,.3)'; ctx.shadowBlur = 12; ctx.fillStyle = 'rgba(255,246,200,.62)'; ctx.fill();
+  ctx.shadowBlur = 0; ctx.strokeStyle = '#a07800'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.strokeStyle = '#5a4300'; ctx.lineWidth = 1;
+  for (let d = 0; d <= 180; d += 5) { const a = ca(d), L = d % 10 === 0 ? R * .12 : R * .06; ctx.beginPath(); ctx.moveTo(V.x + R * Math.cos(a), V.y + R * Math.sin(a)); ctx.lineTo(V.x + (R - L) * Math.cos(a), V.y + (R - L) * Math.sin(a)); ctx.stroke(); }
+  ctx.fillStyle = '#5a4300'; ctx.font = `bold ${Math.round(R * .085)}px "Times New Roman"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (let d = 0; d <= 180; d += 30) { const a = ca(d); ctx.fillText(String(d), V.x + R * .78 * Math.cos(a), V.y + R * .78 * Math.sin(a)); }
+  ctx.beginPath(); ctx.arc(V.x, V.y, R * .3, ca(0), ca(180), ccw); ctx.stroke();
+  const am = ca(90); toolText('THẦY HÀ VĂN CHUNG', {x: V.x + R * .55 * Math.cos(am), y: V.y + R * .55 * Math.sin(am)}, am + Math.PI / 2, R * .095, '#8a1c1c');
+  if (markDeg !== undefined) { const a = -rad(markDeg); ctx.strokeStyle = '#e8173c'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(V.x + R * .62 * Math.cos(a), V.y + R * .62 * Math.sin(a)); ctx.lineTo(V.x + R * 1.08 * Math.cos(a), V.y + R * 1.08 * Math.sin(a)); ctx.stroke(); }
+  ctx.restore();
+}
+function PRO(V, baseDeg, deg, ccw = true, o = {}) {
+  const LT = .2, tgt = baseDeg + (ccw ? 1 : -1) * deg, Rw = o.r || 1.7, mark = G.dir(V, tgt, Rw * 1.04);
+  let landed = false;
+  const tipAt = p => { const m = W(mark), b = p < .55 ? 14 : p < .75 ? Math.sin((p - .55) / .2 * Math.PI) * 12 : 0; return {x: m.x, y: m.y - b}; };
+  return {
+    kind: 'pen', enter: 'spin', landT: LT, dur: o.dur || 2.6,
+    under(p) {
+      if (p < .02) landed = false;
+      const v = W(V); let off = {x: 0, y: 0}, rot = 0;
+      if (p < LT) { const e = ease(p / LT); off = {x: (1 - e) * VIEW.cw * .7, y: -(1 - e) * VIEW.ch * .8}; rot = (1 - e) * Math.PI * 4; }
+      else if (p > .9) { const e = (p - .9) / .1; off = {x: e * e * VIEW.cw * .7, y: -e * e * VIEW.ch * .8}; rot = -e * Math.PI * 2; }
+      if (!landed && p >= LT) { landed = true; fxSpark(v.x, v.y, 22, '255,200,60'); fxShake(6); SND.clang(); MAN.sq = 1; }
+      drawProtractor(v, baseDeg, ccw, Rw * VIEW.s, 1, off, rot, p > .35 ? tgt : undefined);
+      if (p > .66) { const m = W(mark); ctx.fillStyle = COL.aux; ctx.beginPath(); ctx.arc(m.x, m.y, 3.5 * VIEW.f, 0, 7); ctx.fill(); }
+    },
+    over(p) { drawPencil(tipAt(p)); },
+    grip(p) { return pencilGrip(tipAt(p)); },
+    commit() { ITEMS.push({k: 'apt', P: mark, aux: true}); landed = false; }
+  };
+}
 function PT(name, P, dx, dy, o = {}) {
   const it = {k: 'pt', name, P, dx, dy};
   return {
@@ -459,6 +501,7 @@ function RA(V, d1, d2) {
 }
 function WAIT(s) { return {dur: s, under() {}, over() {}, grip: () => null, commit() {}}; }
 function itemCenter(it) {
+  if (it.k === 'apt') return W(it.P);
   if (it.k === 'seg') return W(lerpP(it.P, it.Q, .5));
   const m = (it.a0 + it.a1) / 2; return W(G.dir(it.C, m, it.r));
 }
@@ -1485,17 +1528,30 @@ function frame(ts) {
   requestAnimationFrame(frame);
 }
 
-function boot() {
-  document.title = FIG.title;
-  $('#ttl').textContent = FIG.title; $('#badge').textContent = FIG.badge;
-  $('#wm').innerHTML = Array(40).fill('<span>Thầy Hà Văn Chung</span>').join('');
-  buildTimeline();
-  const tabs = [...new Set(SCENES.map(s => s.tab))];
-  tabs.forEach(t => {
+// Nhiều bài trong một file: PROBLEMS = [{name, FIG, SCENES}], nút chọn bài ở thanh trên
+const PROBLEMS = [];
+function loadProblem(k, first) {
+  const pr = PROBLEMS[k]; PLAY.prob = k;
+  clearTimeout(PLAY.timer); stopSpeak();
+  FIG = pr.FIG; SCENES = pr.SCENES; buildTimeline();
+  document.title = FIG.title; $('#ttl').textContent = FIG.title; $('#badge').textContent = FIG.badge;
+  $('#tabs').innerHTML = '';
+  [...new Set(SCENES.map(s => s.tab))].forEach(t => {
     const b = document.createElement('button'); b.className = 'tab'; b.textContent = t; b.dataset.tab = t;
     b.onclick = () => { const si = SCENES.findIndex(s => s.tab === t); stopSpeak(); PLAY.paused = false; showBeat(SCENES[si].first, true); };
     $('#tabs').appendChild(b);
   });
+  document.querySelectorAll('.prob').forEach((b, i) => b.classList.toggle('on', i === k));
+  PLAY.cur = -1; PLAY.op = null; PLAY.opsQ = []; PLAY.opsDone = true; PLAY.paused = false; PLAY.shownScene = -1; PLAY.lastSi = undefined;
+  ITEMS = []; ERASE = null; TOOLMEM.cmp = null; FX.parts = []; FX.rings = []; MAN.sx = null; MAN.trail = [];
+  window.__TL = TL; window.__SCENES = SCENES;
+  if (!first) { resize(); renderText(); updateButtons(); }
+}
+function boot() {
+  $('#wm').innerHTML = Array(40).fill('<span>Thầy Hà Văn Chung</span>').join('');
+  PROBLEMS.forEach((pr, k) => { const b = document.createElement('button'); b.className = 'prob'; b.textContent = pr.name; b.onclick = () => loadProblem(k); $('#probs').appendChild(b); });
+  if (PROBLEMS.length < 2) $('#probs').style.display = 'none';
+  loadProblem(0, true);
   $('#bMode').onclick = () => { PLAY.auto = !PLAY.auto; updateButtons(); if (PLAY.auto) checkDone(); else clearTimeout(PLAY.timer); };
   $('#bNext').onclick = next;
   $('#bSfx').onclick = () => { SFX.on = !SFX.on; $('#bSfx').textContent = SFX.on ? '🎵 Âm thanh' : '🔇 Âm thanh'; $('#bSfx').classList.toggle('off', !SFX.on); };
@@ -1518,10 +1574,10 @@ function boot() {
   resize(); renderText(); updateButtons();
   requestAnimationFrame(frame);
   // dùng cho kiểm thử
-  window.__TL = TL; window.__SCENES = SCENES;
   window.__go = i => { PLAY.auto = false; PLAY.fast = true; showBeat(i, true); finishCurrentOps(); updateButtons(); };
 }
 
+PROBLEMS.push((function () { let FIG, SCENES;
 /* ===== TOÁN 8 – BÀI 1: HÌNH CHỮ NHẬT, HÌNH THOI VÀ ĐƯỜNG PHÂN GIÁC ===== */
 const A = {x: 0, y: 0}, B = {x: 0, y: 6}, C = {x: 8, y: 0};
 const M = G.lerp(B, C, .5);
@@ -1845,6 +1901,9 @@ SCENES = [
   if (!eq(G.d(Rb, Pb), 2) || !eq(G.d(X1, B), G.d(X1, C))) bad.push('dựng hình');
   if (bad.length) console.warn('KIỂM TRA HÌNH SAI', bad); else console.log('Kiểm tra hình: đúng');
 })();
+
+return {name: 'Bài 1', FIG, SCENES};
+})());
 
 boot();
 </script>
