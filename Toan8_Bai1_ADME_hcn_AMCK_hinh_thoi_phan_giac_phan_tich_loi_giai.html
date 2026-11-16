@@ -368,7 +368,7 @@ function R(P, Q, o = {}) { // thước RƠI TỪ TRÊN TRỜI XUỐNG, đập "r
       if (p < LT) { const e = p / LT; dy = -(1 - e * e) * VIEW.ch * 1.15; rot = (1 - e) * .4; }
       else if (p < LT + .08) dy = -Math.sin((p - LT) / .08 * Math.PI) * .035 * VIEW.ch;
       else if (p > .9) { const e = (p - .9) / .1; dy = -e * e * VIEW.ch * 1.2; rot = -e * .35; }
-      if (!landed && p >= LT) { landed = true; fxDustLine(a, b); fxShake(11); SND.thud(); }
+      if (!landed && p >= LT) { landed = true; fxDustLine(a, b); fxShake(11); SND.thud(); MAN.sq = 1; }
       drawRulerTool(a, b, side, 1, dy, rot);
       if (p > .27) strokeSeg(it, a, tipAt(p));
     },
@@ -391,7 +391,7 @@ function EKE(V, alongDeg, drawDeg, _unused, o = {}) { // ê ke XOAY TÍT BAY VÀ
       let off = {x: 0, y: 0}, rot = 0;
       if (p < LT) { const e = ease(p / LT); off = {x: (1 - e) * VIEW.cw * .75, y: -(1 - e) * VIEW.ch * .85}; rot = (1 - e) * Math.PI * 6; }
       else if (p > .9) { const e = (p - .9) / .1; off = {x: e * e * VIEW.cw * .75, y: -e * e * VIEW.ch * .85}; rot = -e * Math.PI * 3; }
-      if (!landed && p >= LT) { landed = true; fxSpark(v.x, v.y, 28, '90,190,255'); fxShake(7); SND.clang(); }
+      if (!landed && p >= LT) { landed = true; fxSpark(v.x, v.y, 28, '90,190,255'); fxShake(7); SND.clang(); MAN.sq = 1; }
       drawEke(v, uA, uD, la * s, ld * s, 1, off, rot);
       if (p > .3) strokeSeg(it, v, tipAt(p));
     },
@@ -431,7 +431,7 @@ function CMP(C, r, a0, a1, o = {}) { // compa KÉO VÈO TỪ NGOÀI VÀO (tay d�
           g = shiftGeo(g, dx);
         } else if (TOOLMEM.cmp) g = lerpGeo(TOOLMEM.cmp, g, e);
       }
-      if (!landed && p >= .18) { landed = true; if (fresh) { fxSpark(g.N.x, g.N.y, 20, '255,215,90'); fxShake(5); SND.shing(); } }
+      if (!landed && p >= .18) { landed = true; if (fresh) { fxSpark(g.N.x, g.N.y, 20, '255,215,90'); fxShake(5); SND.shing(); MAN.sq = .7; } }
       if (p > .2) strokeArc(C, r, a0, angAt(p));
       drawCompass(g, p > .94 ? 1 - (p - .94) / .06 * .3 : 1);
       cur = g;
@@ -590,7 +590,7 @@ function drawHL(key, j, T, soft) {
 }
 function hlBoom(key) { // kích hoạt nhấn mạnh: sóng xung kích + tia sáng + giật phóng + tiếng "bùm"
   const h = parseHL(key), c = W(hlCenter(key)), col = HLC[h.k] || HLC.y;
-  fxRing(c.x, c.y, col, h.t === 'p' ? 250 : 170); fxSpark(c.x, c.y, 30, col); fxPunch(.04); SND.impact();
+  fxRing(c.x, c.y, col, h.t === 'p' ? 250 : 170); fxSpark(c.x, c.y, 30, col); fxPunch(.04); SND.impact(); if (!MAN.act) startAct('lunge');
 }
 function hlCenter(key) { const h = parseHL(key), s = h.P.reduce((a, b) => ({x: a.x + b.x, y: a.y + b.y}), {x: 0, y: 0}); return {x: s.x / h.P.length, y: s.y / h.P.length}; }
 function tick(P, Q, n) {
@@ -637,16 +637,53 @@ function gestureFinger(key, T) {
     default: { const tap = Math.abs(Math.sin(u * Math.PI * 3)); return {x: P[0].x - 10 * tap, y: P[0].y - 4 - 20 * tap}; }
   }
 }
+/* ---------- ĐẠO DIỄN ĐỘNG TÁC: mỗi sự kiện một động tác, đổi liên tục như phim ---------- */
+const ACTD = {summon: .7, brace: .6, pull: .55, nod: .8, thumb: 1.3, wave: 1.3, turn: .7, hop: .65, flex: 1.3, lunge: .45, flip: .95};
+function startAct(n, d) { if (PLAY.fast) return; MAN.act = {n, t: 0, d: d || ACTD[n] || 1}; }
+const GESTURES = ['nod', 'thumb', 'wave', 'hop', 'flex', 'turn'];
+function pickGesture() { let g; do { g = GESTURES[Math.floor(Math.random() * GESTURES.length)]; } while (g === MAN.lastG); MAN.lastG = g; return g; }
+function actState(S, ch, fc) {
+  const a = MAN.act, o = {dx: 0, dy: 0, rot: 0, turn: 1, tilt: 0, free: null, freePose: null, pivot: 'center'};
+  if (!a) return o;
+  const k = clamp(a.t / a.d), bell = Math.sin(Math.PI * k);
+  switch (a.n) {
+    case 'summon': o.free = {x: S.x - .03 * ch * fc, y: S.y - .27 * ch}; o.freePose = 'point'; o.tilt = -.2 * bell; o.dy = -.015 * ch * bell; break; // chỉ tay lên trời gọi thước
+    case 'brace': o.rot = -.13 * fc * bell; o.pivot = 'feet'; o.free = {x: S.x + .15 * ch * fc, y: S.y - .06 * ch}; o.freePose = 'open'; break; // thủ thế đón ê ke
+    case 'pull': o.rot = -.12 * fc * bell; o.pivot = 'feet'; o.dx = -.02 * ch * fc * bell; break;                                         // ngả người kéo compa
+    case 'nod': o.tilt = .13 * Math.sin(k * Math.PI * 4); break;
+    case 'thumb': o.free = {x: S.x - .1 * ch * fc, y: S.y - .05 * ch}; o.freePose = 'thumb'; o.tilt = -.06 * bell; break;
+    case 'wave': o.free = {x: S.x - .1 * ch * fc + .035 * ch * Math.sin(a.t * 15), y: S.y - .2 * ch}; o.freePose = 'open'; break;
+    case 'turn': o.turn = Math.cos(k * Math.PI * 2); break;                                                                                 // xoay người một vòng
+    case 'hop': o.dy = -.08 * ch * bell; break;                                                                                             // bật nhảy
+    case 'flex': o.free = {x: S.x - .085 * ch * fc, y: S.y - .1 * ch}; o.freePose = 'fist'; o.tilt = .07 * bell; break;                    // gồng tay khoe cơ
+    case 'lunge': o.dx = .022 * ch * fc * bell; o.rot = .1 * fc * bell; o.pivot = 'feet'; break;                                           // lao người theo cú "bùm"
+    case 'flip': o.dy = -.17 * ch * bell; o.rot = -fc * 2 * Math.PI * ease(k); break;                                                       // lộn nhào ăn mừng
+  }
+  return o;
+}
+function manXf(S, ground, u) {
+  const o = MAN.actO || {}, sq = MAN.sq || 0;
+  const pv = o.pivot === 'feet' ? {x: S.x, y: ground} : {x: S.x, y: S.y + .1 * u};
+  const rot = o.rot || 0, dx = o.dx || 0, dy = o.dy || 0, sx = (o.turn === undefined ? 1 : o.turn) * (1 + .07 * sq), sy = 1 - .11 * sq;
+  return {
+    apply() { ctx.translate(pv.x + dx, pv.y + dy); ctx.rotate(rot); ctx.scale(sx, sy); ctx.translate(-pv.x, -pv.y); },
+    pt(p) { const x = (p.x - pv.x) * sx, y = (p.y - pv.y) * sy, c = Math.cos(rot), sn = Math.sin(rot); return {x: pv.x + dx + x * c - y * sn, y: pv.y + dy + x * sn + y * c}; }
+  };
+}
 function updateMan(dt, grip, finger, mode, approach) {
   const ch = VIEW.ch, tgt = grip || finger, pos = tgt || approach;
   let tx, ty;
   const home = idleX(); // luôn đứng NGOÀI mép trái hình, chỉ vươn tay (tay tự dài ra) vào vẽ / chỉ
-  if (pos) { tx = home + clamp((pos.x - home) * .02, -.012 * ch, .012 * ch); ty = clamp(pos.y + .32 * ch, .5 * ch, .57 * ch); }
-  else { tx = home; ty = .51 * ch + .005 * ch * Math.sin(clock * 1.6); }
-  const k = 1 - Math.exp(-dt * (PLAY.fast ? 18 : 7)), ox = MAN.sx;
+  if (pos) {
+    tx = home + clamp((pos.x - home) * .02, -.012 * ch, .012 * ch);
+    const hi = pos.y + .32 * ch < .51 * ch; MAN.flyT = hi ? 1 : 0;                // chỗ cao: bật lên lơ lửng như siêu anh hùng
+    ty = hi ? clamp(pos.y + .22 * ch, .28 * ch, .51 * ch) + .007 * ch * Math.sin(clock * 5) : clamp(pos.y + .32 * ch, .51 * ch, .57 * ch);
+  } else { MAN.flyT = 0; tx = home; ty = .51 * ch + .005 * ch * Math.sin(clock * 1.6); }
+  const k = 1 - Math.exp(-dt * (PLAY.fast ? 18 : 7)), ox = MAN.sx, oy = MAN.sy;
   MAN.sx += (tx - MAN.sx) * k; MAN.sy += (ty - MAN.sy) * k;
+  MAN.fly = (MAN.fly || 0) + ((MAN.flyT || 0) - (MAN.fly || 0)) * Math.min(1, dt * 6);
   // chân ngắn: với chỗ cao thì đứng lên bục gỗ
-  const need = Math.max(0, .955 * ch - (MAN.sy + .17 * ch + .27 * ch) - .012 * ch);
+  const need = 0; // không cần bục: chỗ cao thì bay lên
   MAN.stool = (MAN.stool || 0) + (need - (MAN.stool || 0)) * Math.min(1, dt * 10);
   const vx = (MAN.sx - ox) / Math.max(dt, 1e-3);
   MAN.phase += (MAN.sx - ox) / (.05 * ch);
@@ -670,6 +707,17 @@ function updateMan(dt, grip, finger, mode, approach) {
   if (mode === 'cheer') MAN.free = {x: S.x - .14 * ch * fc, y: S.y - .15 * ch + .015 * ch * Math.sin(clock * 13 + 1)};
   else if (VOICE.talking && !grip && mode !== 'think') MAN.free = {x: S.x - .13 * ch * fc, y: S.y - .03 * ch + .025 * ch * Math.sin(clock * 4)};
   else MAN.free = null;
+  // động tác đang diễn
+  if (MAN.act) { MAN.act.t += dt; if (MAN.act.t >= MAN.act.d) MAN.act = null; }
+  MAN.actO = actState(S, ch, fc);
+  if (MAN.actO.free) { MAN.free = MAN.actO.free; MAN.freePose = MAN.actO.freePose; }
+  MAN.handAbs = !!(grip || finger);
+  MAN.sq = (MAN.sq || 0) * Math.exp(-dt * 7);
+  // bóng mờ khi lao nhanh / bay / nhào lộn
+  const sp = Math.hypot(MAN.sx - ox, MAN.sy - oy) / Math.max(dt, 1e-3);
+  MAN.trail = (MAN.trail || []).filter(g => clock - g.t < .22);
+  const fast = sp > .45 * ch || (MAN.act && ['hop', 'flip', 'turn', 'lunge'].includes(MAN.act.n));
+  if (fast && (!MAN.trail.length || clock - MAN.trail[MAN.trail.length - 1].t > .035)) MAN.trail.push({x: MAN.sx, y: MAN.sy, t: clock, o: Object.assign({}, MAN.actO)});
 }
 const LOOK = {skin: '#f1b892', skinL: '#c07a52', shirt: '#fafafa', shirtL: '#bfc4cc', shorts: '#1f3a8c', shortsL: '#13265e', shoe: '#ffffff', shoeL: '#b8bcc4', stripe: '#1f3a8c'};
 // Một đoạn chi có cơ bắp: rộng wa ở A, phình wm tại tỉ lệ tm, thon wb ở B
@@ -712,6 +760,9 @@ function drawHand(E, ang, pose, ts, idxLen) {
     seg(22, KN[0], 22 + il * .55, KN[0], W5[0]); seg(22 + il * .55, KN[0], 22 + il, KN[0], W5[0] * .92); nail(22 + il, KN[0], 0);
     [1, 2, 3].forEach(i => { seg(22, KN[i], 28, KN[i] + 1.5, W5[i]); seg(28, KN[i] + 1.5, 23, KN[i] + 4, W5[i] * .9); });
     seg(6, -10, 15, -9, 6); seg(15, -9, 23, -3, 5.4);
+  } else if (pose === 'thumb') { // giơ ngón cái
+    KN.forEach((y, i) => { seg(22, y, 29, y + 1, W5[i]); seg(29, y + 1, 25, y + 5, W5[i] * .9); });
+    seg(8, -10, 10, -24, 6.4); seg(10, -24, 11, -35, 5.8); nail(11, -35, -1.5);
   } else if (pose === 'grip' || pose === 'fist') {
     KN.forEach((y, i) => { seg(22, y, 29, y + 1, W5[i]); seg(29, y + 1, 25, y + 5, W5[i] * .9); });
     seg(6, -10, 16, -12, 6.2); seg(16, -12, 27, -8, 5.6); nail(27, -8, .35);
@@ -798,11 +849,24 @@ function drawMan(part) {
     const c = Math.cos(ang), ts = Math.abs(c) > .3 ? Math.sign(c) : fc;
     drawHand(E, ang, pose, ts, finger ? dist(E, finger) / (.001 * u) - 22 : 24);
   };
+  const xf = manXf(S, ground, u);
   ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  if (part === 'front') {
-    drawArm(shF, MAN.hand || {x: S.x, y: S.y + .3 * u}, below, MAN.finger, MAN.handPose || 'relax');
+  if (part === 'front') { // vai theo động tác; tay cầm dụng cụ / chỉ hình giữ đúng vị trí thật
+    const H = MAN.hand || {x: S.x, y: S.y + .3 * u};
+    drawArm(xf.pt(shF), MAN.handAbs ? H : xf.pt(H), below, MAN.finger, MAN.handPose || 'relax');
     ctx.restore(); return;
   }
+  if (part === 'body' && MAN.trail && MAN.trail.length) { // bóng mờ chuyển động
+    const keep = MAN.actO;
+    MAN.trail.forEach((g, i) => { ctx.save(); ctx.globalAlpha = .1 + .04 * i; ctx.translate(g.x - MAN.sx, g.y - MAN.sy); MAN.actO = g.o; drawMan('ghost'); ctx.restore(); });
+    MAN.actO = keep;
+  }
+  if (MAN.fly > .3) { // vệt gió dưới chân khi bay
+    ctx.save(); ctx.strokeStyle = `rgba(120,190,255,${.55 * MAN.fly})`; ctx.lineWidth = Math.max(2, .005 * u); ctx.lineCap = 'round';
+    for (let q = 0; q < 5; q++) { const x = S.x + (q - 2) * .022 * u, y0 = hip.y + .2 * u + ((clock * 260 + q * 37) % (.12 * u)); ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y0 + .04 * u); ctx.stroke(); }
+    ctx.restore();
+  }
+  xf.apply();
   // bục gỗ (chỉ hiện khi cần với cao)
   if (st > .01 * u) {
     const bx = S.x - .085 * u, by = .985 * u - st;
@@ -816,7 +880,8 @@ function drawMan(part) {
   const legs = [-1, 1].map((sg, i) => {
     const ph = i ? Math.PI : 0;
     return {sg, H: {x: hip.x + sg * .028 * u, y: hip.y},
-      foot: {x: hip.x + sg * .032 * u + amp * Math.sin(p + ph), y: ground - .03 * u - .015 * u * w * Math.max(0, Math.cos(p + ph))}};
+      foot: lerpP({x: hip.x + sg * .032 * u + amp * Math.sin(p + ph), y: ground - .03 * u - .015 * u * w * Math.max(0, Math.cos(p + ph))},
+                  {x: hip.x - .05 * u * fc + sg * .014 * u, y: hip.y + .16 * u}, MAN.fly || 0)}; // bay: co chân
   });
   const drawLeg = l => {
     const k = ik(l.H, l.foot, th, th, fwd), K = k.J, F = k.E;
@@ -869,7 +934,7 @@ function drawMan(part) {
   // đầu ảnh chân dung: miệng nói theo giọng, mắt chớp
   if (!MAN.jaw) MAN.jaw = 0;
   MAN.jaw += (mouthTarget() - MAN.jaw) * .55;
-  const tilt = (MAN.finger ? clamp((MAN.finger.x - S.x) / u, -.3, .3) * .12 : 0) + (VOICE.talking ? .03 * Math.sin(clock * 3.2) : 0);
+  const tilt = (MAN.finger ? clamp((MAN.finger.x - S.x) / u, -.3, .3) * .12 : 0) + (VOICE.talking ? .03 * Math.sin(clock * 3.2) : 0) + ((MAN.actO && MAN.actO.tilt) || 0);
   drawPhotoHead(S.x + .004 * u * fc, S.y - .012 * u, .22 * u, fc, MAN.jaw, tilt);
   ctx.restore();
 }
@@ -1007,6 +1072,8 @@ function showBeat(i, jump) {
   PLAY.cur = i; PLAY.hlT = 0; PLAY.hlAct = {}; PLAY.speakT = 0;
   const {si, b} = TL[i];
   PLAY.drawScene = si === 0;
+  if (PLAY.lastSi !== si) { if (PLAY.lastSi !== undefined) startAct('turn'); PLAY.lastSi = si; }   // sang cảnh mới: xoay người
+  else if ((b.line || b.node) && !(b.ops && b.ops.length) && Math.random() < .7) startAct(pickGesture()); // đổi động tác giữa các bước
   PLAY.opsQ = (b.ops || []).slice(); PLAY.op = null; PLAY.opsDone = PLAY.opsQ.length === 0;
   renderText();
   PLAY.spoke = false;
@@ -1204,6 +1271,9 @@ const SND = {
 function sfxStartOp(op) {
   if (!op) return;
   if (op.start) op.start();
+  if (op.enter === 'drop') startAct('summon', (op.landT || .2) * op.dur + .25);
+  else if (op.enter === 'spin') startAct('brace', (op.landT || .2) * op.dur + .2);
+  else if (op.enter === 'slide' && op.isFresh && op.isFresh()) startAct('pull');
   if (op.kind !== 'compass') TOOLMEM.cmp = null;
   const sp = PLAY.fast ? 4 : 1, lt = (op.landT || .2) * op.dur / sp;
   if (op.enter === 'drop') SND.fall(lt);
@@ -1257,7 +1327,7 @@ function frame(ts) {
   let grip = null;
   if (PLAY.op) { ctx.save(); ctx.globalAlpha = 0; PLAY.op.under(p); ctx.restore(); grip = PLAY.op.grip(p); }
   const cheer = !!(ready && b.line && /Vậy/.test(b.line));
-  if (cheer && PLAY.cheerSound !== PLAY.cur) { PLAY.cheerSound = PLAY.cur; SND.fanfare(); fxConfetti(); }
+  if (cheer && PLAY.cheerSound !== PLAY.cur) { PLAY.cheerSound = PLAY.cur; SND.fanfare(); fxConfetti(); startAct('flip'); }
   const finger = !PLAY.op && !cheer && curK >= 0 ? gestureFinger(hls[curK], PLAY.hlT - PLAY.hlAct[curK]) : null;
   const mode = cheer ? 'cheer' : (!PLAY.drawScene && PLAY.cur >= 0 && curK < 0 ? 'think' : '');
   let approach = null; // đang đọc: đi sẵn tới chỗ sắp vẽ
