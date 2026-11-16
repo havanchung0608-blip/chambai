@@ -1288,7 +1288,9 @@ function sfxInit() {
     const len = ac.sampleRate * 2, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
     SFX.noise = buf;
-    SFX.master = ac.createGain(); SFX.master.gain.value = .55; SFX.master.connect(ac.destination);
+    const comp = ac.createDynamicsCompressor(); comp.threshold.value = -12; comp.knee.value = 8; comp.ratio.value = 6; comp.attack.value = .003; comp.release.value = .2;
+    comp.connect(ac.destination);
+    SFX.master = ac.createGain(); SFX.master.gain.value = .85; SFX.master.connect(comp);
     const src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
     const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 3500; bp.Q.value = .9;
     const g = ac.createGain(); g.gain.value = 0;
@@ -1323,15 +1325,15 @@ function noiseBurst(dur, f0, f1, vol, when) {
 }
 const PENTA = [523, 587, 659, 784, 880, 1047, 1175, 1319, 1568];
 const SND = {
-  hl: (t, n, strong) => { // âm nhấn mạnh theo loại đối tượng; các lần trong một dòng đi lên theo thang ngũ cung
-    const f0 = PENTA[n % PENTA.length];
-    if (t === 's') { noiseBurst(.26, 500, 3800, .06); tone(f0 * .5, .22, 'sine', .08, 0, f0); tone(f0, .4, 'triangle', .06, .12); }             // vút lên + nốt
-    else if (t === 't') { tone(f0 * 2, .7, 'sine', .07); tone(f0 * 5.4, .35, 'sine', .02); tone(f0 * 2.76, .5, 'sine', .025); }               // tiếng chuông "ting"
-    else if (t === 'p') { [1, 1.26, 1.5, 2].forEach((m, i) => tone(f0 * m, .55, 'triangle', .05, i * .06)); noiseBurst(.45, 2000, 7000, .03); } // hợp âm lấp lánh
-    else if (t === 'r' || t === 'a') { tone(260, .18, 'sawtooth', .035, 0, 1100); tone(f0 * 1.5, .45, 'sine', .07, .15); }                    // "dzít" + nốt
-    else if (t === 'e') { tone(f0, .16, 'sine', .08); tone(f0 * 1.5, .32, 'sine', .08, .13); }                                                // hai nốt "khớp"
-    else if (t === 'l') tone(f0 * .75, .45, 'sine', .07, 0, f0 * 1.5);                                                                         // còi trượt
-    if (strong) { tone(58, .6, 'sine', .32, 0, 34); [1, 1.25, 1.5, 2].forEach(m => tone(392 * m, 1.3, 'triangle', .03, .06)); }               // kết luận: trống trầm + hợp âm
+  hl: (t, n, strong) => { // âm nhấn mạnh (TO, rõ) theo loại đối tượng; các lần trong một dòng đi lên theo thang ngũ cung
+    const f0 = PENTA[n % PENTA.length], V = 2.6;
+    if (t === 's') { noiseBurst(.3, 500, 4200, .07 * V); tone(f0 * .5, .24, 'sine', .09 * V, 0, f0); tone(f0, .45, 'triangle', .07 * V, .12); }      // vút lên + nốt
+    else if (t === 't') { tone(f0 * 2, .8, 'sine', .08 * V); tone(f0 * 5.4, .4, 'sine', .025 * V); tone(f0 * 2.76, .55, 'sine', .03 * V); }           // chuông "ting"
+    else if (t === 'p') { [1, 1.26, 1.5, 2].forEach((m, i) => tone(f0 * m, .6, 'triangle', .055 * V, i * .06)); noiseBurst(.5, 2000, 7000, .035 * V); } // hợp âm lấp lánh
+    else if (t === 'r' || t === 'a') { tone(260, .2, 'sawtooth', .04 * V, 0, 1100); tone(f0 * 1.5, .5, 'sine', .08 * V, .15); }                     // "dzít" + nốt
+    else if (t === 'e') { tone(f0, .18, 'sine', .09 * V); tone(f0 * 1.5, .36, 'sine', .09 * V, .13); }                                               // hai nốt "khớp"
+    else if (t === 'l') tone(f0 * .75, .5, 'sine', .08 * V, 0, f0 * 1.5);                                                                             // còi trượt
+    if (strong) { tone(58, .7, 'sine', .45 * V * .6, 0, 34); noiseBurst(.35, 150, 2500, .08 * V); [1, 1.25, 1.5, 2].forEach(m => tone(392 * m, 1.4, 'triangle', .035 * V, .06)); } // kết luận: trống trầm + hợp âm
   },
   fall: d => { tone(1900, Math.max(.15, d), 'sine', .05, 0, 240); noiseBurst(Math.max(.15, d), 2600, 500, .05); },           // rít gió khi rơi
   thud: () => { tone(72, .45, 'sine', .42, 0, 36); noiseBurst(.24, 520, 120, .3); tone(330, .1, 'triangle', .15); },          // đập "rầm"
