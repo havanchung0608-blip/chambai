@@ -19,7 +19,8 @@ Mọi phần dưới đây là engine, KHÔNG viết lại; chỉ cần giữ ng
 
 **Hình dáng nhân vật (giống ảnh thầy gửi)**
 - Đầu là ẢNH CHÂN DUNG thầy Chung (nền trong suốt, nhúng base64 trong `HEAD.img`), kiểu chibi đầu to (`.22·u`). Mắt CHỚP như thật (`EYES` = toạ độ khe mắt trong ảnh, `blinkAmount`: 2,5–5,5 s/lần, đôi khi chớp đôi). Miệng NÓI THEO GIỌNG: tách hàm dưới tại `HEAD.split`, mỗi sự kiện `onboundary` (mỗi tiếng) mở rồi khép, ngắt ở dấu câu (`mouthTarget`).
-- Thân: cơ bắp vừa phải, chân ngắn, tay ngắn kiểu chibi; áo phông trắng NAM (vai vuông, thân suông, logo π), quần short nam xanh navy dài tới gối (cạp, dây rút, túi), tất trắng, giày trắng sọc xanh. KHÔNG eo thắt, KHÔNG đường cong ngực (trông giống nữ). KHÔNG đồ màu tối (che hình).
+- Thân: cơ bắp vừa phải, chân ngắn, tay ngắn kiểu chibi; áo phông trắng NAM (vai vuông, thân suông), quần short nam xanh navy dài tới gối (cạp, dây rút, túi), tất trắng, giày trắng sọc xanh. KHÔNG eo thắt, KHÔNG đường cong ngực (trông giống nữ). KHÔNG đồ màu tối (che hình).
+- **Ngực áo LUÔN in tên: "Thầy Chung" (đỏ đậm `#c62828`) và dòng dưới "SĐT 0988938901" (xanh navy)**, đặt lệch nhẹ về phía tay sau để tay trước không che; chữ luôn đọc xuôi kể cả khi xoay người (lật ngược lại khi `turn < 0`).
 - Bàn tay như thật (`drawHand`: lòng bàn tay, 4 ngón 2 đốt, ngón cái, móng) theo tư thế: `grip` cầm dụng cụ, `point` chỉ ngón trỏ, `open` xoè, `fist` chống cằm, `thumb` giơ ngón cái, `relax`.
 - Nếu thầy gửi ảnh mới: tách đầu (nền trong suốt), đo lại `HEAD.split` (khe giữa hai hàm răng), `HEAD.chin`, `EYES`, nén webp rồi thay base64.
 

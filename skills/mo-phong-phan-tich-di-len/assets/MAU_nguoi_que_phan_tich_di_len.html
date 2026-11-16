@@ -876,11 +876,11 @@ function drawPhotoHead(cx, chinY, H, fc, open, tilt) {
   const k = H / HEAD.chin, Wd = HEAD.w * k, sp = HEAD.split * k, d = open * 12 * k;
   ctx.save(); ctx.translate(cx, chinY); ctx.rotate(tilt); ctx.scale(fc, 1);
   const ox = -HEAD.cx * k, oy = -HEAD.chin * k - d;
-  ctx.fillStyle = '#e8a983'; ctx.beginPath(); ctx.ellipse(ox + HEAD.cx * k, oy + sp + d / 2, 138 * k, 16 * k + d / 2, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = '#e6a07c'; ctx.beginPath(); ctx.ellipse(ox + HEAD.cx * k, oy + sp + d / 2, 147 * k, 18 * k + d / 2, 0, 0, 7); ctx.fill();
   ctx.fillStyle = '#5a1515'; ctx.beginPath(); ctx.ellipse(ox + HEAD.cx * k, oy + sp + d / 2, 70 * k, 7 * k + d / 2, 0, 0, 7); ctx.fill();
   ctx.drawImage(HEAD.img, 0, 0, HEAD.w, HEAD.split, ox, oy, Wd, sp);
   drawLids(ox, oy, k, blinkAmount());
-  ctx.drawImage(HEAD.img, 0, HEAD.split - 1, HEAD.w, HEAD.h - HEAD.split + 1, ox, oy + sp + d - k, Wd, (HEAD.h - HEAD.split + 1) * k);
+  ctx.drawImage(HEAD.img, 0, HEAD.split - 4, HEAD.w, HEAD.h - HEAD.split + 4, ox, oy + sp + d - 4 * k, Wd, (HEAD.h - HEAD.split + 4) * k); // chồng 4px: không lộ đường nối
   ctx.restore();
 }
 // Độ mở miệng theo giọng đọc
@@ -991,8 +991,12 @@ function drawMan(part) {
   ctx.closePath(); ctx.fillStyle = L.shirt; ctx.fill(); ctx.strokeStyle = L.shirtL; ctx.lineWidth = lw; ctx.stroke();
   ctx.strokeStyle = 'rgba(140,148,160,.45)'; ctx.lineWidth = Math.max(1, .0022 * u);                       // nếp áo dọc
   [-1, 1].forEach(sg => { ctx.beginPath(); ctx.moveTo(S.x + sg * .045 * u, S.y + .05 * u); ctx.lineTo(S.x + sg * .05 * u, hy - .004 * u); ctx.stroke(); });
-  ctx.fillStyle = '#1f3a8c'; ctx.font = `bold ${Math.round(.03 * u)}px "Times New Roman"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('π', S.x - .035 * u * fc, S.y + .035 * u);                                                    // logo ngực
+  { // in tên trên ngực áo: luôn đọc xuôi, kể cả khi xoay người
+    const tn = (MAN.actO && MAN.actO.turn !== undefined && MAN.actO.turn < 0) ? -1 : 1;
+    ctx.save(); ctx.translate(S.x - .014 * u * fc, S.y + .058 * u); ctx.scale(tn, 1); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#c62828'; ctx.font = `bold ${Math.round(.02 * u)}px "Times New Roman"`; ctx.fillText('Thầy Chung', 0, -.012 * u);
+    ctx.fillStyle = '#1f3a8c'; ctx.font = `bold ${Math.round(.0145 * u)}px "Times New Roman"`; ctx.fillText('SĐT 0988938901', 0, .011 * u);
+    ctx.restore(); }
   // cổ to + cổ áo tròn
   limb({x: S.x, y: S.y + .004 * u}, {x: S.x, y: S.y - .03 * u}, .05 * u, .05 * u, .046 * u, L.skin, L.skinL, .5);
   ctx.strokeStyle = L.shirtL; ctx.lineWidth = Math.max(1.5, .004 * u);
