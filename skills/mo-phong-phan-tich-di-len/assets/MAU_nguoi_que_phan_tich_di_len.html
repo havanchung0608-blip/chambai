@@ -89,7 +89,8 @@
     <button id="bSfx">🎵 Âm thanh</button>
     <button id="bAgain">🔁 Đọc lại</button>
     <select id="vSel" title="Chọn giọng đọc"></select>
-    <label>Tốc độ <input id="vRate" type="range" min="0.6" max="1.4" step="0.05" value="0.85"></label>
+    <label>Tốc độ vẽ <input id="dRate" type="range" min="0.4" max="1.2" step="0.05" value="0.7"></label>
+    <label>Tốc độ đọc <input id="vRate" type="range" min="0.6" max="1.4" step="0.05" value="0.85"></label>
   </div>
 </div>
 <div id="sig">Thầy Hà Văn Chung – SĐT 0988938901</div>
@@ -1202,6 +1203,10 @@ function speechProg() { // số kí tự đã đọc của câu say hiện tại
   return VOICE.bseen ? Math.max(VOICE.char, Math.min(est, VOICE.char + 20)) : est;
 }
 
+/* ---------- Tốc độ vẽ (chậm để học sinh quan sát thao tác) ---------- */
+let DRAW_SPEED = .7;
+try { const d = parseFloat(localStorage.getItem('tc_draw')); if (d >= .4 && d <= 1.2) DRAW_SPEED = d; } catch (e) {}
+
 /* ---------- Trình chiếu ---------- */
 let SCENES = [], TL = [];
 const PLAY = {cur: -1, auto: true, paused: false, fast: false, opsQ: [], op: null, opT: 0, opsDone: true, spoke: true, timer: null, drawScene: true, shownScene: -1};
@@ -1459,7 +1464,7 @@ function sfxStartOp(op) {
   else if (op.enter === 'spin') startAct('brace', (op.landT || .2) * op.dur + .2);
   else if (op.enter === 'slide' && op.isFresh && op.isFresh()) startAct('pull');
   if (op.kind !== 'compass') TOOLMEM.cmp = null;
-  const sp = PLAY.fast ? 4 : 1, lt = (op.landT || .2) * op.dur / sp;
+  const sp = PLAY.fast ? 4 : DRAW_SPEED, lt = (op.landT || .2) * op.dur / sp;
   if (op.enter === 'drop') SND.fall(lt);
   else if (op.enter === 'spin') SND.whirr(lt);
   else if (op.enter === 'slide') { if (op.isFresh && op.isFresh()) SND.slide(); }
@@ -1476,7 +1481,7 @@ function frame(ts) {
   if (!PLAY.paused && PLAY.cur >= 0) {
     if (!PLAY.op && PLAY.opsQ.length && (PLAY.spoke || PLAY.fast)) { PLAY.op = PLAY.opsQ.shift(); PLAY.opT = 0; sfxStartOp(PLAY.op); } // đọc xong mới vẽ
     if (PLAY.op) {
-      PLAY.opT += dt * (PLAY.fast ? 4 : 1);
+      PLAY.opT += dt * (PLAY.fast ? 4 : DRAW_SPEED);
       if (PLAY.opT >= PLAY.op.dur) {
         PLAY.op.commit(); PLAY.op = null;
         if (!PLAY.opsQ.length) { PLAY.opsDone = true; PLAY.hlT = 0; PLAY.hlAct = {}; checkDone(); }
@@ -1583,6 +1588,8 @@ function boot() {
   $('#bVoice').onclick = () => { VOICE.on = !VOICE.on; if (!VOICE.on) stopSpeak(); updateButtons(); if (PLAY.cur >= 0 && !PLAY.spoke && !PLAY.paused) speak(TL[PLAY.cur].b.say, () => { PLAY.spoke = true; checkDone(); }); };
   $('#bAgain').onclick = () => { if (PLAY.cur >= 0) { clearTimeout(PLAY.timer); PLAY.spoke = false; speak(TL[PLAY.cur].b.say, () => { PLAY.spoke = true; checkDone(); }); } };
   $('#vSel').onchange = e => { VOICE.v = VOICE.list[+e.target.value] || null; VOICE.pitch = (VOICE.v && vMale(VOICE.v) && VOICE.list.every(vMale)) ? 1.35 : 1; try { localStorage.setItem('tc_voice_nu', VOICE.v ? VOICE.v.name : ''); } catch (er) {} };
+  const dr = $('#dRate'); dr.value = DRAW_SPEED;
+  dr.oninput = () => { DRAW_SPEED = +dr.value; try { localStorage.setItem('tc_draw', DRAW_SPEED); } catch (e) {} };
   const rt = $('#vRate'); rt.value = VOICE.rate;
   rt.oninput = () => { VOICE.rate = +rt.value; try { localStorage.setItem('tc_rate_v2', VOICE.rate); } catch (e) {} };
   document.addEventListener('keydown', e => {

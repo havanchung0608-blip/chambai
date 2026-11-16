@@ -47,7 +47,7 @@ Mọi phần dưới đây là engine, KHÔNG viết lại; chỉ cần giữ ng
 
 **Âm thanh (Web Audio tự tổng hợp, chạy offline, nút 🎵 bật/tắt, có bộ nén chống vỡ tiếng)**: rơi rít gió, đập "rầm", vù vù xoay, "keng", "vút", kim loại "xoẹt", bút chì sột soạt, compa, tẩy chà, "tích" chấm điểm, "pốp" khi chữ/ô sơ đồ hiện. Nhấn mạnh (TO, `V = 2.6`): đoạn "vút"+nốt, điểm chuông "ting", hình hợp âm lấp lánh, góc "dzít"+nốt, bằng nhau hai nốt "khớp", song song còi trượt; các lần trong một dòng đi lên theo thang ngũ cung; kết luận thêm trống + hợp âm; "Vậy" có kèn.
 
-**Nhịp trình chiếu**: tốc độ đọc mặc định 0,85× (khoá localStorage `tc_rate_v2`); dòng có nhấn mạnh dừng thêm 1,6 s, sang cảnh 1,8 s để người kịp chỉ và hiệu ứng chạy xong.
+**Nhịp trình chiếu**: VẼ CHẬM để học sinh quan sát thao tác – `DRAW_SPEED` mặc định 0,7× (thanh "Tốc độ vẽ" 0,4–1,2×, khoá localStorage `tc_draw`), áp cho mọi thao tác dụng cụ, nét bút, chấm điểm, tẩy; tốc độ đọc mặc định 0,85× (khoá localStorage `tc_rate_v2`); dòng có nhấn mạnh dừng thêm 1,6 s, sang cảnh 1,8 s để người kịp chỉ và hiệu ứng chạy xong.
 
 ## 1. Lấy khung chương trình (engine) – KHÔNG viết lại từ đầu
 Thứ tự tìm file mẫu:
