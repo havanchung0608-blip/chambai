@@ -160,6 +160,7 @@
     return { w: 0, asc: 0, desc: 0, draw() {} };
   }
   const texCache = new Map();
+  const MCTX = document.createElement("canvas").getContext("2d");
   /* Vẽ chữ/công thức; progress 0..1 = mức "đã viết" (lộ dần trái → phải, có bút) */
   function drawTex(ctx, str, x, y, size, col, align, progress, pen) {
     const key = str;
@@ -218,6 +219,21 @@
     sithand: (t) => ({ fa: [165, 175 + Math.sin(t * 8) * 6], ba: [30, 70], fl: [90, 2], bl: [86, -2] }),
     lie: () => ({ fa: [14, 4], ba: [-14, -4], fl: [7, 0], bl: [-7, 0], rot: -90 }),
     jump: (t) => ({ fa: [138, 158], ba: [-138, -158], fl: [40, -10], bl: [-10, -50], lift: 60 + Math.sin(t * 6) * 30 }),
+    // —— võ thuật ——
+    guard: (t) => ({ fa: [62, 150], ba: [42, 155], fl: [26, -4], bl: [-30, -12], lean: 6, lift: Math.abs(Math.sin(t * 5.5)) * 5 }),
+    punch: () => ({ fa: [94, 92], ba: [32, 152], fl: [32, 0], bl: [-38, -12], lean: 14 }),
+    punch2: () => ({ fa: [40, 150], ba: [96, 92], fl: [30, 0], bl: [-36, -12], lean: 18 }),
+    uppercut: () => ({ fa: [70, 172], ba: [30, 150], fl: [24, -6], bl: [-30, -12], lean: -6, head: -8 }),
+    kick: () => ({ fa: [55, 140], ba: [-45, -20], fl: [94, 92], bl: [-6, 0], lean: -16 }),
+    highkick: () => ({ fa: [60, 150], ba: [-60, -30], fl: [128, 122], bl: [-4, 0], lean: -26 }),
+    block: () => ({ fa: [72, 168], ba: [62, 172], fl: [22, 0], bl: [-26, -6], lean: -4, head: 8 }),
+    hit: () => ({ fa: [-35, -10], ba: [-75, -40], fl: [12, 0], bl: [-22, -6], lean: -24, head: -20 }),
+    hitlow: () => ({ fa: [40, 10], ba: [35, 5], fl: [18, -20], bl: [-14, -18], lean: 32, head: 18 }),
+    dizzy: (t) => ({ fa: [8 + Math.sin(t * 4) * 10, 0], ba: [-8, 0], fl: [10, 0], bl: [-10, 0], lean: Math.sin(t * 3) * 10, head: Math.sin(t * 4) * 14 }),
+    bow: () => ({ fa: [18, 60], ba: [12, 60], fl: [4, 0], bl: [-4, 0], lean: 38, head: 22 }),
+    fistbow: () => ({ fa: [70, 140], ba: [66, 150], fl: [4, 0], bl: [-4, 0], lean: 24, head: 14 }),
+    victory: (t) => ({ fa: [158, 176], ba: [30, 150], fl: [20, 0], bl: [-20, -4], head: -8, lift: Math.abs(Math.sin(t * 4)) * 6 }),
+    kneel: () => ({ fa: [30, 20], ba: [20, 10], fl: [80, 0], bl: [-20, -110], lean: 10, head: 10 }),
     nod: (t) => ({ fa: [14, 4], ba: [-14, -4], fl: [7, 0], bl: [-7, 0], head: Math.sin(t * 8) * 9 })
   };
   /* ------------- chuyển động như người thật: bàn chân bám đất (IK) ------------- */
@@ -256,6 +272,7 @@
   }
   function gaitPose(g) {
     if (g.style === "jump") return jumpPose(g.k);
+    if (g.style === "flykick") { const P = jumpPose(g.k); if (g.k > 0.3 && g.k < 0.8) { const K = poseAt("kick", 0); return { ...P, fa: [60, 150], ba: [-60, -30], ff: K.ff, bf: [-20, 120], lean: -14 }; } return P; }
     const run = g.style === "run", F = gaitFeet(g.u, g.n, g.L), hip = g.u * g.L, sf = Math.sin(Math.PI * F.f);
     const lift = sf * (run ? 58 : 26);
     const H = run ? 156 + sf * 12 : 168 - (1 - sf) * 6;           // hông thấp nhất lúc hai chân chạm đất
@@ -279,7 +296,8 @@
   function moveContacts(m, from, S0) {
     // thời điểm (0..1) từng bàn chân chạm đất → tiếng bước chân khớp hình
     const style = m.style || "walk", to = m.to != null ? m.to : from + (m.by || 0), dist = Math.abs(to - from);
-    if (style === "jump") return [{ k: 0.22, name: "jump" }, { k: 0.82, name: "land" }];
+    if (style === "jump" || style === "flykick") return [{ k: 0.22, name: style === "flykick" ? "whoosh" : "jump" }, { k: 0.82, name: "land" }];
+    if (style === "slide") return [];
     if (dist < 1) return [];
     const n = Math.max(1, Math.round(dist / ((style === "run" ? 150 : 96) * S0))), out = [];
     for (let j = 1; j <= n; j++) { let lo = 0, hi = 1; for (let it = 0; it < 30; it++) { const mid = (lo + hi) / 2; if (trap(mid, 0.18) * n < j) lo = mid; else hi = mid; } out.push({ k: (lo + hi) / 2, name: style === "run" ? "steprun" : "step" }); }
@@ -336,6 +354,8 @@
     hline(ctx, [shoulder, fE, fH], seed + 5);
     // đồ cầm tay
     if (ch.holding) drawHeld(ctx, ch.holding, fH, dir, life);
+    if (ch.fists || FIGHT.has(ch.pose)) { ctx.fillStyle = ch.gloves || ch.color || INK; [fH, bH].forEach((h) => { ctx.beginPath(); ctx.arc(h[0], h[1], 10, 0, 7); ctx.fill(); }); }
+    if (ch.belt) { const b0 = pt(0, 0, 4, 180 - lean); ctx.save(); ctx.strokeStyle = ch.belt; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(b0[0] - 20, b0[1]); ctx.lineTo(b0[0] + 20, b0[1]); ctx.moveTo(b0[0] - dir * 6, b0[1]); ctx.lineTo(b0[0] - dir * 26, b0[1] + 26 + Math.sin(life * 7) * 4); ctx.stroke(); ctx.restore(); }
     // đầu
     hline(ctx, [neck, pt(neck[0], neck[1], LEN.neck + 4, 180 - lean)], seed + 6);
     drawHead(ctx, ch, headC, LEN.head, dir, life, P);
@@ -360,6 +380,7 @@
       ctx.beginPath(); ctx.arc(0, 0, r + 3, Math.PI * 1.08, Math.PI * 1.92); ctx.quadraticCurveTo(dir * r * 0.2, -r * 0.35, -r * 0.95, -r * 0.3); ctx.closePath(); ctx.fill();
       if (ch.hair === "spiky") for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(i * 14 - 8, -r + 4); ctx.lineTo(i * 14, -r - 22); ctx.lineTo(i * 14 + 8, -r + 4); ctx.fill(); }
     }
+    if (ch.band) { ctx.save(); ctx.strokeStyle = ch.band; ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(0, 0, r - 1, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); const tx = -dir * r * 0.85, ty = -r * 0.45, fl = Math.sin(life * 9) * 6; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.quadraticCurveTo(tx - dir * 22, ty + fl, tx - dir * 46, ty + 10 + fl); ctx.moveTo(tx, ty); ctx.quadraticCurveTo(tx - dir * 18, ty + 14 - fl, tx - dir * 38, ty + 26 - fl); ctx.stroke(); ctx.restore(); }
     if (ch.bow) { ctx.fillStyle = ch.bow; ctx.beginPath(); const bx = -dir * r * 0.55, by = -r * 0.85; ctx.moveTo(bx, by); ctx.lineTo(bx - 16, by - 12); ctx.lineTo(bx - 16, by + 12); ctx.closePath(); ctx.moveTo(bx, by); ctx.lineTo(bx + 16, by - 12); ctx.lineTo(bx + 16, by + 12); ctx.closePath(); ctx.fill(); }
     // mặt
     const face = ch.face || "happy";
@@ -416,6 +437,28 @@
     ctx.restore();
   }
 
+  const FIGHT = new Set(["guard", "punch", "punch2", "uppercut", "kick", "highkick", "block", "victory", "fistbow"]);
+  /* Hiệu ứng va chạm kiểu truyện tranh: chớp sáng + tia + chữ */
+  function drawFx(ctx, f, S) {
+    let x = f.x, y = f.y;
+    if (f.on && S.cast[f.on]) { const ch = S.cast[f.on], sc = ch.scale || 1; x = ch.x + (f.dx || 0); y = (ch.y || GROUND) - ({ head: 400, chest: 300, belly: 230, legs: 120 }[f.part || "chest"]) * sc + (f.dy || 0); }
+    if (x == null) return;
+    const d = f.dur || 0.5, k = clamp(f.el / d, 0, 1), a = 1 - k;
+    ctx.save(); ctx.translate(x, y);
+    if ((f.type || "hit") === "hit") {
+      const R = 70 + 90 * easeOutBack(Math.min(1, k * 2.2));
+      ctx.globalAlpha = a; ctx.fillStyle = "#fff59d"; ctx.strokeStyle = "#ff6f00"; ctx.lineWidth = 6; ctx.beginPath();
+      for (let i = 0; i < 16; i++) { const rr = i % 2 ? R * 0.45 : R * (0.85 + hash(i + 3) * 0.3), an = (i / 16) * Math.PI * 2; ctx.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 5; for (let i = 0; i < 8; i++) { const an = (i / 8) * Math.PI * 2 + 0.2; ctx.beginPath(); ctx.moveTo(Math.cos(an) * R * 1.05, Math.sin(an) * R * 1.05); ctx.lineTo(Math.cos(an) * R * 1.5, Math.sin(an) * R * 1.5); ctx.stroke(); }
+    } else if (f.type === "dust") {
+      ctx.globalAlpha = a * 0.7; ctx.fillStyle = "#bcaaa4"; for (let i = -3; i <= 3; i++) { ctx.beginPath(); ctx.arc(i * 40 * (0.5 + k), -20 - k * 40 * hash(i + 9), 26 * (1 - k * 0.4), 0, 7); ctx.fill(); }
+    } else if (f.type === "speed") {
+      ctx.globalAlpha = a; ctx.strokeStyle = "#455a64"; ctx.lineWidth = 6; for (let i = 0; i < 6; i++) { const yy = -260 + i * 50; ctx.beginPath(); ctx.moveTo(-(f.dir || 1) * (60 + 40 * hash(i)), yy); ctx.lineTo(-(f.dir || 1) * (240 + 80 * hash(i + 4)), yy); ctx.stroke(); }
+    }
+    if (f.text) { const s = 1 + 0.25 * easeOutBack(Math.min(1, k * 3)); ctx.globalAlpha = Math.min(1, a * 1.6); ctx.rotate(rad(-10)); ctx.scale(s, s); ctx.font = `bold 110px ${FONT}`; ctx.textAlign = "center"; ctx.lineWidth = 12; ctx.strokeStyle = "#1d1d1f"; ctx.strokeText(f.text, 0, -90); ctx.fillStyle = f.color || "#e53935"; ctx.fillText(f.text, 0, -90); }
+    ctx.restore();
+  }
   /* ---------------------------- phông nền ---------------------------- */
   const BOARDS = {
     classroom: { x: 560, y: 110, w: 1220, h: 540, chalk: true },
@@ -498,6 +541,17 @@
       for (let i = 0; i < 140; i++) { const x = hash(i) * W, y = hash(i + 99) * H, tw = 0.5 + 0.5 * Math.sin(BOIL * 0.9 + i); ctx.fillStyle = `rgba(255,255,255,${0.35 + tw * 0.6})`; ctx.fillRect(x, y, 3, 3); }
       ctx.strokeStyle = "#fff"; ctx.lineWidth = 5; hcircle(ctx, 1600, 250, 120, 200, "#ff8a65"); ctx.fillStyle = "#6d4c8f"; ctx.fillRect(0, GROUND, W, H - GROUND);
     },
+    dojo(ctx) {
+      ctx.fillStyle = "#f3e3c3"; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#8d5a2b"; for (let x = 0; x < W; x += 320) ctx.fillRect(x, 0, 26, GROUND);
+      ctx.fillStyle = "#7a4a22"; ctx.fillRect(0, 0, W, 40); ctx.fillRect(0, 700, W, 18);
+      ctx.strokeStyle = INK; ctx.lineWidth = 6; hrect(ctx, 620, 110, 680, 170, 601, "#b71c1c");
+      ctx.fillStyle = "#ffd54f"; ctx.font = `bold 96px ${FONT}`; ctx.textAlign = "center"; ctx.fillText("VÕ ĐƯỜNG", 960, 230); ctx.textAlign = "left";
+      [300, 1620].forEach((x, i) => { ctx.fillStyle = "#e53935"; ctx.beginPath(); ctx.ellipse(x, 220, 46, 60, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = "#ffca28"; ctx.fillRect(x - 30, 156, 60, 10); ctx.fillRect(x - 30, 274, 60, 10); });
+      ctx.fillStyle = "#c8a070"; ctx.fillRect(0, GROUND, W, H - GROUND);
+      ctx.strokeStyle = "rgba(90,50,20,.35)"; ctx.lineWidth = 3; for (let x = -200; x < W + 200; x += 160) { ctx.beginPath(); ctx.moveTo(x, GROUND); ctx.lineTo(x - 120, H); ctx.stroke(); }
+      ctx.strokeStyle = INK; ctx.lineWidth = 5; hline(ctx, [[0, GROUND], [W, GROUND]], 602);
+    },
     stage(ctx) {
       ctx.fillStyle = "#2a1f2d"; ctx.fillRect(0, 0, W, H);
       const g = ctx.createRadialGradient(W / 2, 700, 50, W / 2, 700, 700); g.addColorStop(0, "rgba(255,240,190,.55)"); g.addColorStop(1, "rgba(255,240,190,0)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
@@ -513,8 +567,8 @@
     coin(ctx, it) { ctx.lineWidth = 5; hcircle(ctx, 0, 0, 40, it._seed, "#ffca28"); ctx.fillStyle = "#8d6e00"; ctx.font = `bold 34px ${FONT}`; ctx.textAlign = "center"; ctx.fillText(it.label || "đ", 0, 12); ctx.textAlign = "left"; },
     money(ctx, it) { ctx.lineWidth = 4; hrect(ctx, -90, -45, 180, 90, it._seed, it.color || "#a5d6a7"); ctx.fillStyle = "#1b5e20"; ctx.font = `bold 40px ${FONT}`; ctx.textAlign = "center"; ctx.fillText(it.label || "10 000đ", 0, 14); ctx.textAlign = "left"; },
     book(ctx, it) { ctx.lineWidth = 5; hrect(ctx, -60, -80, 120, 160, it._seed, it.color || "#3f7fd6"); ctx.fillStyle = "#fff"; ctx.font = `bold 30px ${FONT}`; ctx.textAlign = "center"; ctx.fillText(it.label || "SGK", 0, 0); ctx.textAlign = "left"; },
-    box(ctx, it) { const w = it.w || 160, h = it.h || 120; ctx.lineWidth = 5; hrect(ctx, -w / 2, -h / 2, w, h, it._seed, it.color || "#ffe0a3"); if (it.label != null) drawTex(ctx, String(it.label), 0, 16, it.size || 48, INK, "center", 1); },
-    circle(ctx, it) { ctx.lineWidth = 5; hcircle(ctx, 0, 0, it.r || 60, it._seed, it.color || "#bbdefb"); if (it.label != null) drawTex(ctx, String(it.label), 0, 16, it.size || 44, INK, "center", 1); },
+    box(ctx, it) { const w = it.w || 160, h = it.h || 120; ctx.lineWidth = 5; hrect(ctx, -w / 2, -h / 2, w, h, it._seed, it.color || "#ffe0a3"); if (it.label != null) drawTex(ctx, String(it.label), 0, 20, it.size || 60, INK, "center", 1); },
+    circle(ctx, it) { ctx.lineWidth = 5; hcircle(ctx, 0, 0, it.r || 60, it._seed, it.color || "#bbdefb"); if (it.label != null) drawTex(ctx, String(it.label), 0, 20, it.size || 56, INK, "center", 1); },
     cake(ctx, it) {
       const n = it.slices || 4, k = it.taken || 0, R = it.r || 130, hi = it.highlight || "#ffb74d";
       ctx.lineWidth = 5;
@@ -540,7 +594,7 @@
         ctx.save(); ctx.translate(s * 240, 0); ctx.rotate(-tilt);
         hline(ctx, [[0, 0], [-70, 110]], it._seed + 3 + s); hline(ctx, [[0, 0], [70, 110]], it._seed + 5 + s);
         ctx.fillStyle = "#ffe082"; ctx.beginPath(); ctx.ellipse(0, 112, 100, 18, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        const lab = s < 0 ? it.left : it.right; if (lab != null) drawTex(ctx, String(lab), 0, 85, it.size || 48, INK, "center", 1);
+        const lab = s < 0 ? it.left : it.right; if (lab != null) drawTex(ctx, String(lab), 0, 85, it.size || 60, INK, "center", 1);
         ctx.restore();
       });
       ctx.restore(); ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(0, -60, 10, 0, 7); ctx.fill();
@@ -550,8 +604,8 @@
       const X = (v) => -w / 2 + ((v - a) / (b - a)) * w;
       ctx.lineWidth = 5; ctx.strokeStyle = INK; hline(ctx, [[-w / 2 - 30, 0], [w / 2 + 40, 0]], it._seed);
       ctx.fillStyle = INK; ctx.beginPath(); ctx.moveTo(w / 2 + 50, 0); ctx.lineTo(w / 2 + 26, -12); ctx.lineTo(w / 2 + 26, 12); ctx.fill();
-      for (let v = a; v <= b + 1e-9; v += step) { const x = X(v); hline(ctx, [[x, -14], [x, 14]], it._seed + v * 3); drawTex(ctx, String(Math.round(v * 100) / 100).replace("-", "−"), x, 62, it.size || 40, INK, "center", 1); }
-      arr(it.points).forEach((p, i) => { ctx.fillStyle = p.color || "#e53935"; ctx.beginPath(); ctx.arc(X(p.v), 0, 14, 0, 7); ctx.fill(); if (p.label) drawTex(ctx, p.label, X(p.v), -34, it.size || 40, p.color || "#e53935", "center", 1); });
+      for (let v = a; v <= b + 1e-9; v += step) { const x = X(v); hline(ctx, [[x, -14], [x, 14]], it._seed + v * 3); drawTex(ctx, String(Math.round(v * 100) / 100).replace("-", "−"), x, 70, it.size || 54, INK, "center", 1); }
+      arr(it.points).forEach((p, i) => { ctx.fillStyle = p.color || "#e53935"; ctx.beginPath(); ctx.arc(X(p.v), 0, 14, 0, 7); ctx.fill(); if (p.label) drawTex(ctx, p.label, X(p.v), -38, it.size || 54, p.color || "#e53935", "center", 1); });
       arr(it.jumps).forEach((j) => { ctx.strokeStyle = j.color || "#1e88e5"; ctx.lineWidth = 5; const x1 = X(j.from), x2 = X(j.to); ctx.beginPath(); ctx.moveTo(x1, -10); ctx.quadraticCurveTo((x1 + x2) / 2, -110, x2, -10); ctx.stroke(); if (j.label) drawTex(ctx, j.label, (x1 + x2) / 2, -80, 38, j.color || "#1e88e5", "center", 1); });
     },
     arrow(ctx, it) {
@@ -573,8 +627,8 @@
       const grow = it.grow == null ? 1 : it.grow;
       vals.forEach((v, i) => { const bh = (v / max) * (h - 40) * grow; ctx.fillStyle = cols[i % cols.length]; ctx.fillRect(-w / 2 + i * bw + bw * 0.18, h / 2 - bh, bw * 0.64, bh); ctx.strokeRect(-w / 2 + i * bw + bw * 0.18, h / 2 - bh, bw * 0.64, bh); drawTex(ctx, String(v), -w / 2 + i * bw + bw / 2, h / 2 - bh - 14, 36, INK, "center", 1); if (labs[i]) drawTex(ctx, labs[i], -w / 2 + i * bw + bw / 2, h / 2 + 44, 34, INK, "center", 1); });
     },
-    sign(ctx, it) { const w = it.w || 420, h = it.h || 130; ctx.lineWidth = 6; ctx.strokeStyle = INK; hline(ctx, [[0, h / 2], [0, h / 2 + 140]], it._seed); hrect(ctx, -w / 2, -h / 2, w, h, it._seed + 1, it.color || "#fff8e1"); drawTex(ctx, it.text || "", 0, 18, it.size || 48, INK, "center", 1); },
-    card(ctx, it) { const w = it.w || 520, h = it.h || 140; ctx.save(); ctx.shadowColor = "rgba(0,0,0,.18)"; ctx.shadowBlur = 18; ctx.fillStyle = it.color || "#fffef6"; roundRect(ctx, -w / 2, -h / 2, w, h, 22); ctx.fill(); ctx.restore(); ctx.lineWidth = 5; ctx.strokeStyle = it.border || "#f2a900"; roundRect(ctx, -w / 2, -h / 2, w, h, 22); ctx.stroke(); drawTex(ctx, it.text || "", 0, (it.size || 52) * 0.35, it.size || 52, it.textColor || INK, "center", 1); },
+    sign(ctx, it) { const w = it.w || 420, h = it.h || 130; ctx.lineWidth = 6; ctx.strokeStyle = INK; hline(ctx, [[0, h / 2], [0, h / 2 + 140]], it._seed); hrect(ctx, -w / 2, -h / 2, w, h, it._seed + 1, it.color || "#fff8e1"); drawTex(ctx, it.text || "", 0, 22, it.size || 60, INK, "center", 1); },
+    card(ctx, it) { const w = it.w || 520, h = it.h || 140; ctx.save(); ctx.shadowColor = "rgba(0,0,0,.18)"; ctx.shadowBlur = 18; ctx.fillStyle = it.color || "#fffef6"; roundRect(ctx, -w / 2, -h / 2, w, h, 22); ctx.fill(); ctx.restore(); ctx.lineWidth = 5; ctx.strokeStyle = it.border || "#f2a900"; roundRect(ctx, -w / 2, -h / 2, w, h, 22); ctx.stroke(); drawTex(ctx, it.text || "", 0, (it.size || 64) * 0.35, it.size || 64, it.textColor || INK, "center", 1); },
     table(ctx, it) { const w = it.w || 420, h = it.h || 190; ctx.lineWidth = 6; ctx.strokeStyle = INK; hrect(ctx, -w / 2, -h, w, 22, it._seed, it.color || "#b07a43"); hline(ctx, [[-w / 2 + 30, -h + 22], [-w / 2 + 30, 0]], it._seed + 1); hline(ctx, [[w / 2 - 30, -h + 22], [w / 2 - 30, 0]], it._seed + 2); },
     tree(ctx, it) { tree(ctx, 0, 0, it.s || 1, it._seed); },
     house(ctx, it) { house(ctx, -150, 0, 300, 260, it.color || "#ffe0a3", it._seed); },
@@ -616,6 +670,7 @@
     tone(f, t0, dur, type, vol, f2) { const c = this.ctx, o = c.createOscillator(), g = c.createGain(); o.type = type || "sine"; o.frequency.setValueAtTime(f, t0); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol || 0.3, t0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); o.connect(g); g.connect(this.master); o.start(t0); o.stop(t0 + dur + 0.05); },
     play(name, dur) {
       if (!this.ctx || this.muted) return; const c = this.ctx, t = c.currentTime;
+      name = { punch: "land", punch2: "land", punch3: "land", kickhit: "land", boxing: "land", fall: "land", swish: "whoosh", swish2: "whoosh", crowd: "applause", ko: "tada", victory: "tada" }[name] || name;
       switch (name) {
         case "pop": this.tone(500, t, 0.12, "sine", 0.35, 1100); break;
         case "ding": this.tone(1318, t, 0.9, "sine", 0.3); this.tone(1976, t + 0.02, 0.7, "sine", 0.12); break;
@@ -707,7 +762,7 @@
     const scenes = []; let T = 0; const sfx = [], says = [];
     film.scenes.forEach((sc, si) => {
       const s = { idx: si, start: T, beats: [], src: sc };
-      const board = BOARDS[sc.bg] || null; let writeY = board ? board.y + 90 : 140; const posX = {};
+      const board = BOARDS[sc.bg] || null; let writeY = board ? board.y + 34 : 80; const posX = {};
       let lt = 0;
       (sc.beats || []).forEach((b, bi) => {
         const id = `s${si + 1}b${bi + 1}`;
@@ -723,15 +778,19 @@
           const ws = arr(b.write).map((w) => (typeof w === "string" ? { text: w } : { ...w }));
           let off = 0;
           ws.forEach((w) => {
-            w.size = w.size || 64;
-            if (w.x == null) { w.x = board ? board.x + 70 : 200; w.align = w.align || "left"; }
-            if (w.y == null) { w.y = writeY; writeY += w.size * (w.gap || 1.55); } else if (board) writeY = Math.max(writeY, w.y + w.size * 1.55);
+            w.size = w.size || 84;
+            if (w.x == null) { w.x = board ? board.x + 60 : 200; w.align = w.align || "left"; }
+            // khoảng dòng theo chiều cao THẬT của chữ/công thức (phân số cao hơn chữ thường)
+            const m = layout(MCTX, texCache.get(w.text) || (texCache.set(w.text, parseTex(String(w.text))), texCache.get(w.text)), w.size);
+            const pad = w.box ? 26 : 0;
+            if (w.y == null) w.y = writeY + pad + m.asc;
+            writeY = Math.max(writeY, w.y + m.desc + pad + w.size * (w.gap != null ? w.gap : 0.42));
             w.wstart = off; w.wdur = w.dur || clamp(String(w.text).length * 0.075, 0.7, 2.8); off += w.wdur + 0.15;
             sfx.push({ t: B.start + w.wstart, name: board && board.chalk ? "chalk" : "marker", dur: w.wdur });
           });
           B.writes = ws; d = Math.max(d, off);
         }
-        if (b.clear) writeY = board ? board.y + 90 : 140;
+        if (b.clear) writeY = board ? board.y + 34 : 80;
         if (b.move) arr(b.move).forEach((m) => {
           const dur = m.dur || 1.5; d = Math.max(d, dur);
           const c = (sc.cast || {})[m.who] || {}, base = (film.cast || {})[m.who] || {};
@@ -751,7 +810,7 @@
           if (!b.say) says.push({ id: id + "q", t: B.start, text: b.quiz.say || "", who: "narrator", voice: "nu", dur: 0, skip: true });
         }
         if (b.wait) d = Math.max(d, b.wait);
-        arr(b.sfx).forEach((n) => sfx.push({ t: B.start + (b.sfxAt || 0), name: n }));
+        arr(b.sfx).forEach((n) => sfx.push(typeof n === "string" ? { t: B.start + (b.sfxAt || 0), name: n } : { t: B.start + (n.at || 0), name: n.name, vol: n.vol, len: n.len }));
         d += b.gap != null ? b.gap : 0.35;
         B.dur = d; lt += d; s.beats.push(B);
       });
@@ -773,16 +832,16 @@
     const items = {}; (src.items || []).forEach((it, i) => { items[it.id || "i" + i] = { ...it, _seed: 300 + i * 11 }; });
     const writes = [];
     const cam = { x: W / 2, y: H / 2, zoom: 1 };
-    let speech = null, title = null, quiz = null, highlight = [], emotes = [];
+    let speech = null, title = null, quiz = null, highlight = [], emotes = [], fxs = [], shake = null;
     sc.beats.forEach((B, bi) => {
       if (B.start > t) return;
       const b = B.src, p = (dur) => clamp((t - B.start) / (dur || 1), 0, 1);
       // hành động nhân vật
       const acts = { ...(b.act || {}) };
-      if (b.who && (b.pose || b.face || b.flip != null || b.hold !== undefined)) acts[b.who] = { ...(acts[b.who] || {}), pose: b.pose || (acts[b.who] || {}).pose, face: b.face || (acts[b.who] || {}).face, flip: b.flip != null ? b.flip : (acts[b.who] || {}).flip, hold: b.hold };
+      if (b.who && (b.pose || b.face || b.flip != null || b.hold !== undefined)) acts[b.who] = { ...(acts[b.who] || {}), pose: b.pose || (acts[b.who] || {}).pose, snap: b.snap, face: b.face || (acts[b.who] || {}).face, flip: b.flip != null ? b.flip : (acts[b.who] || {}).flip, hold: b.hold };
       Object.entries(acts).forEach(([id, a]) => {
         const ch = cast[id]; if (!ch) return;
-        if (a.pose && a.pose !== ch.pose) { ch.prevPose = ch.pose; ch.pose = a.pose; ch.poseT = B.start; }
+        if (a.pose && a.pose !== ch.pose) { ch.prevPose = ch.pose; ch.pose = a.pose; ch.poseT = B.start + (a.delay || 0); ch.poseDur = a.snap || b.snap || 0.34; }
         if (a.face) ch.face = a.face;
         if (a.flip != null && !!a.flip !== !!ch.flip) { ch.flip = a.flip; ch.flipT = B.start; }
         if (a.hold !== undefined) ch.holding = a.hold;
@@ -793,14 +852,15 @@
       arr(b.move).forEach((m) => {
         const ch = cast[m.who]; if (!ch) return; const dur = m.dur || 1.5, k = p(dur);
         const from = ch.x, to = m.to != null ? m.to : from + (m.by || 0), style = m.style || "walk", S0 = ch.scale || 1;
-        if (Math.abs(to - from) > 1 && (to < from) !== !!ch.flip) { ch.flip = to < from; ch.flipT = B.start; }
+        if (style !== "slide" && Math.abs(to - from) > 1 && (to < from) !== !!ch.flip) { ch.flip = to < from; ch.flipT = B.start; }
         let g;
-        if (style === "jump") { const q = clamp((k - 0.22) / 0.6, 0, 1); ch.x = lerp(from, to, q * q * (3 - 2 * q)); g = { style, k }; }
+        if (style === "slide") { ch.x = lerp(from, to, 1 - Math.pow(1 - k, 3)); g = null; }
+        else if (style === "jump" || style === "flykick") { const q = clamp((k - 0.22) / 0.6, 0, 1); ch.x = lerp(from, to, q * q * (3 - 2 * q)); g = { style, k }; }
         else { const dist = Math.abs(to - from), n = Math.max(1, Math.round(dist / ((style === "run" ? 150 : 96) * S0))), tr = trap(k, 0.18); ch.x = lerp(from, to, tr); g = { style, u: tr * n, n, L: Math.max(1, dist) / n / S0 }; }
-        if (k < 1) { ch._gait = g; if (style === "jump") ch._jumpLift = Math.sin(clamp((k - 0.22) / 0.6, 0, 1) * Math.PI) * (m.height || 130); }
-        else {
+        if (k < 1 && g) { ch._gait = g; if (style === "jump" || style === "flykick") ch._jumpLift = Math.sin(clamp((k - 0.22) / 0.6, 0, 1) * Math.PI) * (m.height || 130); }
+        else if (k >= 1) {
           ch._gait = null; ch._jumpLift = 0;
-          ch._after = { t0: B.start + dur, g: style === "jump" ? { style, k: 1 } : { ...g, u: g.n } };
+          ch._after = g ? { t0: B.start + dur, g: g.k != null ? { style, k: 1 } : { ...g, u: g.n } } : null;
           if (m.face != null && (m.face === "left") !== !!ch.flip) { ch.flip = m.face === "left"; ch.flipT = B.start + dur; }
         }
       });
@@ -820,8 +880,10 @@
       if (b.quiz && inBeat) quiz = { ...b.quiz, el: t - B.start, think: B.quizThink };
       if (b.highlight && inBeat) arr(b.highlight).forEach((h) => highlight.push({ id: h, el: t - B.start }));
       if (b.emote && inBeat) arr(b.emote).forEach((e) => emotes.push({ ...e, el: t - B.start }));
+      arr(b.fx).forEach((f) => { const el = t - B.start - (f.at || 0); if (el >= 0 && el < (f.dur || 0.5)) fxs.push({ ...f, el }); });
+      if (b.shake) { const sh = typeof b.shake === "number" ? { amp: 22, dur: b.shake } : b.shake, el = t - B.start - (sh.at || 0); if (el >= 0 && el < (sh.dur || 0.35)) shake = { amp: (sh.amp || 22) * (1 - el / (sh.dur || 0.35)), el }; }
     });
-    return { sc, cast, items, writes, cam, speech, title, quiz, highlight, emotes, lt };
+    return { sc, cast, items, writes, cam, speech, title, quiz, highlight, emotes, fxs, shake, lt };
   }
 
   /* ------------------------------ khung hình ------------------------------ */
@@ -833,6 +895,7 @@
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
     ctx.save();
     ctx.translate(W / 2, H / 2); ctx.scale(S.cam.zoom, S.cam.zoom); ctx.translate(-S.cam.x, -S.cam.y);
+    if (S.shake) ctx.translate((hash(Math.floor(t * 60)) - 0.5) * 2 * S.shake.amp, (hash(Math.floor(t * 60) + 0.5) - 0.5) * 2 * S.shake.amp);
     (BG[bg] || BG.paper)(ctx, life);
     const board = BOARDS[bg];
     const ink = board && board.chalk ? "#f5f5ec" : "#1e3a8a";
@@ -853,7 +916,7 @@
     Object.values(S.cast).forEach((ch) => {
       if (ch.hidden) return;
       const age = t - ch.poseT;
-      const k0 = easeIO(clamp(age / 0.34, 0, 1)), k1 = easeOutSoft(clamp((age - 0.05) / 0.42, 0, 1)), k2 = easeIO(clamp((age - 0.1) / 0.32, 0, 1));
+      const pd = ch.poseDur || 0.34, k0 = easeIO(clamp(age / pd, 0, 1)), k1 = easeOutSoft(clamp((age - pd * 0.15) / (pd * 1.2), 0, 1)), k2 = easeIO(clamp((age - pd * 0.3) / pd, 0, 1));
       let P = blendPose(poseAt(ch.prevPose, life), poseAt(ch.pose, life), k0, k1, k2);
       const seated = /^(sit|lie)/.test(ch.pose);
       if (ch._gait) P = gaitPose(ch._gait);
@@ -900,20 +963,25 @@
     // biểu tượng cảm xúc trên đầu
     S.emotes.forEach((e) => { const ch = S.cast[e.who]; if (!ch || !ch._headTop) return; const [x, y] = ch._headTop; const k = clamp(e.el / 0.3, 0, 1); ctx.save(); ctx.translate(x + (S.cast[e.who].flip ? -80 : 80), y + 20 - Math.sin(e.el * 4) * 6); ctx.scale(k, k); const icon = { idea: "bulb", heart: "heart", question: "question", star: "star" }[e.icon]; if (icon) drawItem(ctx, { type: icon, x: 0, y: 0, scale: 0.55, _seed: 77 }, life); else { ctx.font = `bold 90px ${FONT}`; ctx.fillStyle = e.icon === "!" ? "#e53935" : INK; ctx.textAlign = "center"; ctx.fillText(e.icon || "!", 0, 0); ctx.textAlign = "left"; } ctx.restore(); });
     // bong bóng lời thoại
-    if (S.speech && S.speech.who && S.cast[S.speech.who] && S.speech.bubble !== false) drawBubble(ctx, S.cast[S.speech.who], S.speech, film);
+    let bubbled = false;
+    // cảnh có bảng: lời nói xuống thanh phụ đề để không che bảng (bubble: true để ép hiện bóng thoại)
+    const wantBubble = S.speech && (S.speech.bubble === true || (S.speech.bubble !== false && !BOARDS[bg]));
+    if (wantBubble && S.speech.who && S.cast[S.speech.who]) bubbled = drawBubble(ctx, S.cast[S.speech.who], S.speech, film);
     ctx.restore();
+    S.fxs.forEach((f) => drawFx(ctx, f, S));
     // lớp phủ (không theo camera)
     if (S.quiz) drawQuiz(ctx, S.quiz, life);
     if (S.title) drawTitle(ctx, S.title);
-    if (ui.subs && S.speech && S.speech.text) drawSub(ctx, S.speech, film);
+    // phụ đề: mặc định chỉ hiện khi không có bóng thoại (lời dẫn, câu dài) để không che hình; film.subs = "always" để luôn hiện
+    if (ui.subs && S.speech && S.speech.text && (!bubbled || film.subs === "always")) drawSub(ctx, S.speech, film);
     if (film.watermark) { ctx.save(); ctx.globalAlpha = 0.55; ctx.font = `italic 30px ${FONT}`; ctx.fillStyle = "#555"; ctx.textAlign = "right"; ctx.fillText(film.watermark, W - 30, 46); ctx.restore(); }
     return S;
   }
   function drawBubble(ctx, ch, sp, film) {
-    if (!ch._headTop) return;
-    const text = sp.text, size = 40; const maxW = 560;
+    if (!ch._headTop) return false;
+    const text = sp.text, size = 64; const maxW = 900;
     const lines = wrapText(ctx, text, maxW, size);
-    if (lines.length > 4) return; // dài quá → chỉ phụ đề
+    if (lines.length > 3) return false; // dài quá → chỉ phụ đề
     const k = clamp(sp.el / 0.25, 0, 1);
     let w = 0; ctx.font = `${size}px ${FONT}`; lines.forEach((l) => (w = Math.max(w, ctx.measureText(l).width)));
     w += 56; const h = lines.length * size * 1.25 + 40;
@@ -927,11 +995,12 @@
     ctx.fillStyle = INK; ctx.font = `${size}px ${FONT}`; ctx.textAlign = "center";
     lines.forEach((l, i) => ctx.fillText(l, x + w / 2, y + 22 + size * 0.95 + i * size * 1.25));
     ctx.restore(); ctx.textAlign = "left";
+    return true;
   }
   function drawSub(ctx, sp, film) {
-    const size = 44, text = sp.text; const lines = wrapText(ctx, text, 1600, size).slice(-2);
+    const size = 64, text = sp.text; const lines = wrapText(ctx, text, 1640, size).slice(-2);
     const h = lines.length * size * 1.3 + 30, y = H - h - 24;
-    ctx.save(); ctx.fillStyle = "rgba(10,10,20,.62)"; roundRect(ctx, 120, y, W - 240, h, 18); ctx.fill();
+    ctx.save(); ctx.fillStyle = "rgba(10,10,20,.62)"; roundRect(ctx, 60, y, W - 120, h, 18); ctx.fill();
     ctx.fillStyle = "#fff"; ctx.font = `${size}px ${FONT}`; ctx.textAlign = "center";
     const name = sp.who && film.cast && film.cast[sp.who] && film.cast[sp.who].name;
     lines.forEach((l, i) => ctx.fillText((i === 0 && name ? name + ": " : "") + l, W / 2, y + 15 + size + i * size * 1.3));
@@ -943,25 +1012,25 @@
     ctx.fillStyle = T.color || "#c62828"; ctx.textAlign = "center";
     const s = 0.9 + 0.1 * easeOutBack(clamp(T.el / 0.6, 0, 1));
     ctx.translate(W / 2, H / 2 - 30); ctx.scale(s, s);
-    const lines = wrapText(ctx, T.text || "", 1600, 96);
-    ctx.font = `bold 96px ${FONT}`; lines.forEach((l, i) => ctx.fillText(l, 0, (i - (lines.length - 1) / 2) * 110));
-    if (T.sub) { ctx.textAlign = "left"; drawTex(ctx, T.sub, 0, lines.length * 60 + 70, 52, "#37474f", "center", 1); }
+    ctx.font = `bold 124px ${FONT}`; const lines = wrapText(ctx, T.text || "", 1700, 124);
+    ctx.font = `bold 124px ${FONT}`; lines.forEach((l, i) => ctx.fillText(l, 0, (i - (lines.length - 1) / 2) * 140));
+    if (T.sub) { ctx.textAlign = "left"; drawTex(ctx, T.sub, 0, lines.length * 70 + 90, 72, "#37474f", "center", 1); }
     ctx.restore(); ctx.textAlign = "left";
   }
   function drawQuiz(ctx, Q, life) {
     const a = clamp(Q.el / 0.35, 0, 1), reveal = Q.el >= 0.8 + Q.think;
     ctx.save(); ctx.globalAlpha = a;
-    const x = 260, y = 70, w = W - 520, opts = Q.options || [], h = 190 + Math.ceil(opts.length / 2) * 130;
+    const x = 120, y = 50, w = W - 240, opts = Q.options || [], h = 210 + Math.ceil(opts.length / 2) * 160;
     ctx.fillStyle = "rgba(255,253,245,.97)"; ctx.strokeStyle = "#f2a900"; ctx.lineWidth = 8; roundRect(ctx, x, y, w, h, 30); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = "#c62828"; ctx.font = `bold 50px ${FONT}`; ctx.fillText("❓", x + 36, y + 80);
-    drawTex(ctx, Q.q || "", x + 110, y + 80, 50, INK, "left", 1);
+    ctx.fillStyle = "#c62828"; ctx.font = `bold 66px ${FONT}`; ctx.fillText("?", x + 44, y + 100);
+    drawTex(ctx, Q.q || "", x + 110, y + 100, 66, INK, "left", 1);
     opts.forEach((o, i) => {
-      const cx = x + 60 + (i % 2) * (w / 2 - 30), cy = y + 140 + Math.floor(i / 2) * 130, ow = w / 2 - 90;
+      const cx = x + 60 + (i % 2) * (w / 2 - 30), cy = y + 170 + Math.floor(i / 2) * 160, ow = w / 2 - 90;
       const right = reveal && i === Q.answer;
       ctx.fillStyle = right ? "#c8e6c9" : "#fff"; ctx.strokeStyle = right ? "#2e7d32" : "#90a4ae"; ctx.lineWidth = right ? 8 : 4;
-      roundRect(ctx, cx, cy, ow, 100, 20); ctx.fill(); ctx.stroke();
-      drawTex(ctx, "ABCD"[i] + ".  " + o, cx + 30, cy + 66, 46, INK, "left", 1);
-      if (right) drawItem(ctx, { type: "check", x: cx + ow - 60, y: cy + 50, scale: 0.6, _seed: 5 }, life);
+      roundRect(ctx, cx, cy, ow, 130, 20); ctx.fill(); ctx.stroke();
+      drawTex(ctx, "ABCD"[i] + ".  " + o, cx + 30, cy + 88, 64, INK, "left", 1);
+      if (right) drawItem(ctx, { type: "check", x: cx + ow - 60, y: cy + 65, scale: 0.7, _seed: 5 }, life);
     });
     if (!reveal) { const left = Math.ceil(0.8 + Q.think - Q.el); ctx.fillStyle = "#e53935"; ctx.beginPath(); ctx.arc(x + w - 80, y + 70, 48, 0, 7); ctx.fill(); ctx.fillStyle = "#fff"; ctx.font = `bold 56px ${FONT}`; ctx.textAlign = "center"; ctx.fillText(String(Math.max(0, left)), x + w - 80, y + 90); ctx.textAlign = "left"; }
     ctx.restore();

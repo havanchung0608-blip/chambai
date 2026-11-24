@@ -166,7 +166,47 @@ def bandnoise(dur, lo, hi, vol, chop=None):
     return (y * vol).astype(np.float32)
 
 
-def sfx(name, dur=1.0):
+BANK = {}
+ALIAS = {"punch": ["punch", "punch2", "punch3", "boxing"], "whoosh": ["swish", "swish2"], "kick": ["kickhit"]}
+_alias_i = {}
+
+
+def load_bank(d):
+    d = pathlib.Path(d)
+    if d.is_dir():
+        for fp in d.glob("*.wav"):
+            BANK[fp.stem] = decode(fp)
+    return len(BANK)
+
+
+def sfx(name, dur=1.0, length=None):
+    if name in ALIAS and BANK:
+        opts = [k for k in ALIAS[name] if k in BANK]
+        if opts:
+            i = _alias_i.get(name, 0); _alias_i[name] = i + 1
+            name = opts[i % len(opts)]
+    if name in BANK:
+        a = BANK[name]
+        if length:
+            a = a[: int(SR * length)].copy(); n = min(len(a) // 4, int(SR * 0.4)); a[-n:] *= np.linspace(1, 0, n)
+        return a
+    return synth(name, dur)
+
+
+def synth(name, dur=1.0):
+    if name in ("kickhit", "punch2", "punch3", "boxing"):
+        name = "punch"
+    if name == "punch":
+        th = tone(110, 0.16, 0.6, 45); sn = bandnoise(0.08, 300, 3000, 0.4); sn *= np.exp(-np.arange(len(sn)) / (SR * 0.02))
+        out = np.zeros(len(th), np.float32); out += th; out[:len(sn)] += sn; return out
+    if name in ("swish", "swish2"):
+        name = "whoosh"
+    if name == "fall":
+        name = "land"
+    if name in ("ko", "victory"):
+        name = "tada"
+    if name == "crowd":
+        name = "applause"
     if name == "pop":
         return tone(500, 0.14, 0.35, 1100)
     if name == "ding":
@@ -231,7 +271,7 @@ def mix(total, says, files, sfx_events, music):
         a = decode(fp); st = int(s["t"] * SR)
         voice[st:st + len(a)] += a[: max(0, n - st)]
     for e in sfx_events:
-        a = sfx(e["name"], e.get("dur", 1)); st = int(e["t"] * SR)
+        a = sfx(e["name"], e.get("dur", 1), e.get("len")) * float(e.get("vol") or 1); st = int(e["t"] * SR)
         fx[st:st + len(a)] += a[: max(0, n - st)]
     out = voice * 1.0 + fx * 0.8
     if music:
@@ -253,6 +293,8 @@ def main():
     ap.add_argument("--piper-model", help="đường dẫn .onnx (mặc định tự tải vi_VN-vais1000-medium)")
     ap.add_argument("--voice-dir")
     ap.add_argument("--music", action="store_true")
+    ap.add_argument("--sfx-bank", default=str(pathlib.Path.home() / ".cache" / "stickfilm" / "tiengdong"),
+                    help="thư mục .wav hiệu ứng thật (tạo bằng fetch_tiengdong.py)")
     ap.add_argument("--list", action="store_true", help="in danh sách mã nhịp + lời đọc để ghi âm")
     a = ap.parse_args()
     if not shutil.which("ffmpeg"):
@@ -292,6 +334,8 @@ def main():
             lips = {sid: {"fps": a.fps, "env": lip_env(fp, a.fps)} for sid, fp in files.items()}
             pg.evaluate("(m) => { STICKFILM.lip = m; }", lips)
             info = pg.evaluate("() => STICKFILM.info()")
+        nb = load_bank(a.sfx_bank)
+        print(f"Hiệu ứng âm thanh thật: {nb} file" + (" (ghi nguồn: Âm thanh: TiengDong.com)" if nb else " — chưa có, dùng âm tổng hợp. Chạy fetch_tiengdong.py để tải."))
         total = info["duration"]
         print(f"Thời lượng {total:.1f}s · {len(info['scenes'])} cảnh · lời đọc: {'có' if files else 'không'}")
         audio = mix(total, info["says"], files, info["sfx"], a.music)

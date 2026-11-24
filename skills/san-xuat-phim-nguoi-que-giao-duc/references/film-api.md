@@ -48,7 +48,7 @@ Mỗi cảnh bắt đầu lại từ đầu (bảng sạch, nhân vật về v�
 |---|---|
 | `who`, `say` | ai nói + lời đọc (viết thành chữ, không kí hiệu). `who` bỏ trống = người dẫn chuyện |
 | `sub` | phụ đề/bong bóng hiển thị (được dùng kí hiệu); mặc định = `say` |
-| `bubble: false` | không hiện bong bóng, chỉ phụ đề |
+| `bubble: false` / `true` | ép tắt / ép hiện bóng thoại (mặc định: có bảng → phụ đề; không bảng → bóng thoại) |
 | `pose`, `face`, `flip`, `hold` | áp cho người đang nói (`who`) |
 | `act: { an: {pose, face, flip, hold, x, exit, enter} }` | điều khiển nhân vật khác trong cùng nhịp |
 | `move: { who, to, dur, style }` | đi tới x = `to` (`style`: `walk`, `run`, `jump`; `by` = dịch tương đối; `face: "left"/"right"` khi dừng; `height` cho jump) — mảng để nhiều người cùng đi. Tốc độ tự nhiên: đi bộ ≈ 230–300 px/giây (`dur` = quãng đường/260), chạy ≈ 450–600 px/giây, nhảy 1,2–1,6 s. Đi vào/ra khung: x = −160 hoặc 2080 |
@@ -73,6 +73,15 @@ Khi nhân vật đang nói mà tư thế là `idle`, engine tự cho tay đưa n
 
 Chuyển động tự động (không cần khai báo): bàn chân bám đất khi đi/chạy, hông nhấp nhô, tay vung ngược chân, tăng – giảm tốc, bước khép chân khi dừng, quay người khi đổi hướng (`flip` hoặc `move` ngược chiều), nhún lấy đà và tiếp đất khi nhảy, đứng yên thì thở và dồn trọng tâm, đang nói thì tay đưa nhịp + gật đầu nhẹ, người nghe đưa mắt về phía người nói. Tiếng bước chân (`step`, `steprun`), `jump`, `land` tự sinh đúng thời điểm chân chạm đất.
 
+### Cảnh hành động / võ thuật
+Tư thế: `guard` (thủ thế, nhún), `punch` (đấm thẳng), `punch2` (đấm tay sau), `uppercut`, `kick` (đá ngang), `highkick`, `block` (đỡ), `hit` (trúng đòn bật ra sau), `hitlow` (trúng bụng gập người), `dizzy`, `bow`, `fistbow` (ôm quyền chào), `victory`, `kneel`. Nhân vật: `band` (màu băng đô), `belt` (đai), `fists: true` (vẽ nắm tay), `gloves`.
+- `snap: 0.08–0.15` (trong `act` hoặc nhịp) = đổi tư thế cực nhanh cho đòn đánh; `delay` trong `act` = bắt đầu sau x giây trong nhịp (để phản ứng đúng lúc chạm).
+- `move` thêm `style: "slide"` (bị đẩy lùi, không quay người, không bước) và `"flykick"` (tung cước bay).
+- `fx: { type, on, part, dx, dy, at, dur, text, color }`: `type` = `hit` (chớp sáng va chạm), `dust` (bụi), `speed` (vệt tốc độ, `dir`), `text` (chỉ chữ); `on` = nhân vật, `part` = `head|chest|belly|legs`; `text` chữ kiểu truyện tranh "BỐP!".
+- `shake: { amp, dur, at }` rung khung hình khi trúng đòn.
+- `sfx` dạng đối tượng `{ name, at, vol, len }` để canh tiếng đúng khoảnh khắc chạm (`len` cắt ngắn tiếng dài như `crowd`).
+- Nhịp chuẩn một đòn: nhịp ra đòn (`snap` 0,1 + `swish`, `wait` 0,13–0,15, `gap: 0`) → nhịp trúng (`hit` + `fx` + `shake` + `punch`/`kickhit` + `slide`, `wait` 0,5–0,7). Xem `examples/vo-thuat-thu.film.js`.
+
 ## 6. Nét mặt (`face`)
 `happy` (mặc định, má hồng), `neutral`, `sad`, `surprised`, `worried`, `angry`, `thinking`, `happyclosed` (cười híp mắt). Mắt tự chớp; miệng mấp máy khi nói.
 
@@ -96,7 +105,7 @@ Chuyển động tự động (không cần khai báo): bàn chân bám đất k
 | `image` | `src` (URL hoặc data:), `w`, `h` | ảnh ngoài (hạn chế: làm file phụ thuộc mạng) |
 
 ## 8. Phông nền (`bg`)
-`paper` (giấy trơn), `grid` (giấy ô li), `whiteboard` (bảng trắng: vùng viết x 520–1820, y 90–690), `classroom` (bảng xanh phấn: x 560–1780, y 110–650; chữ phấn trắng), `park`, `street`, `market`, `home`, `space`, `stage`.
+`dojo` (võ đường), `paper` (giấy trơn), `grid` (giấy ô li), `whiteboard` (bảng trắng: vùng viết x 520–1820, y 90–690), `classroom` (bảng xanh phấn: x 560–1780, y 110–650; chữ phấn trắng), `park`, `street`, `market`, `home`, `space`, `stage`.
 Bảng ở bên phải → đặt người giảng ở x ≈ 250–330.
 
 ## 9. Chữ & công thức (mini-TeX, vẽ thẳng lên canvas, không cần mạng)
@@ -104,11 +113,11 @@ Bảng ở bên phải → đặt người giảng ở x ≈ 250–330.
 Không hỗ trợ: ma trận, hệ phương trình nhiều dòng (viết thành nhiều dòng `write`), `\left( \right)` co giãn. Phép chia trong SGK dùng dấu `:` (`\div` vẽ ra `:`).
 
 ## 10. Âm thanh
-`step`, `steprun`, `jump`, `land` (tự có khi di chuyển), `pop`, `ding` (chốt kiến thức), `correct`, `wrong`, `tick`, `boing`, `tada`, `bell` (vào tiết), `click`, `step`, `whoosh` (chuyển cảnh), `marker`/`chalk` (tự có khi viết), `applause`.
+Tiếng thật TiengDong.com (sau khi chạy `fetch_tiengdong.py`): `punch` (tự xoay vòng punch/punch2/punch3/boxing), `kickhit`, `swish`, `swish2`, `fall`, `bell`, `crowd`, `ko`, `victory`, `tension`, `action`, `kungfu`, `wrong`. Tổng hợp: `step`, `steprun`, `jump`, `land` (tự có khi di chuyển), `pop`, `ding` (chốt kiến thức), `correct`, `wrong`, `tick`, `boing`, `tada`, `bell` (vào tiết), `click`, `step`, `whoosh` (chuyển cảnh), `marker`/`chalk` (tự có khi viết), `applause`.
 
 ## 11. Mẹo bố cục
 - Hai nhân vật đối thoại: x ≈ 650 và 1270, người bên phải `flip: true`.
 - Bong bóng tự né mép; lời > 4 dòng bong bóng sẽ tự ẩn, chỉ còn phụ đề → tách câu.
 - Đạo cụ "trên bàn": bàn `table` ở y 960 cao 190 → đặt đồ ở y ≈ 690–740.
-- Cỡ chữ bảng 56–76; dòng chốt dùng `box: true` + `sfx: "ding"`.
-- Mỗi bảng tối đa ~6 dòng cỡ 64; nhiều hơn thì `clear: "board"`.
+- Cỡ chữ: mặc định bảng 84, tối thiểu 60 (chuẩn slide trình chiếu); dòng chốt dùng `box: true` + `sfx: "ding"`.
+- Mỗi bảng tối đa ~5 dòng cỡ 84 (phân số chiếm nhiều chỗ hơn); khoảng dòng tự tính theo chiều cao công thức; nhiều hơn thì `clear: "board"`.

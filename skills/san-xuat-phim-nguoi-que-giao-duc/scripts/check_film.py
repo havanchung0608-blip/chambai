@@ -41,6 +41,8 @@ LINT_JS = r"""
         if (/\d+\s*\/\s*\d+/.test(b.say)) Wn(`${bt}: lời đọc có phân số dạng a/b → đọc "a phần b"`);
         const words = b.say.trim().split(/\s+/).length; if (words > 45) Wn(`${bt}: lời đọc dài ${words} chữ — nên tách thành 2 nhịp`);
       }
+      [].concat(b.write || []).forEach((w) => { if (typeof w === "object" && w.size && w.size < 60) Wn(`${bt}: chữ viết bảng cỡ ${w.size} < 60 — học sinh cuối lớp khó đọc (chuẩn slide ≥ 60)`); });
+      [].concat(b.show || []).forEach((it) => { if (it.size && it.size < 56) Wn(`${bt}: chữ đạo cụ ${it.id || it.type} cỡ ${it.size} < 56`); });
       if (b.quiz && !(b.quiz.options && b.quiz.options.length)) E(`${bt}: quiz thiếu options`);
       if (b.quiz && (b.quiz.answer == null || b.quiz.answer >= b.quiz.options.length)) E(`${bt}: quiz.answer sai chỉ số (đếm từ 0)`);
     });

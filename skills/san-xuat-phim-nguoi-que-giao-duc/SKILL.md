@@ -1,11 +1,15 @@
 ---
 name: san-xuat-phim-nguoi-que-giao-duc
-description: Sản xuất trọn gói phim hoạt hình người que giáo dục (kiểu MinutePhysics / stickman explainer) cho thầy Chung — ý tưởng, kịch bản nhiều nhân vật, dựng phim HTML5 bằng engine có sẵn (đi, chạy, nói, viết bảng, đạo cụ trực quan, quiz, máy quay), kiểm tra tự động, xuất MP4 có giọng đọc và nhạc. Dùng skill này mỗi khi thầy muốn làm phim, clip, video hoạt hình người que, phim kể chuyện dẫn nhập bài học, phim tình huống Toán thực tế, phim sai lầm thường gặp, phim cho kênh YouTube giáo dục, hoặc cần xuất phim người que ra MP4 — kể cả khi thầy chỉ nói "làm cái phim hoạt hình cho bài này".
+description: Sản xuất trọn gói phim hoạt hình người que giáo dục ra file MP4 cho thầy Chung — ý tưởng, kịch bản nhiều nhân vật, engine có sẵn (đi/chạy/nhảy như người thật, nói khớp môi, viết bảng, đạo cụ trực quan, quiz, máy quay, cảnh hành động – võ thuật có hiệu ứng va chạm), chữ cỡ slide trình chiếu, tiếng động thật từ TiengDong.com, giọng đọc tiếng Việt, kiểm tra tự động. Dùng skill này mỗi khi thầy muốn làm phim, clip, video hoạt hình người que, phim kể chuyện dẫn nhập bài học, phim tình huống Toán thực tế, phim sai lầm thường gặp, phim cho kênh YouTube giáo dục, hoặc cần xuất phim người que ra MP4 — kể cả khi thầy chỉ nói "làm cái phim hoạt hình cho bài này".
 ---
 
 # Sản xuất phim người que giáo dục
 
-Sản phẩm chính: **một file HTML duy nhất** (mở bằng Chrome/Edge là chiếu, có giọng đọc tiếng Việt, phụ đề, nút quay) và khi thầy cần thì thêm **file MP4** để đăng YouTube/Zalo/chiếu không cần mạng.
+Sản phẩm bàn giao: **file MP4 1920×1080** (thầy yêu cầu phim MP4, không phải HTML). File HTML chỉ là bản dựng trung gian để kiểm tra/xuất — không gửi làm sản phẩm chính, trừ khi thầy hỏi.
+
+**Chuẩn chữ (thầy yêu cầu "cỡ chữ như slide PPT, lớn nhất có thể, học sinh quan sát được"):** khung 1920 px ≈ slide 13,33 in nên 30 pt ≈ 60 px. Engine mặc định: chữ viết bảng 84 px, bóng thoại và phụ đề 64 px, câu hỏi quiz 66 px / đáp án 64 px, tiêu đề 124 px. Không đặt `size` nhỏ hơn 60 cho chữ học sinh cần đọc (bộ kiểm tra cảnh báo). Câu thoại ngắn để bóng thoại ≤ 3 dòng. Cảnh có bảng: lời nói tự xuống thanh phụ đề dưới đáy để không che bảng; cảnh không có bảng dùng bóng thoại (khi đã có bóng thoại thì không lặp phụ đề).
+
+**Âm thanh thật từ TiengDong.com** (miễn phí, trang đề nghị ghi nguồn): chạy `python3 <skill>/scripts/fetch_tiengdong.py` một lần để tải bộ tiếng động (đấm, đá, vụt gió, ngã, chuông, khán giả, K.O, chiến thắng, căng thẳng, trả lời sai…; `--list` xem tên). `export_mp4.py` tự dùng khi tên sfx trùng; thiếu thì dùng âm tổng hợp. Phim có dùng bộ này phải ghi "Âm thanh: TiengDong.com" ở màn kết. Cần tiếng mới: tìm trên tiengdong.com, thêm dòng vào bảng `SOUNDS` trong script.
 
 **Chuẩn chuyển động và âm thanh (thầy yêu cầu "di chuyển như người thật, âm thanh chuẩn"):** engine đã lo phần cơ học — bàn chân bám đất khi đi (không trượt), hông nhấp nhô, tay vung ngược chân và trễ nhịp, tăng tốc – giảm tốc, bước khép chân khi dừng, quay người, nhún lấy đà khi nhảy, đứng yên vẫn thở và dồn trọng tâm, tay đưa nhịp khi nói, người nghe đưa mắt về người nói; tiếng bước chân/tiếp đất tự sinh đúng lúc chân chạm đất; khi xuất MP4 miệng mở theo âm lượng thật của giọng. Việc của em khi viết kịch bản là **cho nhân vật di chuyển có mục đích**: đi vào khung hình thay vì xuất hiện sẵn, đi tới chỗ đạo cụ/bảng trước khi nói về nó, chạy khi vui/vội, quay sang người đối diện khi đối thoại, rời khung hình ở cảnh kết.
 
@@ -52,7 +56,7 @@ python3 <skill>/scripts/check_film.py ten-phim.html ten-phim-preview/
 ```
 `check_film.py` cần Python Playwright (`pip install playwright`; script tự dùng Chromium/Chrome/Edge có sẵn nếu Playwright chưa tải trình duyệt). Sửa mọi `ERROR`; xem xét `WARN`. Sau đó **mở `tong-quan.jpg` ra xem bằng mắt**: nhân vật có che chữ/đạo cụ không, bong bóng có đè nhau không, đạo cụ có lơ lửng vô lí không, bố cục có cân không. Chỉnh toạ độ rồi build lại.
 
-### 5. Xuất MP4 (khi thầy cần video)
+### 5. Xuất MP4 (luôn làm — đây là sản phẩm)
 ```bash
 python3 <skill>/scripts/export_mp4.py ten-phim.html ten-phim.mp4 --music            # tự chọn: Microsoft HoaiMy/NamMinh (edge-tts) → Piper offline → không lời
 python3 <skill>/scripts/export_mp4.py ten-phim.html ten-phim.mp4 --tts piper --music # giọng Việt OFFLINE (pip install piper-tts; lần đầu tự tải mô hình 63 MB từ Hugging Face)
@@ -62,7 +66,7 @@ python3 <skill>/scripts/export_mp4.py ten-phim.html ten-phim.mp4 --voice-dir ghi
 Thời lượng cảnh tự giãn theo độ dài file âm thanh thật; miệng nhân vật khớp âm lượng từng câu. Thứ tự chất lượng giọng: ghi âm thật của thầy (`--voice-dir`) > Microsoft HoaiMy/NamMinh (edge-tts, cần mạng tới speech.platform.bing.com) > Piper offline (một giọng nữ; giọng nam/trẻ em được hạ/nâng cao độ nên kém tự nhiên hơn). Script báo rõ đã dùng giọng nào — nói thật với thầy. Nếu không có giọng nào, phim xuất không lời; gợi ý bấm ⏺ Quay trong file HTML (ghi được giọng đọc của Edge). `--size 1280x720` xuất nhanh hơn. Xem lại vài khung hình của MP4 trước khi giao.
 
 ### 6. Bàn giao
-Gửi file HTML (và MP4 nếu có), tên không dấu. Trả lời ngắn: số cảnh, thời lượng, các điểm sư phạm chính, cách sửa lời (mở file `.film.js`, sửa `say`, chạy lại build), cách quay/xuất video. Đề xuất 1–2 cải tiến thiết thực (phim tiếp theo trong chuỗi, phiếu học tập đi kèm…).
+Gửi file MP4 (tên không dấu); kèm file `.film.js` để sửa lời về sau. Trước khi gửi, trích vài khung hình từ chính file MP4 (ffmpeg) để soát lần cuối. Trả lời ngắn: số cảnh, thời lượng, các điểm sư phạm chính, cách sửa lời (mở file `.film.js`, sửa `say`, chạy lại build), cách quay/xuất video. Đề xuất 1–2 cải tiến thiết thực (phim tiếp theo trong chuỗi, phiếu học tập đi kèm…).
 
 ## Mở rộng engine
 Cần tư thế/đạo cụ/phông nền mới: thêm vào `POSES`, `PROPS`, `BG` trong `scripts/engine.js` (theo mẫu có sẵn, vẽ bằng `hline`/`hcircle`/`hrect` để giữ nét vẽ tay), chạy `node --check`, build lại phim mẫu và `check_film.py` để chắc không hỏng gì, rồi cập nhật bảng trong `references/film-api.md`.
