@@ -711,6 +711,30 @@
       runs.forEach((r) => { if (budget <= 0) return; const n = Math.min(r.length, budget); strokeProg(ctx, r, n >= r.length ? 1 : n / r.length); budget -= r.length; });
       if (it.label && (it._prog == null || it._prog >= 1)) { const l = runs.length ? runs[runs.length - 1] : null; if (l) { const e = l[l.length - 1]; drawTex(ctx, it.label, e[0] + 20, e[1] - 20, it.size || 56, col, "left", 1); } }
     },
+    table(ctx, it) {
+      // bảng giá trị: rows = [["x","-2",...],["y = x^2","4",...]]; reveal = [số ô hiện ở mỗi hàng] (tween được: revealX, revealY)
+      const rows = it.rows || [], cw = it.cw || 140, cw0 = it.cw0 || 220, ch = it.ch || 110, size = it.size || 64;
+      const col = it.color || (DARK ? "#ffffff" : INK), grid = it.gridColor || (DARK ? "#e0e0e0" : INK);
+      const ncol = Math.max(...rows.map((r) => r.length)), W = cw0 + (ncol - 1) * cw, Hh = rows.length * ch;
+      const rv = (r) => (r === 0 ? (it.revealX == null ? 99 : it.revealX) : r === 1 ? (it.revealY == null ? 99 : it.revealY) : 99);
+      const pr = it._prog == null ? 1 : it._prog;
+      ctx.lineWidth = 5; ctx.strokeStyle = grid;
+      if (it.hiCol != null && it.hiCol > 0) { ctx.save(); ctx.fillStyle = it.hiColor || "rgba(255,213,79,.35)"; ctx.fillRect(cw0 + (it.hiCol - 1) * cw, 0, cw, Hh); ctx.restore(); }
+      const lines = [];
+      for (let r = 0; r <= rows.length; r++) lines.push([[0, r * ch], [W, r * ch]]);
+      lines.push([[0, 0], [0, Hh]]);
+      for (let c = 0; c < ncol; c++) { const x = cw0 + c * cw; lines.push([[x, 0], [x, Hh]]); }
+      lines.forEach((L) => strokeProg(ctx, L, pr));
+      if (pr < 1) return;
+      rows.forEach((row, r) => row.forEach((cell, c) => {
+        if (c > 0 && c > rv(r)) return;
+        const k = c > 0 ? clamp(rv(r) - (c - 1), 0, 1) : 1;
+        ctx.save(); ctx.globalAlpha *= k;
+        const x = c === 0 ? cw0 / 2 : cw0 + (c - 0.5) * cw;
+        drawTex(ctx, String(cell).replace(/^-/, "−"), x, r * ch + ch / 2 + size * 0.33, c === 0 ? size * 0.9 : size, (it.cellColors && it.cellColors[r]) || col, "center", 1);
+        ctx.restore();
+      }));
+    },
     dot(ctx, it) { const r = it.r || 15; ctx.fillStyle = it.color || "#ff5252"; ctx.beginPath(); ctx.arc(0, 0, r * (it._prog == null ? 1 : it._prog), 0, 7); ctx.fill(); if (it.label) drawTex(ctx, it.label, 24, -24, it.size || 52, it.color || "#ff5252", "left", 1); },
     seg(ctx, it) { ctx.strokeStyle = it.color || (DARK ? "#fff" : INK); ctx.lineWidth = it.width || 6; strokeProg(ctx, [[it.x1 || 0, it.y1 || 0], [it.x2 || 200, it.y2 || 0]], it._prog == null ? 1 : it._prog); },
     poly(ctx, it) {
@@ -936,7 +960,7 @@
     ctx.save();
     ctx.translate(it.x || 0, it.y || 0);
     if (it.rot) ctx.rotate(rad(it.rot));
-    const s = (it.scale == null ? 1 : it.scale) * (it._pop == null ? 1 : it._pop) * (1 + 0.22 * (it._ind || 0));
+    const s = (it.scale == null ? 1 : it.scale) * (it._pop == null ? 1 : it._pop) * (["graph", "axes", "table"].includes(it.type) ? 1 : 1 + 0.22 * (it._ind || 0));
     ctx.scale(s, s);
     ctx.globalAlpha *= it.alpha == null ? 1 : it.alpha;
     ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = INK;
@@ -1263,6 +1287,9 @@
       if (it._gone) return;
       if (it._dead != null) { const k = (t - it._dead) / 0.3; if (k >= 1) return; it.alpha = (it.alpha == null ? 1 : it.alpha) * (1 - k); }
       if (it._born != null && it.pop !== false) { const k = clamp((t - it._born) / 0.45, 0, 1); it._pop = k >= 1 ? 1 : Math.max(0.001, easeOutBack(k)); }
+      if (it.type === "dot" && it.ax && S.items[it.ax] && it.at) { const A = S.items[it.ax], M = axesMap(A); it.x = (A.x || 0) + M.sx(it.at[0]); it.y = (A.y || 0) + M.sy(it.at[1]);
+        if (it.guides !== false) { const k = it._pop == null ? 1 : Math.min(1, it._pop); ctx.save(); ctx.setLineDash([14, 10]); ctx.lineWidth = 4; ctx.strokeStyle = it.guideColor || "rgba(255,255,255,.75)"; ctx.globalAlpha *= clamp(k, 0, 1) * (it.alpha == null ? 1 : it.alpha);
+          const x0 = (A.x || 0) + M.sx(0), y0 = (A.y || 0) + M.sy(0); ctx.beginPath(); ctx.moveTo(it.x, it.y); ctx.lineTo(it.x, y0); ctx.moveTo(it.x, it.y); ctx.lineTo(x0, it.y); ctx.stroke(); ctx.restore(); } }
       if (it.type === "dot" && it.on && S.items[it.on]) { const G = S.items[it.on], A = S.items[G.axes]; if (A) { const M = axesMap(A), u = it.u != null ? it.u : 0; let y = mfn(G.fn || "x")(u); if (G._fn2) y = lerp(y, mfn(G._fn2)(u), G._mix || 0); it.x = (A.x || 0) + M.sx(u); it.y = (A.y || 0) + M.sy(y); } }
       drawItem(ctx, it, life);
       drawManimFx(ctx, it);
@@ -1363,7 +1390,7 @@
   }
   function drawBubble(ctx, ch, sp, film) {
     if (!ch._headTop) return false;
-    const text = sp.text, size = 64; const maxW = 900;
+    const text = sp.text, size = 80; const maxW = 1100;
     const lines = wrapText(ctx, text, maxW, size);
     if (lines.length > 3) return false; // dài quá → chỉ phụ đề
     const k = clamp(sp.el / 0.25, 0, 1);
@@ -1382,7 +1409,7 @@
     return true;
   }
   function drawSub(ctx, sp, film) {
-    const size = 64, text = sp.text; const lines = wrapText(ctx, text, 1640, size).slice(-2);
+    const size = 78, text = sp.text; const lines = wrapText(ctx, text, 1640, size).slice(-2);
     const h = lines.length * size * 1.3 + 30, y = H - h - 24;
     ctx.save(); ctx.fillStyle = "rgba(10,10,20,.62)"; roundRect(ctx, 60, y, W - 120, h, 18); ctx.fill();
     ctx.fillStyle = "#fff"; ctx.font = `${size}px ${FONT}`; ctx.textAlign = "center";
