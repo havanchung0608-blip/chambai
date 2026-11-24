@@ -272,29 +272,76 @@
     jump: (t) => ({ fa: [138, 158], ba: [-138, -158], fl: [40, -10], bl: [-10, -50], lift: 60 + Math.sin(t * 6) * 30 }),
     nod: (t) => ({ fa: [14, 4], ba: [-14, -4], fl: [7, 0], bl: [-7, 0], head: Math.sin(t * 8) * 9 })
   };
-  function walkPose(phase, run) {
-    const s = Math.sin(phase), c = Math.cos(phase), A = run ? 42 : 26;
-    const knee = (v) => Math.max(0, v);
-    return {
-      fa: [-s * A * 0.9 + (run ? 30 : 0), -s * A * 0.9 + (run ? 95 : 10)],
-      ba: [s * A * 0.9 + (run ? 30 : 0), s * A * 0.9 + (run ? 95 : 10)],
-      fl: [s * A, s * A - knee(-c) * (run ? 70 : 40)],
-      bl: [-s * A, -s * A - knee(c) * (run ? 70 : 40)],
-      lean: run ? 12 : 3,
-      lift: Math.abs(c) * (run ? 10 : 5)
-    };
+  /* ------------- chuyển động như người thật: bàn chân bám đất (IK) ------------- */
+  const LEG = { th: 86, sh: 86 };
+  function noise1(x, seed) { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f); return lerp(hash(i * 7.13 + seed), hash((i + 1) * 7.13 + seed), u) * 2 - 1; }
+  const easeOutSoft = (t) => { const c1 = 1.15, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+  function feetFromAngles(P) {
+    const pt = (x, y, L, a) => [x + L * Math.sin(rad(a)), y + L * Math.cos(rad(a))];
+    const fK = pt(0, 0, LEG.th, P.fl[0]), fF = pt(fK[0], fK[1], LEG.sh, P.fl[1]);
+    const bK = pt(0, 0, LEG.th, P.bl[0]), bF = pt(bK[0], bK[1], LEG.sh, P.bl[1]);
+    return { ff: fF, bf: bF, hipH: Math.max(fF[1], bF[1]) };
   }
-  function blendPose(a, b, k) {
+  function poseAt(name, t) { const P = (POSES[name] || POSES.idle)(t); if (!P.ff) Object.assign(P, feetFromAngles(P)); return P; }
+  // k: thân + chân, ka: tay (trễ, hơi vượt đà), kh: đầu (trễ nhất) → chuyển động gối nhau tự nhiên
+  function blendPose(a, b, k, ka, kh) {
+    ka = ka == null ? k : ka; kh = kh == null ? k : kh;
     const o = {};
-    ["fa", "ba", "fl", "bl"].forEach((key) => { o[key] = [lerp(a[key][0], b[key][0], k), lerp(a[key][1], b[key][1], k)]; });
-    ["lean", "head", "lift", "rot"].forEach((key) => { o[key] = lerp(a[key] || 0, b[key] || 0, k); });
+    ["fa", "ba"].forEach((key) => { o[key] = [lerp(a[key][0], b[key][0], ka), lerp(a[key][1], b[key][1], ka)]; });
+    ["ff", "bf"].forEach((key) => { o[key] = [lerp(a[key][0], b[key][0], k), lerp(a[key][1], b[key][1], k)]; });
+    o.hipH = lerp(a.hipH, b.hipH, k);
+    ["lean", "lift", "rot"].forEach((key) => { o[key] = lerp(a[key] || 0, b[key] || 0, k); });
+    o.head = lerp(a.head || 0, b.head || 0, kh);
     return o;
   }
-  function poseAt(name, t) { return (POSES[name] || POSES.idle)(t); }
+  // quãng đường chuẩn hoá theo vận tốc hình thang: tăng tốc – đều – giảm tốc
+  function trap(k, r) {
+    k = clamp(k, 0, 1); const v = 1 / (1 - r);
+    if (k < r) return 0.5 * v * k * k / r;
+    if (k > 1 - r) { const q = 1 - k; return 1 - 0.5 * v * q * q / r; }
+    return 0.5 * v * r + v * (k - r);
+  }
+  function gaitFeet(u, n, L) {
+    const i = Math.min(Math.floor(u), n - 1), f = clamp(u - i, 0, 1);
+    const a = Math.max(0, (i - 1) * L), b = i === n - 1 ? n * L : (i + 1) * L, sm = f * f * (3 - 2 * f);
+    return { st: i * L, sw: lerp(a, b, sm), f, swingIsF: i % 2 === 0 };
+  }
+  function gaitPose(g) {
+    if (g.style === "jump") return jumpPose(g.k);
+    const run = g.style === "run", F = gaitFeet(g.u, g.n, g.L), hip = g.u * g.L, sf = Math.sin(Math.PI * F.f);
+    const lift = sf * (run ? 58 : 26);
+    const H = run ? 156 + sf * 12 : 168 - (1 - sf) * 6;           // hông thấp nhất lúc hai chân chạm đất
+    const sw = [F.sw - hip + (run ? 0 : sf * 6), H - lift];
+    const st = [F.st - hip, H - (run ? Math.max(0, F.f - 0.62) * 80 : Math.max(0, F.f - 0.7) * 30)]; // nhấc gót
+    const ff = F.swingIsF ? sw : st, bf = F.swingIsF ? st : sw;
+    const u2 = Math.max(0, g.u - 0.12), F2 = gaitFeet(u2, g.n, g.L), h2 = u2 * g.L;   // tay vung trễ hơn chân
+    const rf = ((F2.swingIsF ? F2.sw : F2.st) - h2) / g.L, rb = ((F2.swingIsF ? F2.st : F2.sw) - h2) / g.L;
+    const A = run ? 44 : 32;
+    return {
+      fa: [-rf * A + (run ? 22 : 3), -rf * A + (run ? 105 : 10 + Math.max(0, rf) * 22)],
+      ba: [-rb * A + (run ? 22 : 3), -rb * A + (run ? 105 : 10 + Math.max(0, rb) * 22)],
+      ff, bf, hipH: H, lean: run ? 13 : 4, head: run ? -4 : -sf * 2, lift: 0
+    };
+  }
+  function jumpPose(k) {
+    if (k < 0.22) { const c = Math.sin((k / 0.22) * Math.PI / 2); return { fa: [-45 * c, -25 * c], ba: [-50 * c, -30 * c], ff: [14, 168 - 48 * c], bf: [-12, 168 - 48 * c], hipH: 168 - 48 * c, lean: 18 * c, head: 6 * c }; }
+    if (k < 0.82) { const q = (k - 0.22) / 0.6, tuck = Math.sin(q * Math.PI); return { fa: [140, 160], ba: [-140, -160], ff: [24 + tuck * 20, 168 - tuck * 50], bf: [-14, 168 - tuck * 44], hipH: 168, lean: 4, head: -6 }; }
+    const c = Math.sin(((k - 0.82) / 0.18) * Math.PI); return { fa: [60 * c + 10, 90 * c + 5], ba: [-30 * c, -20 * c], ff: [16, 168 - 42 * c], bf: [-14, 168 - 42 * c], hipH: 168 - 42 * c, lean: 14 * c, head: 4 * c };
+  }
+  function moveContacts(m, from, S0) {
+    // thời điểm (0..1) từng bàn chân chạm đất → tiếng bước chân khớp hình
+    const style = m.style || "walk", to = m.to != null ? m.to : from + (m.by || 0), dist = Math.abs(to - from);
+    if (style === "jump") return [{ k: 0.22, name: "jump" }, { k: 0.82, name: "land" }];
+    if (dist < 1) return [];
+    const n = Math.max(1, Math.round(dist / ((style === "run" ? 150 : 96) * S0))), out = [];
+    for (let j = 1; j <= n; j++) { let lo = 0, hi = 1; for (let it = 0; it < 30; it++) { const mid = (lo + hi) / 2; if (trap(mid, 0.18) * n < j) lo = mid; else hi = mid; } out.push({ k: (lo + hi) / 2, name: style === "run" ? "steprun" : "step" }); }
+    out.push({ k: 1, name: "step", after: 0.26 });
+    return out;
+  }
 
   /* ------------------------- vẽ nhân vật ------------------------- */
   function drawFigure(ctx, ch, life) {
-    const S = ch.scale || 1, P = ch._pose, dir = ch.flip ? -1 : 1;
+    const S = ch.scale || 1, P = ch._pose, dir = ch._dir || (ch.flip ? -1 : 1);
     const LEN = { torso: 132, neck: 12, ua: 72, fa: 66, th: 86, sh: 86, head: 40 };
     const pt = (x, y, L, a) => [x + dir * L * Math.sin(rad(a)), y + L * Math.cos(rad(a))];
     // dựng xương với hông tại (0,0)
@@ -305,14 +352,14 @@
     const shoulder = pt(neck[0], neck[1], 10, -lean);
     const fE = pt(shoulder[0], shoulder[1], LEN.ua, P.fa[0]), fH = pt(fE[0], fE[1], LEN.fa, P.fa[1]);
     const bE = pt(shoulder[0], shoulder[1], LEN.ua, P.ba[0]), bH = pt(bE[0], bE[1], LEN.fa, P.ba[1]);
-    const fK = pt(0, 0, LEN.th, P.fl[0]), fF = pt(fK[0], fK[1], LEN.sh, P.fl[1]);
-    const bK = pt(0, 0, LEN.th, P.bl[0]), bF = pt(bK[0], bK[1], LEN.sh, P.bl[1]);
+    const ik = (F) => { const a = LEG.th, b = LEG.sh; let x = F[0], y = F[1], d = Math.max(1, Math.hypot(x, y)); const md = a + b - 0.5; if (d > md) { x *= md / d; y *= md / d; d = md; } const ang = Math.acos(clamp((a * a + d * d - b * b) / (2 * a * d), -1, 1)), kA = Math.atan2(y, x) - ang; return [[dir * a * Math.cos(kA), a * Math.sin(kA)], [dir * x, y]]; };
+    const [fK, fF] = ik(P.ff), [bK, bF] = ik(P.bf);
     const headC = pt(neck[0], neck[1], LEN.neck + LEN.head, 180 - lean - (P.head || 0) * 0.3);
-    const footY = Math.max(fF[1], bF[1]);
+    const footY = P.hipH;
     const seed = ch._seed || 1;
     ctx.save();
-    ctx.translate(ch.x, (ch.y || GROUND) - (P.lift || 0) * S);
-    ctx.scale(S, S);
+    ctx.translate(ch.x + (ch._sway || 0) * S * dir, (ch.y || GROUND) - (P.lift || 0) * S);
+    ctx.scale(S * (ch._turnSx || 1), S);
     if (P.rot) { ctx.translate(0, -40); ctx.rotate(rad(P.rot) * dir); }
     ctx.translate(0, -footY);
     ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = ch.color || INK;
@@ -322,7 +369,7 @@
     ctx.ellipse(0, footY + (P.lift || 0) + 6, 58, 10, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
     // chi sau (mờ hơn một chút cho có chiều sâu)
     ctx.lineWidth = LW; ctx.globalAlpha = 0.85;
-    hline(ctx, [hip, bK, bF], seed + 1);
+    hline(ctx, [hip, bK, bF, [bF[0] + dir * 17, bF[1] + 1]], seed + 1);
     hline(ctx, [shoulder, bE, bH], seed + 2);
     ctx.globalAlpha = 1;
     // thân (áo màu nếu có)
@@ -337,7 +384,7 @@
       hline(ctx, [[top[0] - nx * wT, top[1] - ny * wT], [top[0] + nx * wT, top[1] + ny * wT], [bot[0] + nx * wB, bot[1] + ny * wB], [bot[0] - nx * wB, bot[1] - ny * wB]], seed + 9, true);
       ctx.fill(); ctx.stroke(); ctx.restore();
     } else hline(ctx, [hip, neck], seed + 3);
-    hline(ctx, [hip, fK, fF], seed + 4);
+    hline(ctx, [hip, fK, fF, [fF[0] + dir * 17, fF[1] + 1]], seed + 4);
     hline(ctx, [shoulder, fE, fH], seed + 5);
     // đồ cầm tay
     if (ch.holding) drawHeld(ctx, ch.holding, fH, dir, life);
@@ -368,7 +415,7 @@
     if (ch.bow) { ctx.fillStyle = ch.bow; ctx.beginPath(); const bx = -dir * r * 0.55, by = -r * 0.85; ctx.moveTo(bx, by); ctx.lineTo(bx - 16, by - 12); ctx.lineTo(bx - 16, by + 12); ctx.closePath(); ctx.moveTo(bx, by); ctx.lineTo(bx + 16, by - 12); ctx.lineTo(bx + 16, by + 12); ctx.closePath(); ctx.fill(); }
     // mặt
     const face = ch.face || "happy";
-    const ex = dir * 9, ey = -4;
+    const lookBack = ch._look && ch._look !== dir; const ex = lookBack ? -dir * 3 : dir * 9, ey = -4;
     const blinkPhase = (life + (ch._seed || 0) * 1.3) % 4.2;
     const blink = blinkPhase < 0.13;
     ctx.fillStyle = INK; ctx.strokeStyle = INK; ctx.lineWidth = 4;
@@ -631,7 +678,14 @@
         case "tada": [523, 659, 784, 1046].forEach((f, i) => this.tone(f, t + i * 0.09, 0.6, "triangle", 0.2)); break;
         case "bell": this.tone(880, t, 1.4, "sine", 0.25); this.tone(1760, t, 1, "sine", 0.08); break;
         case "click": this.tone(2400, t, 0.03, "square", 0.08); break;
-        case "step": this.tone(120, t, 0.06, "sine", 0.2, 70); break;
+        case "step": case "steprun": case "land": {
+          const big = name === "land" ? 1.6 : name === "steprun" ? 1.2 : 1, r = 0.85 + Math.random() * 0.3;
+          this.tone(95 * r, t, 0.09 * big, "sine", 0.32 * big, 48);
+          const s = this.noise(0.06 * big), f = c.createBiquadFilter(), g = c.createGain();
+          f.type = "bandpass"; f.frequency.value = 1500 * r; f.Q.value = 0.9; g.gain.setValueAtTime(0.13 * big, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06 * big);
+          s.connect(f); f.connect(g); g.connect(this.master); s.start(t); s.stop(t + 0.1 * big); break;
+        }
+        case "jump": this.tone(260, t, 0.22, "sine", 0.18, 620); break;
         case "whoosh": case "marker": case "chalk": case "applause": {
           const d = name === "whoosh" ? 0.45 : name === "applause" ? 2.2 : clamp(dur || 1, 0.3, 3);
           const s = this.noise(d), f = c.createBiquadFilter(), g = c.createGain();
@@ -705,7 +759,7 @@
     const scenes = []; let T = 0; const sfx = [], says = [];
     film.scenes.forEach((sc, si) => {
       const s = { idx: si, start: T, beats: [], src: sc };
-      const board = BOARDS[sc.bg] || null; let writeY = board ? board.y + 90 : 140;
+      const board = BOARDS[sc.bg] || null; let writeY = board ? board.y + 90 : 140; const posX = {};
       let lt = 0;
       (sc.beats || []).forEach((b, bi) => {
         const id = `s${si + 1}b${bi + 1}`;
@@ -730,7 +784,14 @@
           B.writes = ws; d = Math.max(d, off);
         }
         if (b.clear) writeY = board ? board.y + 90 : 140;
-        if (b.move) { arr(b.move).forEach((m) => { d = Math.max(d, m.dur || 1.5); if (m.style === "jump") sfx.push({ t: B.start, name: "boing" }); }); }
+        if (b.move) arr(b.move).forEach((m) => {
+          const dur = m.dur || 1.5; d = Math.max(d, dur);
+          const c = (sc.cast || {})[m.who] || {}, base = (film.cast || {})[m.who] || {};
+          const from = posX[m.who] != null ? posX[m.who] : c.x || 0;
+          moveContacts(m, from, c.scale || base.scale || 1).forEach((e) => sfx.push({ t: B.start + e.k * dur + (e.after || 0), name: e.name }));
+          posX[m.who] = m.to != null ? m.to : from + (m.by || 0);
+        });
+        if (b.act) Object.entries(b.act).forEach(([id, a]) => { if (a.x != null) posX[id] = a.x; });
         if (b.tween) arr(b.tween).forEach((m) => { d = Math.max(d, m.dur || 0.8); });
         if (b.cam) d = Math.max(d, b.cam.dur || 1);
         if (b.show) arr(b.show).forEach((it) => { if (it.sfx !== false) sfx.push({ t: B.start, name: "pop" }); d = Math.max(d, 0.4); });
@@ -775,7 +836,7 @@
         const ch = cast[id]; if (!ch) return;
         if (a.pose && a.pose !== ch.pose) { ch.prevPose = ch.pose; ch.pose = a.pose; ch.poseT = B.start; }
         if (a.face) ch.face = a.face;
-        if (a.flip != null) ch.flip = a.flip;
+        if (a.flip != null && !!a.flip !== !!ch.flip) { ch.flip = a.flip; ch.flipT = B.start; }
         if (a.hold !== undefined) ch.holding = a.hold;
         if (a.x != null) ch.x = a.x;
         if (a.enter) { ch.hidden = false; }
@@ -783,10 +844,17 @@
       });
       arr(b.move).forEach((m) => {
         const ch = cast[m.who]; if (!ch) return; const dur = m.dur || 1.5, k = p(dur);
-        const from = ch.x; const to = m.to != null ? m.to : from + (m.by || 0);
-        ch.flip = to < from; ch.x = lerp(from, to, m.style === "jump" ? k : easeIO(k));
-        if (k < 1) { ch._moving = { style: m.style || "walk", phase: (t - B.start) * (m.style === "run" ? 13 : 8) }; if (m.style === "jump") ch._jumpLift = Math.sin(k * Math.PI) * (m.height || 160); }
-        else { ch._moving = null; ch._jumpLift = 0; if (m.face != null) ch.flip = m.face === "left"; }
+        const from = ch.x, to = m.to != null ? m.to : from + (m.by || 0), style = m.style || "walk", S0 = ch.scale || 1;
+        if (Math.abs(to - from) > 1 && (to < from) !== !!ch.flip) { ch.flip = to < from; ch.flipT = B.start; }
+        let g;
+        if (style === "jump") { const q = clamp((k - 0.22) / 0.6, 0, 1); ch.x = lerp(from, to, q * q * (3 - 2 * q)); g = { style, k }; }
+        else { const dist = Math.abs(to - from), n = Math.max(1, Math.round(dist / ((style === "run" ? 150 : 96) * S0))), tr = trap(k, 0.18); ch.x = lerp(from, to, tr); g = { style, u: tr * n, n, L: Math.max(1, dist) / n / S0 }; }
+        if (k < 1) { ch._gait = g; if (style === "jump") ch._jumpLift = Math.sin(clamp((k - 0.22) / 0.6, 0, 1) * Math.PI) * (m.height || 130); }
+        else {
+          ch._gait = null; ch._jumpLift = 0;
+          ch._after = { t0: B.start + dur, g: style === "jump" ? { style, k: 1 } : { ...g, u: g.n } };
+          if (m.face != null && (m.face === "left") !== !!ch.flip) { ch.flip = m.face === "left"; ch.flipT = B.start + dur; }
+        }
       });
       arr(b.show).forEach((it, i) => { const id = it.id || `${B.id}_${i}`; items[id] = { ...it, _seed: 500 + bi * 13 + i, _born: B.start }; });
       arr(b.hide).forEach((id) => { if (items[id]) items[id]._dead = B.start; });
@@ -799,7 +867,7 @@
       if (B.writes) B.writes.forEach((w) => writes.push({ ...w, _p: clamp((t - B.start - w.wstart) / w.wdur, 0, 1), _bs: B.start }));
       if (b.cam) { const k = easeIO(p(b.cam.dur || 1)); const fx = cam.x, fy = cam.y, fz = cam.zoom; cam.x = lerp(fx, b.cam.x != null ? b.cam.x : fx, k); cam.y = lerp(fy, b.cam.y != null ? b.cam.y : fy, k); cam.zoom = lerp(fz, b.cam.zoom != null ? b.cam.zoom : fz, k); }
       const inBeat = t < B.start + B.dur;
-      if (b.say && inBeat) speech = { B, who: b.who, text: b.sub || b.say, bubble: b.bubble, active: t < B.start + B.sayDur, el: t - B.start };
+      if (b.say && inBeat) speech = { B, who: b.who, text: b.sub || b.say, bubble: b.bubble, active: t < B.start + B.sayDur, el: t - B.start, left: B.start + B.sayDur - t };
       if (b.title && t < B.start + (b.title.dur || 3.2)) title = { ...b.title, el: t - B.start };
       if (b.quiz && inBeat) quiz = { ...b.quiz, el: t - B.start, think: B.quizThink };
       if (b.highlight && inBeat) arr(b.highlight).forEach((h) => highlight.push({ id: h, el: t - B.start }));
@@ -833,21 +901,52 @@
       if (hl) { ctx.save(); ctx.strokeStyle = "#ff5252"; ctx.lineWidth = 7; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(hl.el * 8); hcircle(ctx, it.x, it.y, (it.hlR || 120) + Math.sin(hl.el * 8) * 6, 999, null); ctx.restore(); }
     });
     // nhân vật
+    const speaker = S.speech && S.speech.who && S.cast[S.speech.who];
     Object.values(S.cast).forEach((ch) => {
       if (ch.hidden) return;
-      const age = t - ch.poseT, k = clamp(age / 0.38, 0, 1);
-      let P = blendPose(poseAt(ch.prevPose, life), poseAt(ch.pose, life), easeIO(k));
-      if (ch._moving) { const wp = walkPose(ch._moving.phase, ch._moving.style === "run"); P = ch._moving.style === "jump" ? blendPose(P, poseAt("jump", life), 1) : wp; }
+      const age = t - ch.poseT;
+      const k0 = easeIO(clamp(age / 0.34, 0, 1)), k1 = easeOutSoft(clamp((age - 0.05) / 0.42, 0, 1)), k2 = easeIO(clamp((age - 0.1) / 0.32, 0, 1));
+      let P = blendPose(poseAt(ch.prevPose, life), poseAt(ch.pose, life), k0, k1, k2);
+      const seated = /^(sit|lie)/.test(ch.pose);
+      if (ch._gait) P = gaitPose(ch._gait);
+      else if (ch._after && t - ch._after.t0 < 0.34) {
+        // bước khép chân sau khi dừng: chân sau nhấc lên đặt về chỗ
+        const k = easeIO((t - ch._after.t0) / 0.34), G = gaitPose(ch._after.g);
+        P = blendPose(G, P, k);
+        const bk = Math.abs(G.bf[0] - P.bf[0]) > Math.abs(G.ff[0] - P.ff[0]) ? "bf" : "ff";
+        P[bk] = [P[bk][0], P[bk][1] - Math.sin(Math.PI * k) * 18];
+      }
+      if (!ch._gait && !seated) {
+        // dồn trọng tâm, thở, đầu khẽ động — không bao giờ đứng im như tượng
+        const sway = noise1(life * 0.35, ch._seed) * 4;
+        P.ff = [P.ff[0] - sway, P.ff[1]]; P.bf = [P.bf[0] - sway, P.bf[1]];
+        P.head = (P.head || 0) + noise1(life * 0.6, ch._seed + 2) * 2.5;
+        ch._sway = sway;
+      }
       if (ch._jumpLift) P.lift = (P.lift || 0) + ch._jumpLift;
-      ch._pose = P;
+      // quay người: bóp ngang rồi lật
+      ch._turnSx = 1; ch._dir = null;
+      if (ch.flipT != null && t - ch.flipT < 0.24 && t >= ch.flipT) { const k = (t - ch.flipT) / 0.24; ch._turnSx = Math.max(0.12, Math.abs(Math.cos(Math.PI * k))); ch._dir = k < 0.5 ? (ch.flip ? 1 : -1) : (ch.flip ? -1 : 1); }
+      // người nghe đưa mắt về phía người nói
+      ch._look = speaker && speaker !== ch ? (speaker.x < ch.x ? -1 : 1) : 0;
       let talk = 0;
       if (S.speech && S.speech.who === ch.id) {
+        const lip = STICKFILM.lip && STICKFILM.lip[S.speech.B.id];
         const voiceOn = Voice.vi.length > 0 && STICKFILM.useVoice;
         const speakingNow = live ? (Voice.speaking && live.sayId === S.speech.B.id) || (!voiceOn && S.speech.active) : S.speech.active;
-        if (speakingNow) talk = clamp(0.35 + 0.65 * Math.abs(Math.sin(life * 17 + Math.sin(life * 5) * 2)), 0, 1);
+        if (lip && !live) { const v = lip.env[Math.floor(S.speech.el * lip.fps)] || 0; talk = clamp(v * 1.25, 0, 1); }
+        else if (speakingNow) talk = clamp(0.2 + 0.8 * Math.abs(noise1(life * 9, ch._seed + 4)), 0, 1);
+        // cử chỉ tay theo lời nói (beat gesture), vào/ra mềm
+        if ((ch.pose === "idle" || ch.pose === "explain") && !ch._gait && speakingNow) {
+          const w = clamp(S.speech.el / 0.35, 0, 1) * clamp((S.speech.left + 0.2) / 0.4, 0, 1);
+          const n1 = noise1(life * 1.7, ch._seed + 11), n2 = noise1(life * 2.4, ch._seed + 13);
+          P.fa = [lerp(P.fa[0], 40 + 30 * n1, w), lerp(P.fa[1], 98 + 38 * n2, w)];
+          P.ba = [lerp(P.ba[0], -10 + 14 * noise1(life * 1.2, ch._seed + 17), w), P.ba[1]];
+          P.head = (P.head || 0) + w * 5 * noise1(life * 3.2, ch._seed + 19);
+        }
       }
       ch._talk = talk;
-      if (talk > 0 && ch.pose === "idle") ch._pose = blendPose(P, poseAt("explain", life), 0.6);
+      ch._pose = P;
       drawFigure(ctx, ch, life);
     });
     // biểu tượng cảm xúc trên đầu
@@ -993,9 +1092,10 @@ window.FILM = {
   scenes: [
     { // 1. Mở đầu
       bg: "park",
-      cast: { an: { x: 520, pose: "idle", face: "happy" }, binh: { x: 1400, pose: "idle", face: "happy", flip: true } },
+      cast: { an: { x: -160, pose: "idle", face: "happy" }, binh: { x: 2080, pose: "idle", face: "happy", flip: true } },
       beats: [
         { title: { text: "Ai được nhiều bánh hơn?", sub: "Phân số bằng nhau · Toán 6", dur: 3.4 }, sfx: ["bell"] },
+        { move: [{ who: "an", to: 520, dur: 3 }, { who: "binh", to: 1400, dur: 2, style: "run" }], gap: 0.2 },
         { who: "an", say: "Mẹ cho hai đứa mình hai cái bánh giống hệt nhau nè!", pose: "cheer", face: "happy",
           show: [{ id: "ban", type: "table", x: 960, y: 960, w: 560, h: 200, z: -1, sfx: false }, { id: "c1", type: "cake", x: 820, y: 690, slices: 2, r: 95 }, { id: "c2", type: "cake", x: 1100, y: 690, slices: 4, r: 95 }] },
         { who: "binh", say: "Bánh của An cắt làm hai phần, bánh của Bình cắt làm bốn phần.", pose: "point", face: "happy" },
@@ -1006,8 +1106,9 @@ window.FILM = {
     },
     { // 2. Cô giáo giải thích
       bg: "whiteboard",
-      cast: { co: { x: 300, pose: "idle", face: "happy" } },
+      cast: { co: { x: -150, pose: "idle", face: "happy" } },
       beats: [
+        { move: { who: "co", to: 330, dur: 2.4 }, gap: 0.1 },
         { who: "co", say: "Các em cùng cô viết lại nhé. An ăn một phần hai cái bánh.", pose: "write", hold: "marker", write: "An: \\frac{1}{2} cái bánh" },
         { who: "co", say: "Bình ăn hai phần tư cái bánh.", pose: "write", write: "Bình: \\frac{2}{4} cái bánh" },
         { who: "co", say: "Nhìn hình, phần tô màu của hai bánh bằng nhau.", pose: "point", hold: "pointer",
@@ -1043,6 +1144,8 @@ window.FILM = {
       beats: [
         { who: "binh", say: "Hóa ra mình ăn bằng nhau thật!", pose: "shrug", face: "happy" },
         { who: "an", say: "Lần sau chia bánh, nhớ nhân chéo để kiểm tra nhé!", pose: "wave", face: "happy" },
+        { who: "binh", say: "Đi thôi, ra sân đá bóng nào!", pose: "cheer" },
+        { move: [{ who: "an", to: 2100, dur: 2.2, style: "run" }, { who: "binh", to: 2150, dur: 2.6, style: "run" }] },
         { title: { text: "Hẹn gặp lại các em!", sub: "Về nhà: tìm 3 phân số bằng \\frac{2}{3}", dur: 3.5 }, sfx: ["tada"] }
       ]
     }

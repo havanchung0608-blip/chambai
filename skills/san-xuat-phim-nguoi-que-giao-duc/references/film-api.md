@@ -51,7 +51,7 @@ Mỗi cảnh bắt đầu lại từ đầu (bảng sạch, nhân vật về v�
 | `bubble: false` | không hiện bong bóng, chỉ phụ đề |
 | `pose`, `face`, `flip`, `hold` | áp cho người đang nói (`who`) |
 | `act: { an: {pose, face, flip, hold, x, exit, enter} }` | điều khiển nhân vật khác trong cùng nhịp |
-| `move: { who, to, dur, style }` | đi tới x = `to` (`style`: `walk`, `run`, `jump`; `by` = dịch tương đối; `face: "left"/"right"` khi dừng) — có thể là mảng |
+| `move: { who, to, dur, style }` | đi tới x = `to` (`style`: `walk`, `run`, `jump`; `by` = dịch tương đối; `face: "left"/"right"` khi dừng; `height` cho jump) — mảng để nhiều người cùng đi. Tốc độ tự nhiên: đi bộ ≈ 230–300 px/giây (`dur` = quãng đường/260), chạy ≈ 450–600 px/giây, nhảy 1,2–1,6 s. Đi vào/ra khung: x = −160 hoặc 2080 |
 | `write` | viết lên bảng: chuỗi, đối tượng `{text, size, color, x, y, align, box, dur}` hoặc mảng; tự xuống dòng theo bảng |
 | `clear: "board"` / `"all"` | xoá chữ trên bảng / xoá cả đạo cụ |
 | `show` | hiện đạo cụ (có `id` để điều khiển sau), nảy ra kèm tiếng pop (`sfx:false` để tắt) |
@@ -70,6 +70,8 @@ Mỗi cảnh bắt đầu lại từ đầu (bảng sạch, nhân vật về v�
 ## 5. Tư thế (`pose`)
 `idle`, `wave` (vẫy chào), `point` (chỉ ngang về phía trước), `pointup` (giơ ngón tay "chú ý"), `explain` (tay đưa nhịp khi giảng), `think` (tay chống cằm), `ask` (dang tay hỏi), `cheer` (giơ hai tay mừng, nhún), `yes` (giơ nắm tay "yeah"), `write` (viết bảng), `sad`, `surprised`, `shrug` (nhún vai), `clap` (vỗ tay), `hold` (hai tay cầm đồ trước ngực), `give` (đưa đồ), `facepalm`, `angry`, `nod` (gật đầu), `sit`, `sitthink`, `sithand` (ngồi giơ tay phát biểu), `lie` (nằm), `jump`.
 Khi nhân vật đang nói mà tư thế là `idle`, engine tự cho tay đưa nhịp nhẹ. Tư thế đổi được nội suy mượt 0,38 s. Ngồi (`sit…`) tự có ghế đẩu.
+
+Chuyển động tự động (không cần khai báo): bàn chân bám đất khi đi/chạy, hông nhấp nhô, tay vung ngược chân, tăng – giảm tốc, bước khép chân khi dừng, quay người khi đổi hướng (`flip` hoặc `move` ngược chiều), nhún lấy đà và tiếp đất khi nhảy, đứng yên thì thở và dồn trọng tâm, đang nói thì tay đưa nhịp + gật đầu nhẹ, người nghe đưa mắt về phía người nói. Tiếng bước chân (`step`, `steprun`), `jump`, `land` tự sinh đúng thời điểm chân chạm đất.
 
 ## 6. Nét mặt (`face`)
 `happy` (mặc định, má hồng), `neutral`, `sad`, `surprised`, `worried`, `angry`, `thinking`, `happyclosed` (cười híp mắt). Mắt tự chớp; miệng mấp máy khi nói.
@@ -102,7 +104,7 @@ Bảng ở bên phải → đặt người giảng ở x ≈ 250–330.
 Không hỗ trợ: ma trận, hệ phương trình nhiều dòng (viết thành nhiều dòng `write`), `\left( \right)` co giãn. Phép chia trong SGK dùng dấu `:` (`\div` vẽ ra `:`).
 
 ## 10. Âm thanh
-`pop`, `ding` (chốt kiến thức), `correct`, `wrong`, `tick`, `boing`, `tada`, `bell` (vào tiết), `click`, `step`, `whoosh` (chuyển cảnh), `marker`/`chalk` (tự có khi viết), `applause`.
+`step`, `steprun`, `jump`, `land` (tự có khi di chuyển), `pop`, `ding` (chốt kiến thức), `correct`, `wrong`, `tick`, `boing`, `tada`, `bell` (vào tiết), `click`, `step`, `whoosh` (chuyển cảnh), `marker`/`chalk` (tự có khi viết), `applause`.
 
 ## 11. Mẹo bố cục
 - Hai nhân vật đối thoại: x ≈ 650 và 1270, người bên phải `flip: true`.

@@ -7,6 +7,8 @@ description: Sản xuất trọn gói phim hoạt hình người que giáo dục
 
 Sản phẩm chính: **một file HTML duy nhất** (mở bằng Chrome/Edge là chiếu, có giọng đọc tiếng Việt, phụ đề, nút quay) và khi thầy cần thì thêm **file MP4** để đăng YouTube/Zalo/chiếu không cần mạng.
 
+**Chuẩn chuyển động và âm thanh (thầy yêu cầu "di chuyển như người thật, âm thanh chuẩn"):** engine đã lo phần cơ học — bàn chân bám đất khi đi (không trượt), hông nhấp nhô, tay vung ngược chân và trễ nhịp, tăng tốc – giảm tốc, bước khép chân khi dừng, quay người, nhún lấy đà khi nhảy, đứng yên vẫn thở và dồn trọng tâm, tay đưa nhịp khi nói, người nghe đưa mắt về người nói; tiếng bước chân/tiếp đất tự sinh đúng lúc chân chạm đất; khi xuất MP4 miệng mở theo âm lượng thật của giọng. Việc của em khi viết kịch bản là **cho nhân vật di chuyển có mục đích**: đi vào khung hình thay vì xuất hiện sẵn, đi tới chỗ đạo cụ/bảng trước khi nói về nó, chạy khi vui/vội, quay sang người đối diện khi đối thoại, rời khung hình ở cảnh kết.
+
 Không viết hoạt hình từ đầu mỗi lần: skill có sẵn engine đã kiểm thử. Việc của em là **viết kịch bản thật hay dưới dạng dữ liệu `window.FILM`**, rồi build – kiểm tra – xuất. Nhờ vậy thời gian dồn vào nội dung sư phạm, còn hình ảnh luôn đồng bộ và không lỗi.
 
 Phân biệt với skill khác:
@@ -52,11 +54,12 @@ python3 <skill>/scripts/check_film.py ten-phim.html ten-phim-preview/
 
 ### 5. Xuất MP4 (khi thầy cần video)
 ```bash
-python3 <skill>/scripts/export_mp4.py ten-phim.html ten-phim.mp4 --music            # giọng HoaiMy/NamMinh (edge-tts, cần mạng)
+python3 <skill>/scripts/export_mp4.py ten-phim.html ten-phim.mp4 --music            # tự chọn: Microsoft HoaiMy/NamMinh (edge-tts) → Piper offline → không lời
+python3 <skill>/scripts/export_mp4.py ten-phim.html ten-phim.mp4 --tts piper --music # giọng Việt OFFLINE (pip install piper-tts; lần đầu tự tải mô hình 63 MB từ Hugging Face)
 python3 <skill>/scripts/export_mp4.py ten-phim.html --list                           # in mã từng câu để thầy tự ghi âm
 python3 <skill>/scripts/export_mp4.py ten-phim.html ten-phim.mp4 --voice-dir ghi-am/ # dùng giọng thật của thầy (s1b1.mp3…)
 ```
-Thời lượng cảnh tự giãn theo độ dài file âm thanh thật. Nếu edge-tts không chạy được (thiếu gói/mạng chặn), script tự xuất bản không lời và báo rõ — khi đó nói thật với thầy và gợi ý: chạy lại trên máy có mạng, dùng `--voice-dir`, hoặc bấm ⏺ Quay trong file HTML (ghi được cả giọng đọc của trình duyệt). `--size 1280x720` xuất nhanh hơn. Xem lại vài khung hình của MP4 trước khi giao.
+Thời lượng cảnh tự giãn theo độ dài file âm thanh thật; miệng nhân vật khớp âm lượng từng câu. Thứ tự chất lượng giọng: ghi âm thật của thầy (`--voice-dir`) > Microsoft HoaiMy/NamMinh (edge-tts, cần mạng tới speech.platform.bing.com) > Piper offline (một giọng nữ; giọng nam/trẻ em được hạ/nâng cao độ nên kém tự nhiên hơn). Script báo rõ đã dùng giọng nào — nói thật với thầy. Nếu không có giọng nào, phim xuất không lời; gợi ý bấm ⏺ Quay trong file HTML (ghi được giọng đọc của Edge). `--size 1280x720` xuất nhanh hơn. Xem lại vài khung hình của MP4 trước khi giao.
 
 ### 6. Bàn giao
 Gửi file HTML (và MP4 nếu có), tên không dấu. Trả lời ngắn: số cảnh, thời lượng, các điểm sư phạm chính, cách sửa lời (mở file `.film.js`, sửa `say`, chạy lại build), cách quay/xuất video. Đề xuất 1–2 cải tiến thiết thực (phim tiếp theo trong chuỗi, phiếu học tập đi kèm…).

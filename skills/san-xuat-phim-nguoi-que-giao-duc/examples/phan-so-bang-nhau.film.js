@@ -15,9 +15,10 @@ window.FILM = {
   scenes: [
     { // 1. Mở đầu
       bg: "park",
-      cast: { an: { x: 520, pose: "idle", face: "happy" }, binh: { x: 1400, pose: "idle", face: "happy", flip: true } },
+      cast: { an: { x: -160, pose: "idle", face: "happy" }, binh: { x: 2080, pose: "idle", face: "happy", flip: true } },
       beats: [
         { title: { text: "Ai được nhiều bánh hơn?", sub: "Phân số bằng nhau · Toán 6", dur: 3.4 }, sfx: ["bell"] },
+        { move: [{ who: "an", to: 520, dur: 3 }, { who: "binh", to: 1400, dur: 2, style: "run" }], gap: 0.2 },
         { who: "an", say: "Mẹ cho hai đứa mình hai cái bánh giống hệt nhau nè!", pose: "cheer", face: "happy",
           show: [{ id: "ban", type: "table", x: 960, y: 960, w: 560, h: 200, z: -1, sfx: false }, { id: "c1", type: "cake", x: 820, y: 690, slices: 2, r: 95 }, { id: "c2", type: "cake", x: 1100, y: 690, slices: 4, r: 95 }] },
         { who: "binh", say: "Bánh của An cắt làm hai phần, bánh của Bình cắt làm bốn phần.", pose: "point", face: "happy" },
@@ -28,8 +29,9 @@ window.FILM = {
     },
     { // 2. Cô giáo giải thích
       bg: "whiteboard",
-      cast: { co: { x: 300, pose: "idle", face: "happy" } },
+      cast: { co: { x: -150, pose: "idle", face: "happy" } },
       beats: [
+        { move: { who: "co", to: 330, dur: 2.4 }, gap: 0.1 },
         { who: "co", say: "Các em cùng cô viết lại nhé. An ăn một phần hai cái bánh.", pose: "write", hold: "marker", write: "An: \\frac{1}{2} cái bánh" },
         { who: "co", say: "Bình ăn hai phần tư cái bánh.", pose: "write", write: "Bình: \\frac{2}{4} cái bánh" },
         { who: "co", say: "Nhìn hình, phần tô màu của hai bánh bằng nhau.", pose: "point", hold: "pointer",
@@ -65,6 +67,8 @@ window.FILM = {
       beats: [
         { who: "binh", say: "Hóa ra mình ăn bằng nhau thật!", pose: "shrug", face: "happy" },
         { who: "an", say: "Lần sau chia bánh, nhớ nhân chéo để kiểm tra nhé!", pose: "wave", face: "happy" },
+        { who: "binh", say: "Đi thôi, ra sân đá bóng nào!", pose: "cheer" },
+        { move: [{ who: "an", to: 2100, dur: 2.2, style: "run" }, { who: "binh", to: 2150, dur: 2.6, style: "run" }] },
         { title: { text: "Hẹn gặp lại các em!", sub: "Về nhà: tìm 3 phân số bằng \\frac{2}{3}", dur: 3.5 }, sfx: ["tada"] }
       ]
     }

@@ -72,6 +72,67 @@ def tts_edge(says, tmp):
         return {}
 
 
+PIPER_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/main/vi/vi_VN/vais1000/medium/"
+PIPER_NAME = "vi_VN-vais1000-medium.onnx"
+
+
+def tts_piper(says, tmp, model=None):
+    """Giọng đọc tiếng Việt chạy OFFLINE (Piper). Lần đầu tự tải mô hình ~63 MB."""
+    try:
+        import piper  # noqa: F401
+    except ImportError:
+        print("! Chưa có piper-tts (pip install piper-tts) → xuất không lời.")
+        return {}
+    import urllib.request
+    if not model:
+        cache = pathlib.Path.home() / ".cache" / "stickfilm"
+        cache.mkdir(parents=True, exist_ok=True)
+        model = cache / PIPER_NAME
+        for name in (PIPER_NAME, PIPER_NAME + ".json"):
+            fp = cache / name
+            if not fp.exists():
+                print("  tải mô hình giọng Piper:", name)
+                try:
+                    urllib.request.urlretrieve(PIPER_URL + name, fp)
+                except Exception as e:  # noqa: BLE001
+                    print("! Không tải được mô hình Piper:", e)
+                    return {}
+    files = {}
+    # trẻ em: nâng cao độ; nam: hạ cao độ (Piper vais1000 là giọng nữ)
+    shift = {"tre": 1.2, "nam": 0.84}
+    for s in says:
+        raw = tmp / f"{s['id']}_raw.wav"
+        fp = tmp / f"{s['id']}.wav"
+        r = subprocess.run([sys.executable, "-m", "piper", "-m", str(model), "-f", str(raw), "--length-scale", "1.05", "--sentence-silence", "0.15"],
+                           input=s["text"], text=True, capture_output=True)
+        if r.returncode or not raw.exists():
+            print("! Piper lỗi ở", s["id"], r.stderr[-200:]); return {}
+        k = shift.get(s.get("voice") or "nu")
+        if s.get("pitch"):
+            k = 1 + (float(s["pitch"]) - 1) * 0.45
+        if k and abs(k - 1) > 0.01:
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(raw), "-af",
+                            f"asetrate=22050*{k},aresample=44100,atempo={1 / k:.4f}", str(fp)], check=True)
+        else:
+            shutil.copy(raw, fp)
+        files[s["id"]] = fp
+    print(f"Giọng Piper offline: {len(files)} câu.")
+    return files
+
+
+def lip_env(fp, fps):
+    """Độ mở miệng theo âm lượng thật của câu nói (khớp môi)."""
+    a = np.abs(decode(fp))
+    hop = int(SR / fps)
+    n = max(1, len(a) // hop)
+    rms = np.array([np.sqrt(np.mean(a[i * hop:(i + 1) * hop] ** 2) + 1e-12) for i in range(n)])
+    ref = np.percentile(rms, 92) + 1e-6
+    v = np.clip(rms / ref, 0, 1)
+    v[v < 0.12] = 0
+    sm = np.convolve(v, [0.25, 0.5, 0.25], "same")
+    return [round(float(x), 3) for x in sm]
+
+
 # ------------------------- tổng hợp hiệu ứng âm thanh -------------------------
 def env(n, a=0.005, r=None):
     t = np.arange(n) / SR
@@ -128,8 +189,16 @@ def sfx(name, dur=1.0):
         return tone(880, 1.4, 0.25, decay=0.5) + tone(1760, 1.4, 0.08, decay=0.3)
     if name == "click":
         return tone(2400, 0.03, 0.08, kind="square")
-    if name == "step":
-        return tone(120, 0.06, 0.2, 70)
+    if name in ("step", "steprun", "land"):
+        big = 1.6 if name == "land" else 1.2 if name == "steprun" else 1.0
+        r = 0.85 + np.random.rand() * 0.3
+        th = tone(95 * r, 0.09 * big, 0.32 * big, 48)
+        sc = bandnoise(0.06 * big, 900 * r, 2400 * r, 0.13 * big)
+        sc *= np.exp(-np.arange(len(sc)) / (SR * 0.015))
+        n = max(len(th), len(sc)); out = np.zeros(n, np.float32); out[:len(th)] += th; out[:len(sc)] += sc
+        return out
+    if name == "jump":
+        return tone(260, 0.22, 0.18, 620)
     if name == "whoosh":
         n = bandnoise(0.45, 600, 3500, 0.35); return n * np.sin(np.linspace(0, np.pi, len(n)))
     if name in ("marker", "chalk"):
@@ -180,7 +249,8 @@ def main():
     ap.add_argument("html"); ap.add_argument("out", nargs="?")
     ap.add_argument("--fps", type=int, default=30)
     ap.add_argument("--size", default="1920x1080")
-    ap.add_argument("--tts", default="edge", choices=["edge", "none"])
+    ap.add_argument("--tts", default="auto", choices=["auto", "edge", "piper", "none"])
+    ap.add_argument("--piper-model", help="đường dẫn .onnx (mặc định tự tải vi_VN-vais1000-medium)")
     ap.add_argument("--voice-dir")
     ap.add_argument("--music", action="store_true")
     ap.add_argument("--list", action="store_true", help="in danh sách mã nhịp + lời đọc để ghi âm")
@@ -211,11 +281,16 @@ def main():
                         files[s["id"]] = vd / (s["id"] + ext); break
             miss = [s["id"] for s in info["says"] if s["id"] not in files]
             print(f"Ghi âm: có {len(files)}/{len(info['says'])} câu." + (f" Thiếu: {', '.join(miss[:12])}" if miss else ""))
-        elif a.tts == "edge":
-            files = tts_edge(info["says"], tmp)
+        else:
+            if a.tts in ("auto", "edge"):
+                files = tts_edge(info["says"], tmp)
+            if not files and a.tts in ("auto", "piper"):
+                files = tts_piper(info["says"], tmp, a.piper_model)
         if files:
             timing = {sid: ffprobe_dur(fp) + 0.12 for sid, fp in files.items()}
             pg.evaluate("(m) => STICKFILM.setTiming(m)", timing)
+            lips = {sid: {"fps": a.fps, "env": lip_env(fp, a.fps)} for sid, fp in files.items()}
+            pg.evaluate("(m) => { STICKFILM.lip = m; }", lips)
             info = pg.evaluate("() => STICKFILM.info()")
         total = info["duration"]
         print(f"Thời lượng {total:.1f}s · {len(info['scenes'])} cảnh · lời đọc: {'có' if files else 'không'}")
