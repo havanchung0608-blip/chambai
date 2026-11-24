@@ -23,7 +23,7 @@ Phim 2D người que (HTML/canvas) dùng skill `san-xuat-phim-nguoi-que-giao-duc
 | `animations/gestures.json` | Thư viện động tác thân trên (đếm bằng `python3 scripts/catalog.py`) |
 | `cameras/`, `environments/`, `characters/`, `audio/` | Danh mục preset, nhân vật mẫu, hướng dẫn âm thanh |
 | `templates/film_template.json` | Mẫu kịch bản trống có chú thích |
-| `examples/duong-tron/film.json` | Phim mẫu 30 s: cô giáo vào lớp, cầm compa, vẽ đường tròn, giải thích bán kính – đường kính |
+| `examples/duong-tron/film.json` | Phim mẫu 30 s: thầy giáo vào lớp, cầm compa, vẽ đường tròn, giải thích bán kính – đường kính |
 | `references/` | Kĩ thuật (12 nguyên tắc hoạt hình áp vào code), ngữ pháp máy quay, giọng nói, nguồn tham khảo |
 | `tests/` | Kiểm thử tự động (`python3 tests/run_tests.py`) |
 | `LEARNINGS.md` | Nhật kí tự nâng cấp sau mỗi dự án |

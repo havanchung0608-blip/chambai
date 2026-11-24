@@ -6,33 +6,288 @@
  "music": "story",
  "music_vol": 0.07,
  "characters": {
-  "co": {"name": "Cô Mai", "voice": "Ngọc Huyền", "start": "door_out", "heading": 1.57,
-         "spec": {"shirt": "#e57373", "pants": "#37474f", "hair": "long", "hair_color": "#3e2723", "skirt": true, "glasses": true}}
+  "thay": {
+   "name": "Thầy Chung",
+   "voice": "Thiện Minh",
+   "start": "door_out",
+   "heading": 1.57,
+   "spec": {
+    "shirt": "#90caf9",
+    "pants": "#263238",
+    "limbs": "#212121",
+    "hair": "short",
+    "hair_color": "#1b1b1b",
+    "glasses": true,
+    "long_sleeves": true
+   }
+  }
  },
- "props": {"compa": {"type": "compass", "radius": 0.4, "at": [2.3, 1.55, 0.785], "yaw": 0.0}},
+ "props": {
+  "compa": {
+   "type": "compass",
+   "radius": 0.4,
+   "at": [
+    2.3,
+    1.55,
+    0.785
+   ],
+   "yaw": 0.0
+  }
+ },
  "actions": [
-  {"do": "board_label", "text": "ĐƯỜNG TRÒN", "at": [-1.45, 0.48], "size": 0.17, "bold": true, "color": "#ffd54f", "sfx": "none", "cam": {"preset": "establishing_wide", "subject": "co"}},
-  {"do": "walk", "who": "co", "to": [[4.0, 1.75], [2.3, 2.05]], "face": "camera", "with": true},
-  {"do": "say", "who": "co", "text": "Chào các em! Hôm nay chúng ta cùng tìm hiểu về đường tròn.", "with": true, "offset": 1.6, "extend": false, "gesture_auto": true},
-  {"do": "gesture", "who": "co", "name": "wave", "dur": 1.4, "cam": "medium"},
-  {"do": "pick", "who": "co", "prop": "compa", "hold_for": 7.0, "cam": "insert_hand"},
-  {"do": "say", "who": "co", "text": "Cô dùng com-pa để vẽ một đường tròn tâm O.", "emotion": {"smile": 0.8, "brow_up": 0.4}, "cam": "medium_close"},
-  {"do": "walk", "who": "co", "to": [[0.6, 2.2], [-0.55, 2.35]], "face": "board", "cam": "truck_follow"},
-  {"do": "place_on_board", "who": "co", "prop": "compa", "center": [0.0, -0.05], "cam": "board_three_quarter"},
-  {"do": "draw_circle", "who": "co", "prop": "compa", "dur": 2.6},
-  {"do": "lift_from_board", "who": "co", "prop": "compa"},
-  {"do": "gesture", "who": "co", "name": "hold_prop", "dur": 9.0, "hands": ["R"], "with": true, "extend": false},
-  {"do": "walk", "who": "co", "to": [[-1.5, 2.0]], "face": "camera", "cam": "medium"},
-  {"do": "board_label", "text": "O", "at": [-0.08, -0.15], "size": 0.13, "cam": "insert_board"},
-  {"do": "say", "who": "co", "text": "Đoạn thẳng nối tâm O với một điểm trên đường tròn gọi là bán kính, kí hiệu là $R$.", "gesture": "present_L", "hands": ["L"], "with": true, "offset": 0.3},
-  {"do": "board_line", "from": [0.0, -0.05], "to": [0.4, -0.05], "dur": 0.9, "with": true, "offset": 1.2, "extend": false},
-  {"do": "board_label", "text": "A", "at": [0.48, -0.06], "size": 0.12, "with": true, "offset": 1.0, "extend": false},
-  {"do": "board_label", "text": "R", "at": [0.2, 0.05], "size": 0.13, "color": "#ffd54f", "with": true, "offset": 3.0, "extend": false},
-  {"do": "say", "who": "co", "text": "Đường kính đi qua tâm và dài gấp đôi bán kính: $d = 2R$.", "gesture": "point_board_L", "hands": ["L"], "cam": "board_three_quarter"},
-  {"do": "board_line", "from": [-0.4, -0.05], "to": [0.0, -0.05], "dur": 0.8, "color": "#ffd54f", "with": true, "offset": 0.6, "extend": false},
-  {"do": "board_label", "text": "B", "at": [-0.48, -0.06], "size": 0.12, "with": true, "offset": 0.6, "extend": false},
-  {"do": "board_label", "text": "d = 2R", "at": [1.2, 0.15], "size": 0.22, "bold": true, "color": "#ffd54f", "with": true, "offset": 2.6, "extend": false, "sfx": "ding"},
-  {"do": "say", "who": "co", "text": "Các em nhớ nhé!", "emotion": {"smile": 1.0, "brow_up": 0.6}, "gesture": "point_up", "cam": "push_in_emotion"},
-  {"do": "wait", "dur": 0.6}
+  {
+   "do": "board_label",
+   "text": "ĐƯỜNG TRÒN",
+   "at": [
+    -1.45,
+    0.48
+   ],
+   "size": 0.17,
+   "bold": true,
+   "color": "#ffd54f",
+   "sfx": "none",
+   "cam": {
+    "preset": "establishing_wide",
+    "subject": "thay"
+   }
+  },
+  {
+   "do": "walk",
+   "who": "thay",
+   "to": [
+    [
+     4.0,
+     1.75
+    ],
+    [
+     2.3,
+     2.05
+    ]
+   ],
+   "face": "camera",
+   "with": true
+  },
+  {
+   "do": "say",
+   "who": "thay",
+   "text": "Chào các em! Hôm nay chúng ta cùng tìm hiểu về đường tròn.",
+   "with": true,
+   "offset": 1.6,
+   "extend": false,
+   "gesture_auto": true
+  },
+  {
+   "do": "gesture",
+   "who": "thay",
+   "name": "wave",
+   "dur": 1.4,
+   "cam": "medium"
+  },
+  {
+   "do": "pick",
+   "who": "thay",
+   "prop": "compa",
+   "hold_for": 7.0,
+   "cam": "insert_hand"
+  },
+  {
+   "do": "say",
+   "who": "thay",
+   "text": "Thầy dùng com-pa để vẽ một đường tròn tâm O.",
+   "emotion": {
+    "smile": 0.8,
+    "brow_up": 0.4
+   },
+   "cam": "medium_close"
+  },
+  {
+   "do": "walk",
+   "who": "thay",
+   "to": [
+    [
+     0.6,
+     2.2
+    ],
+    [
+     -0.55,
+     2.35
+    ]
+   ],
+   "face": "board",
+   "cam": "truck_follow"
+  },
+  {
+   "do": "place_on_board",
+   "who": "thay",
+   "prop": "compa",
+   "center": [
+    0.0,
+    -0.05
+   ],
+   "cam": "board_three_quarter"
+  },
+  {
+   "do": "draw_circle",
+   "who": "thay",
+   "prop": "compa",
+   "dur": 2.6
+  },
+  {
+   "do": "lift_from_board",
+   "who": "thay",
+   "prop": "compa"
+  },
+  {
+   "do": "gesture",
+   "who": "thay",
+   "name": "hold_prop",
+   "dur": 9.0,
+   "hands": [
+    "R"
+   ],
+   "with": true,
+   "extend": false
+  },
+  {
+   "do": "walk",
+   "who": "thay",
+   "to": [
+    [
+     -1.5,
+     2.0
+    ]
+   ],
+   "face": "camera",
+   "cam": "medium"
+  },
+  {
+   "do": "board_label",
+   "text": "O",
+   "at": [
+    -0.08,
+    -0.15
+   ],
+   "size": 0.13,
+   "cam": "insert_board"
+  },
+  {
+   "do": "say",
+   "who": "thay",
+   "text": "Đoạn thẳng nối tâm O với một điểm trên đường tròn gọi là bán kính, kí hiệu là $R$.",
+   "gesture": "present_L",
+   "hands": [
+    "L"
+   ],
+   "with": true,
+   "offset": 0.3
+  },
+  {
+   "do": "board_line",
+   "from": [
+    0.0,
+    -0.05
+   ],
+   "to": [
+    0.4,
+    -0.05
+   ],
+   "dur": 0.9,
+   "with": true,
+   "offset": 1.2,
+   "extend": false
+  },
+  {
+   "do": "board_label",
+   "text": "A",
+   "at": [
+    0.48,
+    -0.06
+   ],
+   "size": 0.12,
+   "with": true,
+   "offset": 1.0,
+   "extend": false
+  },
+  {
+   "do": "board_label",
+   "text": "R",
+   "at": [
+    0.2,
+    0.05
+   ],
+   "size": 0.13,
+   "color": "#ffd54f",
+   "with": true,
+   "offset": 3.0,
+   "extend": false
+  },
+  {
+   "do": "say",
+   "who": "thay",
+   "text": "Đường kính đi qua tâm và dài gấp đôi bán kính: $d = 2R$.",
+   "gesture": "point_board_L",
+   "hands": [
+    "L"
+   ],
+   "cam": "board_three_quarter"
+  },
+  {
+   "do": "board_line",
+   "from": [
+    -0.4,
+    -0.05
+   ],
+   "to": [
+    0.0,
+    -0.05
+   ],
+   "dur": 0.8,
+   "color": "#ffd54f",
+   "with": true,
+   "offset": 0.6,
+   "extend": false
+  },
+  {
+   "do": "board_label",
+   "text": "B",
+   "at": [
+    -0.48,
+    -0.06
+   ],
+   "size": 0.12,
+   "with": true,
+   "offset": 0.6,
+   "extend": false
+  },
+  {
+   "do": "board_label",
+   "text": "d = 2R",
+   "at": [
+    1.2,
+    0.15
+   ],
+   "size": 0.22,
+   "bold": true,
+   "color": "#ffd54f",
+   "with": true,
+   "offset": 2.6,
+   "extend": false,
+   "sfx": "ding"
+  },
+  {
+   "do": "say",
+   "who": "thay",
+   "text": "Các em nhớ nhé!",
+   "emotion": {
+    "smile": 1.0,
+    "brow_up": 0.6
+   },
+   "gesture": "point_up",
+   "cam": "push_in_emotion"
+  },
+  {
+   "do": "wait",
+   "dur": 0.6
+  }
  ]
 }
