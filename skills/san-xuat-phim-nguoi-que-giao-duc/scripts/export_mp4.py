@@ -237,6 +237,11 @@ def synth(name, dur=1.0):
         sc *= np.exp(-np.arange(len(sc)) / (SR * 0.015))
         n = max(len(th), len(sc)); out = np.zeros(n, np.float32); out[:len(th)] += th; out[:len(sc)] += sc
         return out
+    if name == "shimmer":
+        out = np.zeros(int(SR * 0.8), np.float32)
+        for i, f in enumerate([1568, 2093, 2637, 3136]):
+            a = tone(f, 0.5, 0.07, decay=0.15); st = int(i * 0.06 * SR); out[st:st + len(a)] += a
+        return out
     if name == "jump":
         return tone(260, 0.22, 0.18, 620)
     if name == "whoosh":
@@ -275,7 +280,16 @@ def mix(total, says, files, sfx_events, music):
         fx[st:st + len(a)] += a[: max(0, n - st)]
     out = voice * 1.0 + fx * 0.8
     if music:
-        m = music_bed(total + 0.5)[:n]
+        key = music if isinstance(music, str) else None
+        src = BANK.get("music_" + key) if key else None
+        if src is None and key:
+            src = BANK.get(key)
+        if src is not None and len(src) > SR:
+            reps = int(np.ceil(n / len(src))) + 1
+            m = np.tile(src, reps)[:n] * 0.55
+            fade = min(n, int(SR * 2)); m[-fade:] *= np.linspace(1, 0, fade)
+        else:
+            m = music_bed(total + 0.5)[:n]
         duck = np.convolve((np.abs(voice) > 0.01).astype(np.float32), np.ones(int(SR * 0.3)) / (SR * 0.3), "same")
         out += m * (1 - 0.55 * np.clip(duck * 3, 0, 1))
     peak = np.abs(out).max()
@@ -338,7 +352,11 @@ def main():
         print(f"Hiệu ứng âm thanh thật: {nb} file" + (" (ghi nguồn: Âm thanh: TiengDong.com)" if nb else " — chưa có, dùng âm tổng hợp. Chạy fetch_tiengdong.py để tải."))
         total = info["duration"]
         print(f"Thời lượng {total:.1f}s · {len(info['scenes'])} cảnh · lời đọc: {'có' if files else 'không'}")
-        audio = mix(total, info["says"], files, info["sfx"], a.music)
+        fm = pg.evaluate("() => window.FILM && window.FILM.music")
+        music = a.music or bool(fm)
+        if isinstance(fm, str):
+            music = fm
+        audio = mix(total, info["says"], files, info["sfx"], music)
         wav = tmp / "audio.f32"
         audio.astype(np.float32).tofile(wav)
         pg.evaluate("""([w,h]) => { window.__c = document.createElement('canvas'); __c.width = 1920; __c.height = 1080;

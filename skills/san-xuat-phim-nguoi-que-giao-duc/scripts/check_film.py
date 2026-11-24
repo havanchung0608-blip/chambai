@@ -22,9 +22,11 @@ LINT_JS = r"""
   const E = (m) => out.push(["ERROR", m]), Wn = (m) => out.push(["WARN", m]);
   if (!F || !Array.isArray(F.scenes) || !F.scenes.length) { E("FILM.scenes rỗng"); return out; }
   const cast = F.cast || {};
+  Object.entries(cast).forEach(([id, c]) => { if (c.role && !SF.ROLES[c.role]) E(`Nhân vật ${id}: vai "${c.role}" không có. Dùng: ${Object.keys(SF.ROLES).join(", ")}`); });
+  const ANIMS = ["create", "write", "uncreate", "fadein", "fadeout", "grow", "transform", "indicate", "circumscribe", "flash", "along", "move"];
   F.scenes.forEach((sc, si) => {
     const tag = `Cảnh ${si + 1}`;
-    if (sc.bg && !SF.BG[sc.bg]) E(`${tag}: phông nền "${sc.bg}" không có. Dùng: ${Object.keys(SF.BG).join(", ")}`);
+    if (sc.bg && !SF.BG[sc.bg] && !SF.BGL[sc.bg]) E(`${tag}: phông nền "${sc.bg}" không có. Dùng: ${Object.keys(SF.BGL).concat(Object.keys(SF.BG)).join(", ")}`);
     const here = new Set(Object.keys(sc.cast || {}));
     Object.entries(sc.cast || {}).forEach(([id, c]) => { if (c.pose && !SF.POSES[c.pose]) E(`${tag}: tư thế "${c.pose}" của ${id} không có`); if (c.x == null) Wn(`${tag}: ${id} chưa có toạ độ x`); });
     (sc.items || []).forEach((it) => { if (it.type && !SF.PROPS[it.type]) E(`${tag}: đạo cụ "${it.type}" không có`); });
@@ -35,7 +37,7 @@ LINT_JS = r"""
       if (b.pose && !SF.POSES[b.pose]) E(`${bt}: tư thế "${b.pose}" không có. Dùng: ${Object.keys(SF.POSES).join(", ")}`);
       Object.entries(b.act || {}).forEach(([id, a]) => { if (!here.has(id)) E(`${bt}: act cho "${id}" không có trong cảnh`); if (a.pose && !SF.POSES[a.pose]) E(`${bt}: tư thế "${a.pose}" không có`); });
       [].concat(b.move || []).forEach((m) => { if (!here.has(m.who)) E(`${bt}: move cho "${m.who}" không có trong cảnh`); });
-      [].concat(b.show || []).forEach((it) => { if (it.type && !SF.PROPS[it.type]) E(`${bt}: đạo cụ "${it.type}" không có. Dùng: ${Object.keys(SF.PROPS).join(", ")}`); if (it.x == null || it.y == null) Wn(`${bt}: đạo cụ ${it.id || it.type} thiếu x/y`); });
+      [].concat(b.show || []).forEach((it) => { if (it.type && !SF.PROPS[it.type]) E(`${bt}: đạo cụ "${it.type}" không có. Dùng: ${Object.keys(SF.PROPS).join(", ")}`); if (!["graph", "seg", "dot"].includes(it.type) && (it.x == null || it.y == null)) Wn(`${bt}: đạo cụ ${it.id || it.type} thiếu x/y`); });
       if (b.say) {
         if (/[\\^_{}√≤≥≠∠⇒×÷=<>%]/.test(b.say)) Wn(`${bt}: lời đọc còn kí hiệu → viết thành chữ: "${b.say.slice(0, 60)}"`);
         if (/\d+\s*\/\s*\d+/.test(b.say)) Wn(`${bt}: lời đọc có phân số dạng a/b → đọc "a phần b"`);
@@ -43,6 +45,7 @@ LINT_JS = r"""
       }
       [].concat(b.write || []).forEach((w) => { if (typeof w === "object" && w.size && w.size < 60) Wn(`${bt}: chữ viết bảng cỡ ${w.size} < 60 — học sinh cuối lớp khó đọc (chuẩn slide ≥ 60)`); });
       [].concat(b.show || []).forEach((it) => { if (it.size && it.size < 56) Wn(`${bt}: chữ đạo cụ ${it.id || it.type} cỡ ${it.size} < 56`); });
+      [].concat(b.anim || []).forEach((a) => { if (!ANIMS.includes(a.do)) E(`${bt}: anim "${a.do}" không có. Dùng: ${ANIMS.join(", ")}`); });
       if (b.quiz && !(b.quiz.options && b.quiz.options.length)) E(`${bt}: quiz thiếu options`);
       if (b.quiz && (b.quiz.answer == null || b.quiz.answer >= b.quiz.options.length)) E(`${bt}: quiz.answer sai chỉ số (đếm từ 0)`);
     });

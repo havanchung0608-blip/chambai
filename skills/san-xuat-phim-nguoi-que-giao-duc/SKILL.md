@@ -1,9 +1,11 @@
 ---
 name: san-xuat-phim-nguoi-que-giao-duc
-description: Sản xuất trọn gói phim hoạt hình người que giáo dục ra file MP4 cho thầy Chung — ý tưởng, kịch bản nhiều nhân vật, engine có sẵn (đi/chạy/nhảy như người thật, nói khớp môi, viết bảng, đạo cụ trực quan, quiz, máy quay, cảnh hành động – võ thuật có hiệu ứng va chạm), chữ cỡ slide trình chiếu, tiếng động thật từ TiengDong.com, giọng đọc tiếng Việt, kiểm tra tự động. Dùng skill này mỗi khi thầy muốn làm phim, clip, video hoạt hình người que, phim kể chuyện dẫn nhập bài học, phim tình huống Toán thực tế, phim sai lầm thường gặp, phim cho kênh YouTube giáo dục, hoặc cần xuất phim người que ra MP4 — kể cả khi thầy chỉ nói "làm cái phim hoạt hình cho bài này".
+description: Sản xuất phim hoạt hình người que MỌI THỂ LOẠI ra file MP4 cho thầy Chung — giáo dục, cổ tích, hành động/võ thuật, hài, phiêu lưu, viễn tưởng, hồi hộp, thể thao, kĩ năng sống, lịch sử — theo kịch bản. Nhân vật mặc trang phục đúng vai (vua, hiệp sĩ, phù thủy, ninja, robot, phi hành gia, nông dân nón lá…), chuyển động như người thật, máy quay 2.5D như phim 3D (cỡ cảnh, góc thấp/cao/nghiêng, bám theo, lia nhanh, chiều sâu nhiều lớp, letterbox), hoạt hình toán kiểu Manim (vẽ dần trục, đồ thị, biến hình công thức), tiếng động thật TiengDong.com, giọng đọc tiếng Việt khớp môi, chữ cỡ slide trình chiếu. Dùng mỗi khi thầy muốn làm phim, clip, video, phim ngắn, hoạt hình người que hay hoạt hình toán kiểu Manim — kể cả khi chỉ nói "làm cái phim hoạt hình cho bài này" hoặc "làm phim võ thuật/cổ tích người que".
 ---
 
-# Sản xuất phim người que giáo dục
+# Sản xuất phim người que (mọi thể loại)
+
+Thầy Chung: phim người que không chỉ để giảng bài — **kịch bản quyết định thể loại**, nhân vật phải mặc đúng vai, âm thanh hiệu ứng kết hợp hoạt hình kiểu Manim, góc máy thay đổi như phim 3D. Đọc `references/the-loai-va-may-quay.md` trước khi viết kịch bản để chọn vai, phông, góc máy, âm thanh hợp thể loại.
 
 Sản phẩm bàn giao: **file MP4 1920×1080** (thầy yêu cầu phim MP4, không phải HTML). File HTML chỉ là bản dựng trung gian để kiểm tra/xuất — không gửi làm sản phẩm chính, trừ khi thầy hỏi.
 
@@ -23,9 +25,13 @@ Phân biệt với skill khác:
 ## Tài nguyên trong skill
 | Đường dẫn | Dùng khi |
 |---|---|
-| `references/kich-ban.md` | Luôn đọc trước khi viết kịch bản: bài học từ các kênh người que, 6 khung thể loại, cách viết lời đọc, nhịp độ |
+| `references/the-loai-va-may-quay.md` | Luôn đọc: bảng thể loại → vai/phông/máy quay/âm thanh; vai diễn có sẵn; ngữ pháp máy quay; hoạt hình Manim; chuyển cảnh |
+| `references/kich-ban.md` | Phim có mục tiêu dạy học: nguyên tắc kể chuyện sư phạm, khung bài, cách viết lời đọc, nhịp độ |
 | `references/film-api.md` | Tra cứu đầy đủ định dạng `window.FILM`: nhân vật, tư thế, nét mặt, đạo cụ, phông nền, mini-TeX, âm thanh |
-| `examples/phan-so-bang-nhau.film.js` | Phim mẫu hoàn chỉnh 5 cảnh (≈85 s) — chép cấu trúc từ đây |
+| `examples/hiep-si-parabol.film.js` | Mẫu đa thể loại: cổ tích + phiêu lưu + Manim, đủ kiểu máy quay, vai diễn, chuyển cảnh, nhạc nền |
+| `examples/vo-thuat-thu.film.js` | Mẫu hành động: nhịp đòn đánh, hiệu ứng va chạm, rung khung, tiếng thật |
+| `examples/phan-so-bang-nhau.film.js` | Mẫu giáo dục: tình huống → bảng → quiz |
+| `scripts/fetch_tiengdong.py` | Tải bộ tiếng động + nhạc nền TiengDong.com (chạy một lần) |
 | `scripts/build_film.py` | Ghép kịch bản + engine → 1 file HTML |
 | `scripts/check_film.py` | Bắt lỗi kịch bản, chữ tràn bảng, lời đọc còn kí hiệu; chụp ảnh từng cảnh + ảnh tổng |
 | `scripts/export_mp4.py` | Xuất MP4 (giọng edge-tts hoặc file ghi âm của thầy, hiệu ứng, nhạc) |
@@ -36,13 +42,16 @@ Gọi các script bằng đường dẫn tuyệt đối tới thư mục skill (
 ## Quy trình
 
 ### 1. Nắm yêu cầu (ngắn gọn)
-Xác định: lớp, bài/khái niệm, mục đích (khởi động tiết, hình thành kiến thức, củng cố, kênh YouTube), thời lượng (mặc định 2–3 phút), thể loại (A–F trong `kich-ban.md`), có cần MP4 không. Nếu thầy gửi ảnh đề, đọc chính xác trước. Yêu cầu đã rõ thì làm luôn, không hỏi lại.
+Xác định: thể loại (theo kịch bản thầy đưa hoặc mục đích), khán giả, thông điệp, thời lượng (mặc định 1–3 phút). Phim dạy học thì thêm lớp, bài, mục tiêu. Nếu thầy gửi ảnh đề, đọc chính xác trước. Yêu cầu đã rõ thì làm luôn, không hỏi lại.
 
 ### 2. Kịch bản phân cảnh (duyệt trước khi dựng nếu phim > 3 phút hoặc ý còn mơ hồ)
-Trình bày bảng ngắn: Cảnh | Bối cảnh | Diễn biến & lời thoại chính | Hình ảnh trực quan | Âm thanh. Bám các nguyên tắc trong `kich-ban.md`: một ý chính, mở bằng tình huống, có hiểu lầm để sửa, có quiz, chốt 1 câu dễ nhớ. Kiến thức đúng SGK Kết nối tri thức; mọi phép tính tự tính lại.
+Trình bày bảng ngắn: Cảnh | Bối cảnh | Diễn biến & lời thoại | Cỡ cảnh/góc máy | Âm thanh. Mỗi cảnh mở bằng toàn cảnh, đối thoại dựng shot – reverse shot, góc máy đổi có lí do (xem ngữ pháp máy quay). Phim dạy học bám thêm `kich-ban.md` (một ý chính, tình huống, hiểu lầm để sửa, quiz, câu chốt); kiến thức đúng SGK Kết nối tri thức, mọi phép tính và đồ thị tự kiểm lại. Phim lịch sử/danh nhân chỉ dùng sự kiện đã kiểm chứng.
 
 ### 3. Viết `ten-phim.film.js`
-- Khai báo `cast` (mỗi nhân vật một dáng riêng: tóc, áo, mũ, giọng) → `scenes` → `beats`.
+- Khai báo `cast` bằng `role` đúng thể loại (rồi chỉnh màu/phụ kiện), mỗi nhân vật một giọng → `scenes` (`bg`, `trans`, `cam` đầu cảnh) → `beats`.
+- Máy quay: dùng `cam` với `shot`/`on`/`angle`/`follow`/`whip`/`letterbox` để có nhịp điện ảnh; cảnh giảng bài giữ máy ổn định.
+- Toán học động: phông `manim`/`manimgrid`, đối tượng `axes`/`graph`/`dot`/`poly` + `anim` (create, write, transform, indicate, circumscribe, along…) — tiếng hiệu ứng tự gắn.
+- Âm thanh: mỗi hành động một tiếng đúng khoảnh khắc (`sfx` với `at`); `FILM.music` chọn nhạc nền theo thể loại.
 - Mọi trường trong một nhịp chạy cùng lúc: nhân vật vừa nói, vừa viết bảng, vừa hiện đạo cụ.
 - `say` = lời đọc viết thành chữ (máy đọc kí hiệu sai); `sub`/`write`/`quiz` = hiển thị kí hiệu chuẩn mini-TeX (`\frac{1}{2}`, `x^2`, `\hat{A}`…).
 - Dùng đạo cụ trực quan thay cho chữ khi được: `bar`/`cake` (phân số), `numberline` (số nguyên), `balance` (phương trình), `chart` (thống kê), `clock`, `money`…
@@ -69,4 +78,4 @@ Thời lượng cảnh tự giãn theo độ dài file âm thanh thật; miệng
 Gửi file MP4 (tên không dấu); kèm file `.film.js` để sửa lời về sau. Trước khi gửi, trích vài khung hình từ chính file MP4 (ffmpeg) để soát lần cuối. Trả lời ngắn: số cảnh, thời lượng, các điểm sư phạm chính, cách sửa lời (mở file `.film.js`, sửa `say`, chạy lại build), cách quay/xuất video. Đề xuất 1–2 cải tiến thiết thực (phim tiếp theo trong chuỗi, phiếu học tập đi kèm…).
 
 ## Mở rộng engine
-Cần tư thế/đạo cụ/phông nền mới: thêm vào `POSES`, `PROPS`, `BG` trong `scripts/engine.js` (theo mẫu có sẵn, vẽ bằng `hline`/`hcircle`/`hrect` để giữ nét vẽ tay), chạy `node --check`, build lại phim mẫu và `check_film.py` để chắc không hỏng gì, rồi cập nhật bảng trong `references/film-api.md`.
+Cần tư thế/đạo cụ/vai/phông nền mới: thêm vào `POSES`, `PROPS`, `ROLES` (+ `drawHeadwearFront`), `BGL` (phông nhiều lớp `far/mid/main/fg`) trong `scripts/engine.js` (theo mẫu có sẵn, vẽ bằng `hline`/`hcircle`/`hrect` để giữ nét vẽ tay), chạy `node --check`, build lại phim mẫu và `check_film.py` để chắc không hỏng gì, rồi cập nhật bảng trong `references/film-api.md`.

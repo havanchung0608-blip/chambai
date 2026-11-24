@@ -1,5 +1,7 @@
 # Định dạng kịch bản `window.FILM` (tra cứu đầy đủ)
 
+Máy quay, vai diễn, phông nhiều lớp, Manim, chuyển cảnh, nhạc nền: xem `the-loai-va-may-quay.md`.
+
 Mục lục: 1. Khung tổng · 2. Nhân vật · 3. Cảnh · 4. Nhịp (beat) · 5. Tư thế · 6. Nét mặt · 7. Đạo cụ · 8. Phông nền · 9. Chữ & công thức · 10. Âm thanh · 11. Mẹo bố cục
 
 Khung hình cố định **1920×1080**. Mặt đất ở `y = 960`. Toạ độ x của nhân vật là điểm giữa hai chân.
@@ -9,7 +11,8 @@ Khung hình cố định **1920×1080**. Mặt đất ở `y = 960`. Toạ độ
 window.FILM = {
   title: "Tên phim", subtitle: "Bài … · Toán 7", file: "ten-khong-dau",
   watermark: "Thầy Hà Văn Chung",   // góc phải trên, bỏ đi nếu không cần
-  music: true,                      // nhạc nền nhẹ, tự giảm khi có lời
+  music: "story",                   // nhạc nền: "story" | "intro" | "tension" (TiengDong) hoặc true (tổng hợp); tự nhỏ khi có lời
+  letterbox: false, handheld: 0,     // khung điện ảnh / máy cầm tay cho cả phim; vignette: false để tắt viền tối
   narrator: { voice: "nu" },        // người dẫn chuyện (không hiện hình)
   cast: { ... },                    // khai báo nhân vật dùng chung cả phim
   scenes: [ ... ]
@@ -105,7 +108,7 @@ Tư thế: `guard` (thủ thế, nhún), `punch` (đấm thẳng), `punch2` (đ�
 | `image` | `src` (URL hoặc data:), `w`, `h` | ảnh ngoài (hạn chế: làm file phụ thuộc mạng) |
 
 ## 8. Phông nền (`bg`)
-`dojo` (võ đường), `paper` (giấy trơn), `grid` (giấy ô li), `whiteboard` (bảng trắng: vùng viết x 520–1820, y 90–690), `classroom` (bảng xanh phấn: x 560–1780, y 110–650; chữ phấn trắng), `park`, `street`, `market`, `home`, `space`, `stage`.
+Phông nhiều lớp có chiều sâu: `park`, `street`, `city`, `rooftop` (đêm), `forest`, `castle`, `night`, `lab`, `beach`, `manim`, `manimgrid`. Phông một lớp: `dojo` (võ đường), `paper` (giấy trơn), `grid` (giấy ô li), `whiteboard` (bảng trắng: vùng viết x 520–1820, y 90–690), `classroom` (bảng xanh phấn: x 560–1780, y 110–650; chữ phấn trắng), `park`, `street`, `market`, `home`, `space`, `stage`.
 Bảng ở bên phải → đặt người giảng ở x ≈ 250–330.
 
 ## 9. Chữ & công thức (mini-TeX, vẽ thẳng lên canvas, không cần mạng)

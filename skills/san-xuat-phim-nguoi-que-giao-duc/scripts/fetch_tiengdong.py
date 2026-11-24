@@ -37,6 +37,22 @@ SOUNDS = {
     "action":   ("Am-thanh-hanh-dong-cuoi-canh-phim-www_tiengdong_com.mp3", 0, None, 0.7, "nhạc hành động"),
     "kungfu":   ("Am-thanh-luyen-vo-thuat-www_tiengdong_com.mp3", 0, None, 0.7, "luyện võ (nền)"),
     "wrong":    ("Am-thanh-ban-tra-loi-sai-roi-www_tiengdong_com.mp3", 0, None, 0.8, "trả lời sai"),
+    # —— phép thuật, hài, bất ngờ, anime ——
+    "magic":    ("Tong-hop-am-thanh-tan-cong-ma-thuat-phep-thuat-www_tiengdong_com.mp3", 0.2, 1.7, 0.8, "phép thuật bắn ra"),
+    "magic2":   ("Tong-hop-am-thanh-tan-cong-ma-thuat-phep-thuat-www_tiengdong_com.mp3", 5.5, 7.2, 0.8, "phép thuật 2"),
+    "surprise": ("am-thanh-ten-ten-ten-bat-ngo-www_tiengdong_com.mp3", 0.6, 4.6, 0.8, "tèn tèn ten bất ngờ"),
+    "wow":      ("Anime-wow-sound-effect-www_tiengdong_com.mp3", 0.1, 2.6, 0.8, "wow anime"),
+    "boom":     ("Boom-sound-effect-www_tiengdong_com.mp3", 0, None, 0.9, "boom"),
+    "fail":     ("Fail-sound-effect-www_tiengdong_com.mp3", 0, None, 0.8, "thất bại (hài)"),
+    "oof":      ("Oof-sound-effect-www_tiengdong_com.mp3", 0, None, 0.8, "oof"),
+    "laugh":    ("Tieng-cuoi-khan-gia-www_tiengdong_com.mp3", 1.9, None, 0.6, "khán giả cười"),
+    "slap":     ("tieng-bet-www_tiengdong_com.mp3", 0, None, 0.9, "tiếng bẹt"),
+    "animepunch": ("anime-punch-sound-effect-www_tiengdong_com.mp3", 0, None, 0.9, "đấm kiểu anime"),
+    "mystery":  ("nhac-nen-to-mo-bi-an-www_tiengdong_com.mp3", 0, None, 0.6, "tò mò bí ẩn"),
+    # —— nhạc nền (dùng film.music = "story" | "intro" | "tension" | "kungfu" | "mystery") ——
+    "music_story":   ("Nhac-nen-ke-chuyen-www_tiengdong_com.mp3", 0, 120, 0.5, "nhạc nền kể chuyện"),
+    "music_intro":   ("Nhac-intro-hay-nhat-www_tiengdong_com.mp3", 0, 100, 0.5, "nhạc intro sôi động"),
+    "music_tension": ("Nhac-nen-hoi-hop-cang-thang-www_tiengdong_com.mp3", 0, 120, 0.5, "nhạc hồi hộp căng thẳng"),
 }
 
 
