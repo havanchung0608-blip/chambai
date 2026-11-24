@@ -1,0 +1,28 @@
+{
+ "_huong_dan": "Mẫu kịch bản phim 3D. Hành động chạy tuần tự; thêm \"with\": true để chạy song song với hành động liền trước (\"offset\" giây), \"extend\": false để không kéo dài mạch chính. \"cam\" đặt góc máy bắt đầu từ hành động đó. Công thức trong lời thoại đặt giữa $...$. Xem references/kich-ban-3d.md.",
+ "title": "Tên phim",
+ "file": "ten-file-khong-dau",
+ "fps": 30,
+ "environment": "classroom",
+ "music": "story",
+ "music_vol": 0.07,
+ "characters": {
+  "co": {"name": "Cô Mai", "voice": "Ngọc Huyền", "start": "door_out", "heading": 1.57,
+         "spec": {"shirt": "#e57373", "pants": "#37474f", "hair": "long", "hair_color": "#3e2723", "skirt": true, "glasses": true}}
+ },
+ "props": {"compa": {"type": "compass", "radius": 0.4, "at": [2.3, 1.55, 0.785], "yaw": 0.0}},
+ "actions": [
+  {"do": "walk", "who": "co", "to": [[4.0, 1.75], [2.3, 2.05]], "face": "camera", "cam": {"preset": "establishing_wide", "subject": "co"}},
+  {"do": "say", "who": "co", "text": "Chào các em!", "with": true, "offset": 1.0, "extend": false},
+  {"do": "gesture", "who": "co", "name": "wave", "dur": 1.4, "cam": "medium"},
+  {"do": "pick", "who": "co", "prop": "compa", "hold_for": 6.0, "cam": "insert_hand"},
+  {"do": "walk", "who": "co", "to": [[-0.55, 2.35]], "face": "board", "cam": "truck_follow"},
+  {"do": "place_on_board", "who": "co", "prop": "compa", "center": [0.0, -0.05], "cam": "board_three_quarter"},
+  {"do": "draw_circle", "who": "co", "prop": "compa", "dur": 2.6},
+  {"do": "lift_from_board", "who": "co", "prop": "compa"},
+  {"do": "board_line", "from": [0.0, -0.05], "to": [0.4, -0.05], "dur": 0.9},
+  {"do": "board_label", "text": "R", "at": [0.2, 0.05], "size": 0.13, "color": "#ffd54f"},
+  {"do": "say", "who": "co", "text": "Bán kính kí hiệu là $R$.", "gesture": "present_L", "hands": ["L"], "cam": "insert_board"},
+  {"do": "wait", "dur": 0.6}
+ ]
+}

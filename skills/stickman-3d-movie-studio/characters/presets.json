@@ -1,0 +1,9 @@
+{
+ "co_giao": {"shirt": "#e57373", "pants": "#37474f", "hair": "long", "hair_color": "#3e2723", "skirt": true, "glasses": true, "voice": "Ngọc Huyền"},
+ "thay_giao": {"shirt": "#5c6bc0", "pants": "#263238", "hair": "short", "hair_color": "#212121", "glasses": true, "voice": "Thiện Minh"},
+ "hoc_sinh_nam": {"shirt": "#fafafa", "pants": "#1565c0", "hair": "short", "scale": 0.82, "voice": "Hải Đăng"},
+ "hoc_sinh_nu": {"shirt": "#fafafa", "pants": "#1565c0", "hair": "ponytail", "hair_color": "#3e2723", "skirt": true, "scale": 0.8, "voice": "Quỳnh Anh"},
+ "ong_ke_chuyen": {"shirt": "#8d6e63", "pants": "#4e342e", "hair": "short", "hair_color": "#e0e0e0", "voice": "Thiền Tâm Đức"},
+ "nha_khoa_hoc": {"shirt": "#fafafa", "pants": "#455a64", "hair": "short", "hair_color": "#9e9e9e", "glasses": true, "voice": "Minh Đức"},
+ "nguoi_que_co_dien": {"shirt": "#212121", "limbs": "#212121", "skin": "#ffffff", "hair": "none", "outline": true, "voice": "Adam"}
+}

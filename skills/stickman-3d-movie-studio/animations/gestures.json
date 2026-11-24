@@ -1,0 +1,1135 @@
+{
+ "wave": {
+  "hands": {
+   "R": [
+    0.32,
+    0.05,
+    0.32
+   ]
+  },
+  "osc": 0.09,
+  "osc_hz": 2.4,
+  "osc_axis": "x",
+  "face": {
+   "smile": 1,
+   "brow_up": 0.5
+  },
+  "desc": "vẫy tay chào"
+ },
+ "wave_both": {
+  "hands": {
+   "L": [
+    0.32,
+    0.05,
+    0.32
+   ],
+   "R": [
+    0.32,
+    0.05,
+    0.32
+   ]
+  },
+  "osc": 0.09,
+  "osc_hz": 2.4,
+  "osc_axis": "x",
+  "osc_phase": 3.14,
+  "face": {
+   "smile": 1
+  },
+  "desc": "vẫy hai tay"
+ },
+ "point_forward": {
+  "hands": {
+   "R": [
+    0.12,
+    0.6,
+    0.02
+   ]
+  },
+  "spine": [
+   0.05,
+   0,
+   0
+  ],
+  "desc": "chỉ thẳng về trước"
+ },
+ "point_side": {
+  "hands": {
+   "R": [
+    0.62,
+    0.15,
+    0.05
+   ]
+  },
+  "head": [
+   0,
+   -0.3,
+   0
+  ],
+  "desc": "chỉ sang bên phải"
+ },
+ "point_up": {
+  "hands": {
+   "R": [
+    0.16,
+    0.18,
+    0.42
+   ]
+  },
+  "face": {
+   "brow_up": 0.8
+  },
+  "desc": "giơ ngón tay: chú ý nhé"
+ },
+ "present": {
+  "hands": {
+   "R": [
+    0.45,
+    0.35,
+    -0.1
+   ]
+  },
+  "face": {
+   "smile": 0.6
+  },
+  "desc": "đưa tay giới thiệu (lòng bàn tay mở)"
+ },
+ "present_both": {
+  "hands": {
+   "L": [
+    0.42,
+    0.3,
+    -0.12
+   ],
+   "R": [
+    0.42,
+    0.3,
+    -0.12
+   ]
+  },
+  "face": {
+   "smile": 0.7
+  },
+  "desc": "mở rộng hai tay giới thiệu"
+ },
+ "explain": {
+  "hands": {
+   "L": [
+    0.2,
+    0.26,
+    -0.28
+   ],
+   "R": [
+    0.22,
+    0.28,
+    -0.24
+   ]
+  },
+  "osc": 0.05,
+  "osc_hz": 1.6,
+  "osc_axis": "z",
+  "osc_phase": 1.6,
+  "desc": "đưa nhịp tay khi giảng"
+ },
+ "count": {
+  "hands": {
+   "R": [
+    0.12,
+    0.3,
+    -0.12
+   ]
+  },
+  "osc": 0.04,
+  "osc_hz": 2.0,
+  "desc": "đếm / liệt kê"
+ },
+ "stop": {
+  "hands": {
+   "R": [
+    0.12,
+    0.55,
+    0.0
+   ]
+  },
+  "spine": [
+   -0.05,
+   0,
+   0
+  ],
+  "face": {
+   "brow_angry": 0.4
+  },
+  "desc": "giơ tay ra hiệu dừng lại"
+ },
+ "beckon": {
+  "hands": {
+   "R": [
+    0.18,
+    0.45,
+    -0.08
+   ]
+  },
+  "osc": 0.07,
+  "osc_hz": 2.0,
+  "osc_axis": "y",
+  "face": {
+   "smile": 0.8
+  },
+  "desc": "vẫy gọi lại gần"
+ },
+ "raise_hand": {
+  "hands": {
+   "R": [
+    0.2,
+    0.05,
+    0.62
+   ]
+  },
+  "face": {
+   "brow_up": 0.6,
+   "smile": 0.4
+  },
+  "desc": "giơ tay phát biểu"
+ },
+ "thumbs_up": {
+  "hands": {
+   "R": [
+    0.25,
+    0.32,
+    -0.05
+   ]
+  },
+  "face": {
+   "smile": 1
+  },
+  "desc": "khen ngợi"
+ },
+ "hand_on_chest": {
+  "hands": {
+   "R": [
+    -0.05,
+    0.12,
+    -0.1
+   ]
+  },
+  "head": [
+   0.1,
+   0,
+   0
+  ],
+  "face": {
+   "smile": 0.5
+  },
+  "desc": "đặt tay lên ngực (chân thành)"
+ },
+ "welcome": {
+  "hands": {
+   "L": [
+    0.5,
+    0.2,
+    -0.05
+   ],
+   "R": [
+    0.5,
+    0.2,
+    -0.05
+   ]
+  },
+  "face": {
+   "smile": 1,
+   "brow_up": 0.4
+  },
+  "desc": "dang tay chào đón"
+ },
+ "shh": {
+  "hands": {
+   "R": [
+    0.0,
+    0.18,
+    0.2
+   ]
+  },
+  "face": {
+   "mouth_O": 0.3
+  },
+  "desc": "suỵt, giữ im lặng"
+ },
+ "salute": {
+  "hands": {
+   "R": [
+    0.15,
+    0.08,
+    0.36
+   ]
+  },
+  "spine": [
+   -0.04,
+   0,
+   0
+  ],
+  "desc": "chào kiểu nghiêm"
+ },
+ "think": {
+  "hands": {
+   "R": [
+    0.04,
+    0.16,
+    0.12
+   ],
+   "L": [
+    0.05,
+    0.12,
+    -0.28
+   ]
+  },
+  "head": [
+   0.15,
+   0.1,
+   0.1
+  ],
+  "face": {
+   "brow_up": 0.3,
+   "look_L": 0.8
+  },
+  "desc": "chống cằm suy nghĩ"
+ },
+ "scratch_head": {
+  "hands": {
+   "R": [
+    0.12,
+    0.0,
+    0.36
+   ]
+  },
+  "osc": 0.03,
+  "osc_hz": 4,
+  "head": [
+   0.05,
+   0,
+   0.15
+  ],
+  "face": {
+   "frown": 0.3,
+   "brow_sad": 0.4
+  },
+  "desc": "gãi đầu bối rối"
+ },
+ "shrug": {
+  "hands": {
+   "L": [
+    0.42,
+    0.15,
+    -0.3
+   ],
+   "R": [
+    0.42,
+    0.15,
+    -0.3
+   ]
+  },
+  "chest": [
+   0,
+   0,
+   0
+  ],
+  "head": [
+   0,
+   0,
+   0.12
+  ],
+  "hips_dz": 0.0,
+  "face": {
+   "brow_up": 1,
+   "frown": 0.3
+  },
+  "desc": "nhún vai"
+ },
+ "cheer": {
+  "hands": {
+   "L": [
+    0.3,
+    0.05,
+    0.6
+   ],
+   "R": [
+    0.3,
+    0.05,
+    0.6
+   ]
+  },
+  "osc": 0.05,
+  "osc_hz": 3,
+  "face": {
+   "smile": 1,
+   "mouth_open": 0.6,
+   "brow_up": 0.6
+  },
+  "desc": "giơ hai tay reo mừng"
+ },
+ "fist_pump": {
+  "hands": {
+   "R": [
+    0.2,
+    0.2,
+    0.3
+   ]
+  },
+  "osc": 0.08,
+  "osc_hz": 2.5,
+  "face": {
+   "smile": 1
+  },
+  "desc": "nắm tay ăn mừng"
+ },
+ "clap": {
+  "hands": {
+   "L": [
+    0.03,
+    0.35,
+    -0.15
+   ],
+   "R": [
+    0.03,
+    0.35,
+    -0.15
+   ]
+  },
+  "osc": 0.07,
+  "osc_hz": 3.2,
+  "osc_axis": "x",
+  "osc_phase": 0,
+  "face": {
+   "smile": 1
+  },
+  "desc": "vỗ tay"
+ },
+ "facepalm": {
+  "hands": {
+   "R": [
+    0.0,
+    0.16,
+    0.2
+   ]
+  },
+  "head": [
+   0.3,
+   0,
+   0
+  ],
+  "face": {
+   "frown": 0.6,
+   "brow_sad": 0.6
+  },
+  "desc": "ôm mặt ngán ngẩm"
+ },
+ "surprised": {
+  "hands": {
+   "L": [
+    0.3,
+    0.25,
+    0.1
+   ],
+   "R": [
+    0.3,
+    0.25,
+    0.1
+   ]
+  },
+  "spine": [
+   -0.12,
+   0,
+   0
+  ],
+  "head": [
+   -0.1,
+   0,
+   0
+  ],
+  "face": {
+   "mouth_O": 1,
+   "brow_up": 1
+  },
+  "desc": "ngạc nhiên lùi người"
+ },
+ "scared": {
+  "hands": {
+   "L": [
+    0.12,
+    0.3,
+    0.15
+   ],
+   "R": [
+    0.12,
+    0.3,
+    0.15
+   ]
+  },
+  "osc": 0.015,
+  "osc_hz": 9,
+  "spine": [
+   0.15,
+   0,
+   0
+  ],
+  "hips_dz": -0.08,
+  "face": {
+   "mouth_O": 0.6,
+   "brow_sad": 1
+  },
+  "desc": "sợ hãi run rẩy"
+ },
+ "sad": {
+  "hands": {
+   "L": [
+    0.16,
+    0.05,
+    -0.58
+   ],
+   "R": [
+    0.16,
+    0.05,
+    -0.58
+   ]
+  },
+  "spine": [
+   0.18,
+   0,
+   0
+  ],
+  "head": [
+   0.35,
+   0,
+   0
+  ],
+  "face": {
+   "frown": 1,
+   "brow_sad": 1
+  },
+  "desc": "buồn, rũ vai"
+ },
+ "angry": {
+  "hands": {
+   "L": [
+    0.25,
+    0.12,
+    -0.4
+   ],
+   "R": [
+    0.25,
+    0.12,
+    -0.4
+   ]
+  },
+  "spine": [
+   0.08,
+   0,
+   0
+  ],
+  "face": {
+   "frown": 0.8,
+   "brow_angry": 1
+  },
+  "desc": "giận dữ nắm chặt tay"
+ },
+ "laugh": {
+  "hands": {
+   "L": [
+    0.15,
+    0.2,
+    -0.35
+   ],
+   "R": [
+    0.15,
+    0.2,
+    -0.35
+   ]
+  },
+  "head": [
+   -0.15,
+   0,
+   0
+  ],
+  "head_hz": 4,
+  "head_osc": [
+   0.06,
+   0,
+   0
+  ],
+  "face": {
+   "smile": 1,
+   "mouth_open": 0.8
+  },
+  "desc": "cười lớn"
+ },
+ "proud": {
+  "hands": {
+   "L": [
+    0.25,
+    -0.02,
+    -0.38
+   ],
+   "R": [
+    0.25,
+    -0.02,
+    -0.38
+   ]
+  },
+  "spine": [
+   -0.06,
+   0,
+   0
+  ],
+  "head": [
+   -0.12,
+   0,
+   0
+  ],
+  "face": {
+   "smile": 1
+  },
+  "desc": "chống nạnh tự hào"
+ },
+ "arms_crossed": {
+  "hands": {
+   "L": [
+    -0.12,
+    0.18,
+    -0.3
+   ],
+   "R": [
+    -0.12,
+    0.2,
+    -0.27
+   ]
+  },
+  "face": {
+   "brow_angry": 0.2
+  },
+  "desc": "khoanh tay"
+ },
+ "nod": {
+  "head": [
+   0.1,
+   0,
+   0
+  ],
+  "head_hz": 2.2,
+  "head_osc": [
+   0.18,
+   0,
+   0
+  ],
+  "face": {
+   "smile": 0.5
+  },
+  "desc": "gật đầu đồng ý"
+ },
+ "shake_head": {
+  "head": [
+   0,
+   0,
+   0
+  ],
+  "head_hz": 2.2,
+  "head_osc": [
+   0,
+   0.35,
+   0
+  ],
+  "face": {
+   "frown": 0.4
+  },
+  "desc": "lắc đầu không đồng ý"
+ },
+ "look_around": {
+  "head": [
+   0,
+   0,
+   0
+  ],
+  "head_hz": 0.5,
+  "head_osc": [
+   0,
+   0.7,
+   0
+  ],
+  "face": {
+   "brow_up": 0.4
+  },
+  "desc": "nhìn quanh"
+ },
+ "yawn": {
+  "hands": {
+   "R": [
+    0.02,
+    0.18,
+    0.15
+   ]
+  },
+  "head": [
+   -0.2,
+   0,
+   0
+  ],
+  "face": {
+   "mouth_O": 1,
+   "blink": 0.8
+  },
+  "desc": "ngáp"
+ },
+ "stretch": {
+  "hands": {
+   "L": [
+    0.18,
+    0.0,
+    0.7
+   ],
+   "R": [
+    0.18,
+    0.0,
+    0.7
+   ]
+  },
+  "spine": [
+   -0.1,
+   0,
+   0
+  ],
+  "face": {
+   "blink": 0.6
+  },
+  "desc": "vươn vai"
+ },
+ "bow": {
+  "hands": {
+   "L": [
+    0.1,
+    0.12,
+    -0.55
+   ],
+   "R": [
+    0.1,
+    0.12,
+    -0.55
+   ]
+  },
+  "spine": [
+   0.45,
+   0,
+   0
+  ],
+  "chest": [
+   0.2,
+   0,
+   0
+  ],
+  "head": [
+   0.2,
+   0,
+   0
+  ],
+  "desc": "cúi chào"
+ },
+ "fistbow": {
+  "hands": {
+   "L": [
+    0.0,
+    0.32,
+    -0.12
+   ],
+   "R": [
+    0.0,
+    0.3,
+    -0.12
+   ]
+  },
+  "spine": [
+   0.3,
+   0,
+   0
+  ],
+  "head": [
+   0.15,
+   0,
+   0
+  ],
+  "desc": "ôm quyền cúi chào (võ)"
+ },
+ "kneel_tie": {
+  "hands": {
+   "R": [
+    0.15,
+    0.4,
+    -0.95
+   ]
+  },
+  "spine": [
+   0.5,
+   0,
+   0
+  ],
+  "hips_dz": -0.35,
+  "desc": "cúi xuống buộc dây giày"
+ },
+ "guard": {
+  "hands": {
+   "L": [
+    0.12,
+    0.28,
+    0.0
+   ],
+   "R": [
+    0.1,
+    0.22,
+    -0.05
+   ]
+  },
+  "hips_dz": -0.06,
+  "spine": [
+   0.08,
+   0,
+   0
+  ],
+  "face": {
+   "brow_angry": 0.7
+  },
+  "desc": "thủ thế võ"
+ },
+ "punch": {
+  "hands": {
+   "R": [
+    0.02,
+    0.7,
+    0.0
+   ],
+   "L": [
+    0.12,
+    0.2,
+    0.0
+   ]
+  },
+  "spine": [
+   0.1,
+   0,
+   0
+  ],
+  "chest": [
+   0,
+   -0.35,
+   0
+  ],
+  "face": {
+   "brow_angry": 1,
+   "mouth_open": 0.4
+  },
+  "desc": "đấm thẳng"
+ },
+ "block": {
+  "hands": {
+   "L": [
+    0.06,
+    0.3,
+    0.18
+   ],
+   "R": [
+    0.06,
+    0.32,
+    0.2
+   ]
+  },
+  "spine": [
+   -0.06,
+   0,
+   0
+  ],
+  "face": {
+   "brow_angry": 0.6
+  },
+  "desc": "giơ tay đỡ đòn"
+ },
+ "push": {
+  "hands": {
+   "L": [
+    0.15,
+    0.6,
+    -0.1
+   ],
+   "R": [
+    0.15,
+    0.6,
+    -0.1
+   ]
+  },
+  "spine": [
+   0.15,
+   0,
+   0
+  ],
+  "desc": "đẩy về phía trước"
+ },
+ "pull": {
+  "hands": {
+   "L": [
+    0.12,
+    0.25,
+    -0.2
+   ],
+   "R": [
+    0.12,
+    0.25,
+    -0.2
+   ]
+  },
+  "spine": [
+   -0.15,
+   0,
+   0
+  ],
+  "hips_dz": -0.05,
+  "desc": "kéo về phía mình"
+ },
+ "carry_box": {
+  "hands": {
+   "L": [
+    0.18,
+    0.35,
+    -0.3
+   ],
+   "R": [
+    0.18,
+    0.35,
+    -0.3
+   ]
+  },
+  "spine": [
+   -0.04,
+   0,
+   0
+  ],
+  "desc": "bê vật trước ngực"
+ },
+ "throw": {
+  "hands": {
+   "R": [
+    0.25,
+    -0.3,
+    0.3
+   ]
+  },
+  "spine": [
+   -0.1,
+   0,
+   0
+  ],
+  "chest": [
+   0,
+   0.4,
+   0
+  ],
+  "desc": "lấy đà ném (phần giơ tay ra sau)"
+ },
+ "write_board": {
+  "hands": {
+   "R": [
+    0.1,
+    0.62,
+    0.1
+   ]
+  },
+  "osc": 0.05,
+  "osc_hz": 1.5,
+  "osc_axis": "x",
+  "desc": "viết lên bảng trước mặt"
+ },
+ "type_keyboard": {
+  "hands": {
+   "L": [
+    0.1,
+    0.38,
+    -0.42
+   ],
+   "R": [
+    0.1,
+    0.38,
+    -0.42
+   ]
+  },
+  "osc": 0.015,
+  "osc_hz": 6,
+  "head": [
+   0.25,
+   0,
+   0
+  ],
+  "desc": "gõ bàn phím"
+ },
+ "read_book": {
+  "hands": {
+   "L": [
+    0.1,
+    0.35,
+    -0.25
+   ],
+   "R": [
+    0.1,
+    0.35,
+    -0.25
+   ]
+  },
+  "head": [
+   0.35,
+   0,
+   0
+  ],
+  "desc": "cầm sách đọc"
+ },
+ "phone_call": {
+  "hands": {
+   "R": [
+    0.08,
+    0.04,
+    0.22
+   ]
+  },
+  "head": [
+   0,
+   0,
+   -0.15
+  ],
+  "desc": "nghe điện thoại"
+ },
+ "measure": {
+  "hands": {
+   "L": [
+    0.35,
+    0.45,
+    -0.2
+   ],
+   "R": [
+    -0.1,
+    0.45,
+    -0.2
+   ]
+  },
+  "head": [
+   0.3,
+   0,
+   0
+  ],
+  "desc": "đo bằng thước hai tay"
+ },
+ "binoculars": {
+  "hands": {
+   "L": [
+    0.05,
+    0.18,
+    0.16
+   ],
+   "R": [
+    0.05,
+    0.18,
+    0.16
+   ]
+  },
+  "head": [
+   -0.05,
+   0,
+   0
+  ],
+  "desc": "nhìn xa (ống nhòm)"
+ },
+ "dance": {
+  "hands": {
+   "L": [
+    0.35,
+    0.1,
+    0.2
+   ],
+   "R": [
+    0.35,
+    0.1,
+    -0.2
+   ]
+  },
+  "osc": 0.15,
+  "osc_hz": 2,
+  "osc_phase": 3.14,
+  "spine_hz": 1,
+  "spine_osc": [
+   0,
+   0,
+   0.12
+  ],
+  "face": {
+   "smile": 1
+  },
+  "desc": "nhảy múa"
+ },
+ "warm_up": {
+  "hands": {
+   "L": [
+    0.55,
+    0.0,
+    0.0
+   ],
+   "R": [
+    0.55,
+    0.0,
+    0.0
+   ]
+  },
+  "osc": 0.1,
+  "osc_hz": 1.5,
+  "osc_axis": "z",
+  "osc_phase": 3.14,
+  "desc": "khởi động dang tay"
+ },
+ "hold_prop": {
+  "hands": {
+   "R": [
+    0.1,
+    0.32,
+    -0.22
+   ]
+  },
+  "desc": "cầm đồ vật trước ngực (tay phải)"
+ },
+ "hold_prop_L": {
+  "hands": {
+   "L": [
+    0.1,
+    0.32,
+    -0.22
+   ]
+  },
+  "desc": "cầm đồ vật trước ngực (tay trái)"
+ },
+ "present_L": {
+  "hands": {
+   "L": [
+    0.48,
+    0.32,
+    -0.08
+   ]
+  },
+  "face": {
+   "smile": 0.7
+  },
+  "desc": "đưa tay trái giới thiệu"
+ },
+ "point_board_L": {
+  "hands": {
+   "L": [
+    0.55,
+    0.25,
+    0.12
+   ]
+  },
+  "head": [
+   0,
+   0.25,
+   0
+  ],
+  "desc": "tay trái chỉ lên bảng bên cạnh"
+ }
+}

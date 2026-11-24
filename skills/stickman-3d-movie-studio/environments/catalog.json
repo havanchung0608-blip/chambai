@@ -1,0 +1,4 @@
+{"classroom": {"desc": "Lớp học: sàn gỗ phản chiếu, 3 cửa sổ nắng xiên, bảng phấn xanh có khay phấn, bàn GV, 9 bộ bàn ghế HS, cửa ra vào, đồng hồ, đèn trần", "builder": "sm_env.build_classroom", "status": "đã có"},
+ "studio": {"desc": "Phông vô cực (cyclorama) màu tuỳ chọn", "builder": "sm_env.build_studio", "status": "đã có"},
+ "school_yard": {"status": "kế hoạch"}, "lab": {"status": "kế hoạch"}, "park": {"status": "kế hoạch"}, "street": {"status": "kế hoạch"},
+ "library": {"status": "kế hoạch"}, "market": {"status": "kế hoạch"}, "village": {"status": "kế hoạch"}, "space": {"status": "kế hoạch"}}

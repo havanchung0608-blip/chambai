@@ -1240,7 +1240,8 @@
     if (S.shake) { C.sx += (hash(Math.floor(t * 60)) - 0.5) * 2 * S.shake.amp; C.sy += (hash(Math.floor(t * 60) + 0.5) - 0.5) * 2 * S.shake.amp; }
     const hh = C.handheld != null ? C.handheld : film.handheld || 0;
     if (hh) { C.sx += noise1(life * 0.8, 51) * 12 * hh; C.sy += noise1(life * 0.7, 77) * 8 * hh; C.rot = (C.rot || 0) + noise1(life * 0.5, 93) * 0.6 * hh; }
-    const dof = C.dof != null ? C.dof : clamp((C.zoom - 1.4) * 3.2, 0, 7);
+    // nhoè hậu cảnh rất nặng với canvas: chỉ bật khi kịch bản yêu cầu (cam.dof hoặc FILM.dof)
+    const dof = C.dof != null ? C.dof : film.dof ? clamp((C.zoom - 1.4) * 3.2, 0, 7) : 0;
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.filter = "none";
     ctx.fillStyle = (L && L.base) || BGBASE[bg] || "#fbf8f1"; ctx.fillRect(0, 0, W, H);
     const layer = (p, fn, blur) => { ctx.save(); applyCam(ctx, C, p); if (blur > 0.4) ctx.filter = `blur(${blur.toFixed(1)}px)`; fn(); ctx.restore(); ctx.filter = "none"; };
