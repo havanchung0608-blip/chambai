@@ -76,7 +76,7 @@ def ass_time(s):
 
 def write_subs(lines, fps, out_srt, out_ass, W, H, names):
     srt, ass = [], []
-    fs = int(H * 0.058)  # ≈ 63 px ở 1080p — cỡ chữ trình chiếu
+    fs = int(H * 0.075)  # ≈ 81 px ở 1080p — chữ lớn cho học sinh (thầy Chung yêu cầu)
     ass.append(f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {W}
