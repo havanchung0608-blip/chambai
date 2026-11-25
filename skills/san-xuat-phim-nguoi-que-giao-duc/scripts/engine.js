@@ -1086,6 +1086,7 @@
           d = Math.max(d, B.sayDur + 0.15);
           says.push({ id, t: B.start, text: sayText(b), who: b.who || "narrator", voice: (speaker && speaker.voice) || (film.narrator && film.narrator.voice) || "nu", pitch: speaker && speaker.pitch, dur: B.sayDur });
         }
+        if (b.clear) writeY = board ? board.y + 34 : 80;  // xoá bảng TRƯỚC khi viết dòng mới trong cùng nhịp
         if (b.write != null) {
           const ws = arr(b.write).map((w) => (typeof w === "string" ? { text: w } : { ...w }));
           let off = 0;
@@ -1102,7 +1103,6 @@
           });
           B.writes = ws; d = Math.max(d, off);
         }
-        if (b.clear) writeY = board ? board.y + 34 : 80;
         if (b.move) arr(b.move).forEach((m) => {
           const dur = m.dur || 1.5; d = Math.max(d, dur);
           const c = (sc.cast || {})[m.who] || {}, base = (film.cast || {})[m.who] || {};
