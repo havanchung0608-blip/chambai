@@ -234,6 +234,8 @@
     fistbow: () => ({ fa: [70, 140], ba: [66, 150], fl: [4, 0], bl: [-4, 0], lean: 24, head: 14 }),
     victory: (t) => ({ fa: [158, 176], ba: [30, 150], fl: [20, 0], bl: [-20, -4], head: -8, lift: Math.abs(Math.sin(t * 4)) * 6 }),
     kneel: () => ({ fa: [30, 20], ba: [20, 10], fl: [80, 0], bl: [-20, -110], lean: 10, head: 10 }),
+    dance: (t) => ({ fa: [120 + Math.sin(t * 8) * 50, 160 + Math.sin(t * 8) * 30], ba: [-120 + Math.sin(t * 8 + 3) * 50, -160 + Math.sin(t * 8 + 3) * 30], fl: [10 + Math.sin(t * 8) * 18, 0], bl: [-10 + Math.sin(t * 8) * 18, 0], lean: Math.sin(t * 4) * 10, head: Math.sin(t * 8) * 10, lift: Math.abs(Math.sin(t * 8)) * 16 }),
+    tired: (t) => ({ fa: [28, 8], ba: [24, 4], fl: [14, -6], bl: [-12, -8], lean: 26 + Math.sin(t * 7) * 3, head: 14 + Math.sin(t * 7) * 4 }),
     skate: (t) => ({ fa: [78, 98 + Math.sin(t * 3) * 8], ba: [-72, -92 + Math.sin(t * 3 + 1) * 8], fl: [30, -18], bl: [-24, -42], lean: 6 + Math.sin(t * 2.5) * 3 }),
     nod: (t) => ({ fa: [14, 4], ba: [-14, -4], fl: [7, 0], bl: [-7, 0], head: Math.sin(t * 8) * 9 })
   };
@@ -771,6 +773,7 @@
     graph(ctx, it) {
       const A = CUR_ITEMS[it.axes]; if (!A) return; ctx.translate((A.x || 0) - (it.x || 0), (A.y || 0) - (it.y || 0));
       const pts = graphPts(it, A), col = it.color || "#ffeb3b"; ctx.strokeStyle = col; ctx.lineWidth = it.width || 8;
+      if (it.glow) { ctx.shadowColor = col; ctx.shadowBlur = it.glow === true ? 18 : it.glow; }
       const runs = []; let cur = []; pts.forEach((p) => { if (!p) { if (cur.length > 1) runs.push(cur); cur = []; } else cur.push(p); }); if (cur.length > 1) runs.push(cur);
       const total = runs.reduce((s, r) => s + r.length, 0); let budget = (it._prog == null ? 1 : it._prog) * total;
       runs.forEach((r) => { if (budget <= 0) return; const n = Math.min(r.length, budget); strokeProg(ctx, r, n >= r.length ? 1 : n / r.length); budget -= r.length; });
@@ -800,7 +803,7 @@
         ctx.restore();
       }));
     },
-    dot(ctx, it) { const r = it.r || 15; ctx.fillStyle = it.color || "#ff5252"; ctx.beginPath(); ctx.arc(0, 0, r * (it._prog == null ? 1 : it._prog), 0, 7); ctx.fill(); if (it.label) { const L = it.labelSide === "left"; drawTex(ctx, it.label, L ? -24 : 24, -24, it.size || 52, it.color || "#ff5252", L ? "right" : "left", it._lp == null ? 1 : it._lp); } },
+    dot(ctx, it) { const r = it.r || 15; ctx.fillStyle = it.color || "#ff5252"; if (DARK || it.glow) { ctx.shadowColor = it.color || "#ff5252"; ctx.shadowBlur = 14; } ctx.beginPath(); ctx.arc(0, 0, r * (it._prog == null ? 1 : it._prog), 0, 7); ctx.fill(); if (it.label) { const L = it.labelSide === "left"; drawTex(ctx, it.label, L ? -24 : 24, -24, it.size || 52, it.color || "#ff5252", L ? "right" : "left", it._lp == null ? 1 : it._lp); } },
     seg(ctx, it) { ctx.strokeStyle = it.color || (DARK ? "#fff" : INK); ctx.lineWidth = it.width || 6; strokeProg(ctx, [[it.x1 || 0, it.y1 || 0], [it.x2 || 200, it.y2 || 0]], it._prog == null ? 1 : it._prog); },
     poly(ctx, it) {
       const P = it.points || [[0, -120], [-140, 100], [140, 100]], pr = it._prog == null ? 1 : it._prog, col = it.color || (DARK ? "#58c4dd" : "#1e88e5");
@@ -933,6 +936,14 @@
   const PROPS = {
     text(ctx, it) {
       const col = it.color || (DARK ? "#ffffff" : INK), size = it.size || 64, al = it.align || "center";
+      if (it.panel) {
+        // khung công thức kiểu Manim: nền tối bo góc, viền phấn mảnh
+        ctx.font = `${size}px ${FONT}`;
+        const w1 = layout(ctx, texCache.get(it.text) || parseTex(String(it.text)), size), w0 = it._from != null && it._mix < 1 ? layout(ctx, texCache.get(it._from) || parseTex(String(it._from)), size) : w1;
+        const Wd = Math.max(w1.w, w0.w, it.minW || 0) + size * 1.1, Hh = size * 1.75, x0 = al === "center" ? -Wd / 2 : al === "right" ? -Wd + size * 0.55 : -size * 0.55;
+        ctx.save(); ctx.fillStyle = it.panelColor || "rgba(8,22,16,.88)"; roundRect(ctx, x0, -size * 1.12, Wd, Hh, size * 0.3); ctx.fill();
+        ctx.strokeStyle = it.panelBorder || "rgba(255,241,118,.6)"; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
+      }
       if (it._from != null && it._mix != null && it._mix < 1) {
         ctx.save(); ctx.globalAlpha *= 1 - it._mix; ctx.translate(0, -it._mix * 34); drawTex(ctx, it._from, 0, 0, size, it._fromColor || col, al, 1); ctx.restore();
         ctx.save(); ctx.globalAlpha *= it._mix; ctx.translate(0, (1 - it._mix) * 34); drawTex(ctx, it.text, 0, 0, size, col, al, 1); ctx.restore();
@@ -1004,6 +1015,8 @@
     },
     sign(ctx, it) { const w = it.w || 420, h = it.h || 130; ctx.lineWidth = 6; ctx.strokeStyle = INK; hline(ctx, [[0, h / 2], [0, h / 2 + 140]], it._seed); hrect(ctx, -w / 2, -h / 2, w, h, it._seed + 1, it.color || "#fff8e1"); drawTex(ctx, it.text || "", 0, 22, it.size || 60, INK, "center", 1); },
     card(ctx, it) { const w = it.w || 520, h = it.h || 140; ctx.save(); ctx.shadowColor = "rgba(0,0,0,.18)"; ctx.shadowBlur = 18; ctx.fillStyle = it.color || "#fffef6"; roundRect(ctx, -w / 2, -h / 2, w, h, 22); ctx.fill(); ctx.restore(); ctx.lineWidth = 5; ctx.strokeStyle = it.border || "#f2a900"; roundRect(ctx, -w / 2, -h / 2, w, h, 22); ctx.stroke(); drawTex(ctx, it.text || "", 0, (it.size || 64) * 0.35, it.size || 64, it.textColor || INK, "center", 1); },
+    panel(ctx, it) { const w = it.w || 800, h = it.h || 500; ctx.save(); ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 30; ctx.fillStyle = it.color || "rgba(8,22,16,.9)"; roundRect(ctx, -w / 2, -h / 2, w, h, 34); ctx.fill(); ctx.restore(); ctx.strokeStyle = it.border || "rgba(255,241,118,.7)"; ctx.lineWidth = 4; roundRect(ctx, -w / 2, -h / 2, w, h, 34); ctx.stroke(); if (it.title) drawTex(ctx, it.title, -w / 2 + 40, -h / 2 + 70, it.size || 54, it.titleColor || "#80deea", "left", 1); },
+    skateboard(ctx, it) { ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.fillStyle = it.color || "#ff7043"; roundRect(ctx, -78, -34, 156, 14, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = "#ffeb3b"; [-48, 48].forEach((wx) => { ctx.save(); ctx.translate(wx, -11); ctx.rotate((it.x || 0) / 10); ctx.beginPath(); ctx.arc(0, 0, 10, 0, 7); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(8, 0); ctx.stroke(); ctx.restore(); }); },
     table(ctx, it) { const w = it.w || 420, h = it.h || 190; ctx.lineWidth = 6; ctx.strokeStyle = INK; hrect(ctx, -w / 2, -h, w, 22, it._seed, it.color || "#b07a43"); hline(ctx, [[-w / 2 + 30, -h + 22], [-w / 2 + 30, 0]], it._seed + 1); hline(ctx, [[w / 2 - 30, -h + 22], [w / 2 - 30, 0]], it._seed + 2); },
     tree(ctx, it) { tree(ctx, 0, 0, it.s || 1, it._seed); },
     house(ctx, it) { house(ctx, -150, 0, 300, 260, it.color || "#ffe0a3", it._seed); },
@@ -1182,7 +1195,7 @@
         if (b.tween) arr(b.tween).forEach((m) => { d = Math.max(d, m.dur || 0.8); });
         if (b.cam) { d = Math.max(d, b.cam.dur != null ? b.cam.dur : 1); if (b.cam.whip && b.cam.sfx !== false) sfx.push({ t: B.start, name: "whoosh", vol: 0.8 }); }
         arr(b.anim).forEach((a) => { const nm = a.sfx !== undefined ? a.sfx : ANIM_SFX[a.do]; if (nm) sfx.push({ t: B.start + (a.at || 0), name: nm, dur: a.dur || 1, vol: a.vol || 0.55 }); d = Math.max(d, (a.at || 0) + (a.dur || 1)); });
-        if (b.show) arr(b.show).forEach((it) => { const nm = it.sfx !== undefined ? it.sfx : it.anim ? ANIM_SFX[it.anim] || null : "pop"; if (nm) sfx.push({ t: B.start, name: nm, dur: it.dur || 1, vol: it.anim ? 0.55 : 1 }); d = Math.max(d, it.anim ? it.dur || 1 : 0.4); });
+        if (b.show) arr(b.show).forEach((it) => { const nm = it.sfx !== undefined ? it.sfx : it.anim ? ANIM_SFX[it.anim] || null : "pop"; if (nm) sfx.push({ t: B.start + (it.at || 0), name: nm, dur: it.dur || 1, vol: it.anim ? 0.55 : 1 }); d = Math.max(d, (it.at || 0) + (it.anim ? it.dur || 1 : 0.4)); });
         if (b.title) { d = Math.max(d, b.title.dur || 3.2); sfx.push({ t: B.start, name: "whoosh" }); }
         if (b.quiz) {
           const th = b.quiz.think != null ? b.quiz.think : 5; B.quizThink = th; d = Math.max(d, th + (b.quiz.answer >= 0 ? 2.6 : 0.8));
@@ -1299,8 +1312,9 @@
         }
       });
       arr(b.show).forEach((it, i) => {
-        const id = it.id || `${B.id}_${i}`; const o = items[id] = { ...it, _seed: 500 + bi * 13 + i, _born: B.start };
-        if (it.anim) { o.pop = false; applyAnim({ do: it.anim, id, dur: it.dur || 1, shift: it.shift }, items, B.start, t, bi); }
+        const t0 = B.start + (it.at || 0); if (t < t0) return;   // "at": hiện trễ trong nhịp
+        const id = it.id || `${B.id}_${i}`; const o = items[id] = { ...it, _seed: 500 + bi * 13 + i, _born: t0 };
+        if (it.anim) { o.pop = false; applyAnim({ do: it.anim, id, dur: it.dur || 1, shift: it.shift }, items, t0, t, bi); }
       });
       arr(b.hide).forEach((id) => { if (items[id]) items[id]._dead = B.start; });
       arr(b.set).forEach((s) => { if (items[s.id]) Object.assign(items[s.id], s); });
@@ -1388,7 +1402,7 @@
     S.writes.forEach((w) => { if (!w.box || w._p < 1) return; ctx.font = `${w.size}px ${FONT}`; const Lw = layout(ctx, texCache.get(w.text) || parseTex(w.text), w.size); const x0 = w.align === "center" ? w.x - Lw.w / 2 : w.x; ctx.save(); ctx.strokeStyle = w.boxColor || "#ffca28"; ctx.lineWidth = 6; ctx.globalAlpha = 0.75 + 0.25 * Math.sin(life * 5); roundRect(ctx, x0 - 22, w.y - Lw.asc - 18, Lw.w + 44, Lw.asc + Lw.desc + 36, 14); ctx.stroke(); ctx.restore(); });
     // đối tượng (sắp theo z)
     Object.entries(S.items).sort((a, b) => (a[1].z || 0) - (b[1].z || 0)).forEach(([id, it]) => {
-      if (it._gone) return;
+      if (it._gone || it.screen) return;
       if (it._dead != null) { const k = (t - it._dead) / 0.3; if (k >= 1) return; it.alpha = (it.alpha == null ? 1 : it.alpha) * (1 - k); }
       if (it._born != null && it.pop !== false) { const k = clamp((t - it._born) / 0.45, 0, 1); it._pop = k >= 1 ? 1 : Math.max(0.001, easeOutBack(k)); }
       if (it.type === "dot" && it.ax && S.items[it.ax] && it.at) { const A = S.items[it.ax], M = axesMap(A); it.x = (A.x || 0) + M.sx(it.at[0]); it.y = (A.y || 0) + M.sy(it.at[1]);
@@ -1482,6 +1496,12 @@
     // viền tối nhẹ (vignette) + khung điện ảnh (letterbox)
     if (film.vignette !== false && !BOARDS[bg]) { const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, H * 1.05); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.28)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
     if (C.letter > 0.01) { ctx.fillStyle = "#000"; const bh = 118 * C.letter; ctx.fillRect(0, 0, W, bh); ctx.fillRect(0, H - bh, W, bh); }
+    // vật thể gắn màn hình (bảng công thức...) — luôn đúng chỗ, không bị máy quay cắt
+    Object.values(S.items).filter((it) => it.screen && !it._gone).sort((a, b) => (a.z || 0) - (b.z || 0)).forEach((it) => {
+      if (it._dead != null) { const k = (t - it._dead) / 0.3; if (k >= 1) return; it.alpha = (it.alpha == null ? 1 : it.alpha) * (1 - k); }
+      if (it._born != null && it.pop !== false) { const k = clamp((t - it._born) / 0.45, 0, 1); it._pop = k >= 1 ? 1 : Math.max(0.001, easeOutBack(k)); }
+      ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); drawItem(ctx, it, life); drawManimFx(ctx, it); ctx.restore();
+    });
     // lớp phủ (không theo camera)
     if (S.quiz) drawQuiz(ctx, S.quiz, life);
     if (S.title) drawTitle(ctx, S.title);
