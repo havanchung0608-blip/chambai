@@ -327,6 +327,7 @@
     ctx.save();
     ctx.translate(ch.x + (ch._sway || 0) * S * dir, (ch.y || GROUND) - (P.lift || 0) * S);
     if (ch.tilt) ctx.rotate(rad(ch.tilt));
+    if (ch.spin) { const cy = -230 * S; ctx.translate(0, cy); ctx.rotate(rad(ch.spin) * dir); ctx.translate(0, -cy); }
     if (ch.skate) {
       // ván trượt: mặt ván + 2 bánh, nhân vật đứng trên ván
       ctx.save(); ctx.scale(S, S); ctx.lineWidth = 5; ctx.strokeStyle = INK;
@@ -510,6 +511,9 @@
       ctx.strokeStyle = "#fff"; ctx.lineWidth = 5; for (let i = 0; i < 8; i++) { const an = (i / 8) * Math.PI * 2 + 0.2; ctx.beginPath(); ctx.moveTo(Math.cos(an) * R * 1.05, Math.sin(an) * R * 1.05); ctx.lineTo(Math.cos(an) * R * 1.5, Math.sin(an) * R * 1.5); ctx.stroke(); }
     } else if (f.type === "dust") {
       ctx.globalAlpha = a * 0.7; ctx.fillStyle = "#bcaaa4"; for (let i = -3; i <= 3; i++) { ctx.beginPath(); ctx.arc(i * 40 * (0.5 + k), -20 - k * 40 * hash(i + 9), 26 * (1 - k * 0.4), 0, 7); ctx.fill(); }
+    } else if (f.type === "confetti") {
+      const cols = ["#ffeb3b", "#ff8a80", "#80deea", "#b9f6ca", "#ffffff", "#ce93d8"];
+      for (let i = 0; i < 60; i++) { const a = hash(i * 2.7) * Math.PI * 2, sp = 200 + hash(i * 5.1) * 420, x = Math.cos(a) * sp * k, y = Math.sin(a) * sp * k + 500 * k * k; ctx.save(); ctx.globalAlpha = a > 0 ? 1 - k : 1 - k; ctx.translate(x, y); ctx.rotate(k * 12 + i); ctx.fillStyle = cols[i % cols.length]; ctx.fillRect(-7, -4, 14, 8); ctx.restore(); }
     } else if (f.type === "speed") {
       ctx.globalAlpha = a; ctx.strokeStyle = "#455a64"; ctx.lineWidth = 6; for (let i = 0; i < 6; i++) { const yy = -260 + i * 50; ctx.beginPath(); ctx.moveTo(-(f.dir || 1) * (60 + 40 * hash(i)), yy); ctx.lineTo(-(f.dir || 1) * (240 + 80 * hash(i + 4)), yy); ctx.stroke(); }
     }
@@ -709,6 +713,17 @@
       far: (ctx, life) => { skyFill(ctx, "#81d4fa", "#e1f5fe", 760); ctx.strokeStyle = INK; ctx.lineWidth = 5; hcircle(ctx, 1550, 160, 75, 90, "#ffd54f"); clouds(ctx, life, 4); },
       mid: (ctx, life) => { ctx.fillStyle = "#29b6f6"; ctx.fillRect(-6000, 700, 14000, 300); ctx.strokeStyle = "#e1f5fe"; ctx.lineWidth = 5; for (let r = 0; r < 4; r++) { ctx.beginPath(); for (let x = -3000; x < 5000; x += 40) ctx.lineTo(x, 740 + r * 55 + Math.sin(x * 0.02 + life * 2 + r) * 8); ctx.stroke(); } },
       main: (ctx, life) => { ctx.fillStyle = "#ffe0a3"; ctx.beginPath(); ctx.moveTo(-8000, GROUND - 40); ctx.lineTo(10000, GROUND - 40); ctx.lineTo(10000, 4000); ctx.lineTo(-8000, 4000); ctx.fill(); tile(ctx, 2000, () => { palm(ctx, 250, life); ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(1500, GROUND); ctx.lineTo(1500, 640); ctx.stroke(); ctx.fillStyle = "#e53935"; ctx.beginPath(); ctx.moveTo(1320, 680); ctx.quadraticCurveTo(1500, 520, 1680, 680); ctx.closePath(); ctx.fill(); ctx.stroke(); }); }
+    },
+    chalkgrid: {
+      base: "#1f3d30", dark: true,
+      main: (ctx) => {
+        ctx.fillStyle = "#1f3d30"; ctx.fillRect(-8000, -4000, 18000, 9000);
+        // vệt phấn lau dở (bảng thật)
+        for (let i = 0; i < 26; i++) { const x = hash(i * 3.1) * 2400 - 240, y = hash(i * 7.7) * 1200 - 60, r = 120 + hash(i * 1.3) * 260; const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, "rgba(255,255,255,0.055)"); g.addColorStop(1, "rgba(255,255,255,0)"); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, 2 * r, 2 * r); }
+        ctx.strokeStyle = "rgba(255,255,255,.07)"; ctx.lineWidth = 2;
+        for (let x = -4000; x <= 6000; x += 80) { ctx.beginPath(); ctx.moveTo(x, -3000); ctx.lineTo(x, 4000); ctx.stroke(); }
+        for (let y = -3000; y <= 4000; y += 80) { ctx.beginPath(); ctx.moveTo(-4000, y); ctx.lineTo(6000, y); ctx.stroke(); }
+      }
     },
     manim: { base: "#1c1c1c", main: (ctx) => { ctx.fillStyle = "#1c1c1c"; ctx.fillRect(-8000, -4000, 18000, 9000); }, dark: true },
     manimgrid: {
@@ -1275,6 +1290,7 @@
         else if (style === "skate") { const e = easeIO(k); ch.x = lerp(from, to, e); ch.y = lerp(fy, ty, e); g = null; ch.skate = k < 1 || !!m.keep; ch.tilt = 0; }
         else if (style === "jump" || style === "flykick") { const q = clamp((k - 0.22) / 0.6, 0, 1), e = q * q * (3 - 2 * q); ch.x = lerp(from, to, e); ch.y = lerp(fy, ty, e); g = { style, k }; }
         else { const dist = Math.abs(to - from), n = Math.max(1, Math.round(dist / ((style === "run" ? 150 : 96) * S0))), tr = trap(k, 0.18); ch.x = lerp(from, to, tr); ch.y = lerp(fy, ty, tr); g = { style, u: tr * n, n, L: Math.max(1, dist) / n / S0 }; }
+        if (m.spin && (style === "jump" || style === "flykick")) ch.spin = k < 1 ? (m.spin || 360) * easeIO(clamp((k - 0.22) / 0.6, 0, 1)) : 0;
         if (k < 1 && g) { ch._gait = g; if (style === "jump" || style === "flykick") ch._jumpLift = Math.sin(clamp((k - 0.22) / 0.6, 0, 1) * Math.PI) * (m.height || 130); }
         else if (k >= 1) {
           ch._gait = null; ch._jumpLift = 0;
