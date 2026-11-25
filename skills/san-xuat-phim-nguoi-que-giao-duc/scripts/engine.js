@@ -1037,6 +1037,40 @@
     },
     sign(ctx, it) { const w = it.w || 420, h = it.h || 130; ctx.lineWidth = 6; ctx.strokeStyle = INK; hline(ctx, [[0, h / 2], [0, h / 2 + 140]], it._seed); hrect(ctx, -w / 2, -h / 2, w, h, it._seed + 1, it.color || "#fff8e1"); drawTex(ctx, it.text || "", 0, 22, it.size || 60, INK, "center", 1); },
     card(ctx, it) { const w = it.w || 520, h = it.h || 140; ctx.save(); ctx.shadowColor = "rgba(0,0,0,.18)"; ctx.shadowBlur = 18; ctx.fillStyle = it.color || "#fffef6"; roundRect(ctx, -w / 2, -h / 2, w, h, 22); ctx.fill(); ctx.restore(); ctx.lineWidth = 5; ctx.strokeStyle = it.border || "#f2a900"; roundRect(ctx, -w / 2, -h / 2, w, h, 22); ctx.stroke(); drawTex(ctx, it.text || "", 0, (it.size || 64) * 0.35, it.size || 64, it.textColor || INK, "center", 1); },
+    // ĐƯỜNG TRÒN DUỖI THẲNG: run 0→1 chấm chạy một vòng; unroll 0→1 cắt ở điểm thấp nhất, duỗi dần thành đoạn thẳng sang phải
+    unroll(ctx, it) {
+      const r = it.r || 100, run = it.run == null ? 0 : it.run, u = clamp(it.unroll || 0, 0, 1), col = it.color || "#ffd54f", L = u * 2 * Math.PI * r;
+      ctx.lineWidth = it.width || 9; ctx.strokeStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 14; ctx.lineCap = "round";
+      const th = L / r;                                   // góc đã duỗi
+      if (th < 2 * Math.PI - 1e-3) { ctx.beginPath(); ctx.arc(0, 0, r, Math.PI / 2 + th, Math.PI / 2 + 2 * Math.PI); ctx.stroke(); }
+      if (L > 0) { ctx.beginPath(); ctx.moveTo(0, r); ctx.lineTo(L, r); ctx.stroke(); }
+      if (run > 0 && run < 1) { const a = Math.PI / 2 + run * 2 * Math.PI; ctx.fillStyle = "#fff59d"; ctx.beginPath(); ctx.arc(r * Math.cos(a), r * Math.sin(a), 15, 0, 7); ctx.fill(); }
+      ctx.shadowBlur = 0;
+    },
+    // CUNG TRÒN sáng: tâm (0,0), bán kính r, từ góc a0 tới a1 (độ, chiều kim đồng hồ trên màn hình), vẽ dần theo prog
+    arc(ctx, it) {
+      const r = it.r || 100, a0 = rad(it.a0 || 0), a1 = rad(it.a1 == null ? 360 : it.a1), p = it.prog == null ? 1 : clamp(it.prog, 0, 1), col = it.color || "#ffd54f";
+      if (p <= 0) return;
+      ctx.lineWidth = it.width || 10; ctx.strokeStyle = col; ctx.lineCap = "round"; if (it.glow !== false) { ctx.shadowColor = col; ctx.shadowBlur = 16; }
+      if (it.dash) ctx.setLineDash(it.dash);
+      ctx.beginPath(); ctx.arc(0, 0, r, a0, a0 + (a1 - a0) * p); ctx.stroke(); ctx.setLineDash([]); ctx.shadowBlur = 0;
+      if (it.bug && p > 0 && p < 1) {            // con gián bò ở đầu nét
+        const a = a0 + (a1 - a0) * p; ctx.save(); ctx.translate(r * Math.cos(a), r * Math.sin(a)); ctx.rotate(a + Math.PI / 2);
+        ctx.fillStyle = "#8d3f12"; ctx.beginPath(); ctx.ellipse(0, 0, 24, 15, 0, 0, 7); ctx.fill(); ctx.fillStyle = "#2b1d16"; ctx.beginPath(); ctx.arc(24, 0, 9, 0, 7); ctx.fill();
+        ctx.strokeStyle = "#2b1d16"; ctx.lineWidth = 3; for (const dx of [-12, 0, 12]) for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(dx, sd * 10); ctx.lineTo(dx + 6, sd * (22 + 4 * Math.sin(p * 80 + dx))); ctx.stroke(); }
+        ctx.fillStyle = "#ffd54f"; ctx.beginPath(); ctx.arc(-4, 0, 6, 0, 7); ctx.fill(); ctx.restore();
+      }
+      if (it.label) drawTex(ctx, it.label, (r + (it.labelOff || 46)) * Math.cos((a0 + a1) / 2), (r + (it.labelOff || 46)) * Math.sin((a0 + a1) / 2) + 20, it.size || 60, col, "center", 1);
+    },
+    // HÌNH QUẠT / HÌNH TRÒN / VÀNH KHUYÊN tô kín: r0 (trong) → r (ngoài), góc a0→a1; grow 0→1 lan từ tâm ra (hoặc quét góc nếu sweep)
+    sector(ctx, it) {
+      const r = it.r || 100, r0 = it.r0 || 0, a0 = rad(it.a0 || 0), a1 = rad(it.a1 == null ? 360 : it.a1), g = it.grow == null ? 1 : clamp(it.grow, 0, 1);
+      if (g <= 0) return;
+      const R1 = it.sweep ? r : r0 + (r - r0) * g, A1 = it.sweep ? a0 + (a1 - a0) * g : a1;
+      ctx.save(); ctx.globalAlpha *= it.opacity == null ? 0.85 : it.opacity; ctx.fillStyle = it.color || "#ffb300";
+      ctx.beginPath(); ctx.arc(0, 0, R1, a0, A1); if (r0 > 0) ctx.arc(0, 0, r0, A1, a0, true); else ctx.lineTo(0, 0); ctx.closePath(); ctx.fill("evenodd"); ctx.restore();
+      if (it.edge) { ctx.strokeStyle = it.edge; ctx.lineWidth = 4; ctx.stroke(); }
+    },
     panel(ctx, it) { const w = it.w || 800, h = it.h || 500; ctx.save(); ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 30; ctx.fillStyle = it.color || "rgba(8,22,16,.9)"; roundRect(ctx, -w / 2, -h / 2, w, h, 34); ctx.fill(); ctx.restore(); ctx.strokeStyle = it.border || "rgba(255,241,118,.7)"; ctx.lineWidth = 4; roundRect(ctx, -w / 2, -h / 2, w, h, 34); ctx.stroke(); if (it.title) drawTex(ctx, it.title, -w / 2 + 40, -h / 2 + 70, it.size || 54, it.titleColor || "#80deea", "left", 1); },
     // THƯỚC KẺ trong suốt: gốc (0,0) là vạch 0 nằm trên MÉP KẺ, thước kéo dài theo trục x cục bộ (xoay bằng rot)
     ruler(ctx, it) {

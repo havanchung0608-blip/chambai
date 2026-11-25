@@ -16,3 +16,12 @@
 - Gọng kính mảnh khó thấy → gọng 0,031/0,0065 m.
 - Tốc độ thực tế (4 CPU, không GPU, chất lượng cpu 720p + motion blur + SSR): 5,1 s/khung → phim 30 s mất ~78 phút.
 - Còn cần cải thiện: góc `insert_hand` cắt mất đầu khi nhân vật cúi; trượt chân 24 mm (mục tiêu < 10 mm).
+
+## 2026-11-26 — "Phi vụ giải cứu bánh tráng trứng" (5 phút, 3D + Toán 2D)
+- Phim dài: truyện 3D render Blender, đoạn giảng Toán (nhìn từ trên xuống, 60 % chữ / 40 % hình) dựng bằng engine 2D kiểu Manim → ghép xen kẽ theo mốc `mark`. Rẻ hơn nhiều so với dựng công thức trong 3D, chữ nét, lớn.
+- Lỗi: nhân vật đứng trước máy che mọi góc cận đạo cụ (khung trắng/hồng mờ = máy quay nằm trong người). Sửa: đặt nhân vật lệch sang một bên, máy cận đặt phía đối diện (az 45–60); quét 1 khung giữa MỖI shot trước khi render.
+- Lỗi: `close_up` az 0 khi nhân vật quay mặt vào quầy → máy nằm sau quầy. Chỉ dùng cận chính diện sau `turn face camera`.
+- Lỗi: kính nắp + AgX làm đồ ăn nhạt màu. Sửa: kính alpha 0,035, view "Standard" + exposure −1.
+- Lỗi: object ẩn (hide_viewport) không được đánh giá trong depsgraph → in matrix_world ra 0 khi debug; render vẫn đúng.
+- Khoá `offset` dùng cho thời gian song song — tham số đạo cụ phải đặt tên khác (`head_offset`).
+- An toàn: không `rm -rf` thư mục khung hình để render lại — tạo thư mục out mới và chép `voice/` sang (cache giọng).

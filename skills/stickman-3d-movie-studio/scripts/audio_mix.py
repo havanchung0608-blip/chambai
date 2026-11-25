@@ -47,6 +47,14 @@ def bandnoise(dur, lo, hi, vol):
     return (y / (np.abs(y).max() + 1e-9) * vol).astype(np.float32)
 
 
+def _mx(*arrs):
+    n = max(len(a) for a in arrs)
+    out = np.zeros(n, np.float32)
+    for a in arrs:
+        out[:len(a)] += a
+    return out
+
+
 def synth(name, dur=1.0):
     if name in ("step", "steprun", "land"):
         big = {"step": 1.0, "steprun": 1.3, "land": 1.8}[name]
@@ -85,14 +93,57 @@ def synth(name, dur=1.0):
             a = tone(f, 0.5, 0.06, decay=0.15)
             out[int(i * 0.06 * SR):int(i * 0.06 * SR) + len(a)] += a
         return out
+    if name == "knock":          # đầu gối gõ "cộc": gỗ rỗng
+        return _mx(tone(420, 0.09, 0.45, 300, decay=0.025), tone(980, 0.05, 0.18, decay=0.012), bandnoise(0.02, 1500, 4000, 0.08))
+    if name == "bike_bell":      # chuông xe đạp "kính coong"
+        out = np.zeros(int(SR * 1.6), np.float32)
+        for st, f in ((0.0, 2350), (0.22, 1980)):
+            a = _mx(tone(f, 1.2, 0.22, decay=0.35), tone(f * 2.76, 0.8, 0.06, decay=0.2))
+            out[int(st * SR):int(st * SR) + len(a)] += a
+        return out
+    if name == "beep":
+        return tone(1046, 0.16, 0.2, decay=0.5)
+    if name == "beep2":
+        return np.concatenate([tone(880, 0.12, 0.2, decay=0.5), np.zeros(int(SR * 0.06), np.float32), tone(1320, 0.18, 0.2, decay=0.5)])
+    if name == "sizzle":         # trứng "xèo"
+        n = bandnoise(dur, 2500, 9000, 0.22)
+        t = np.arange(len(n)) / SR
+        crack = (np.random.rand(len(n)) > 0.9985).astype(np.float32) * 0.5
+        return ((n * (0.6 + 0.4 * np.sin(2 * np.pi * 7 * t) ** 2) + crack) * np.minimum(1, t / 0.08) * np.clip((dur - t) / 0.3, 0, 1)).astype(np.float32)
+    if name == "boing":
+        t = np.arange(int(SR * 0.6)) / SR
+        f = 180 + 80 * np.sin(2 * np.pi * 9 * t) * np.exp(-t * 4)
+        return (np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 5) * 0.35).astype(np.float32)
+    if name == "latch":          # chốt khoá "cạch"
+        return _mx(tone(260, 0.07, 0.4, 120, decay=0.02), tone(2600, 0.04, 0.15, decay=0.01))
+    if name == "unlatch":
+        return _mx(tone(1500, 0.05, 0.18, decay=0.015), tone(700, 0.12, 0.2, 1400, decay=0.05))
+    if name == "metalstep":      # bước chân kim loại tí hon
+        return _mx(tone(3200, 0.03, 0.07, decay=0.008), bandnoise(0.02, 4000, 9000, 0.05))
+    if name == "slam":
+        return _mx(tone(90, 0.35, 0.5, 50, decay=0.12), bandnoise(0.15, 200, 1500, 0.3))
+    if name == "spray":
+        n = bandnoise(dur, 3000, 10000, 0.18)
+        return n * np.minimum(1, np.arange(len(n)) / (SR * 0.05))
+    if name == "pluck":          # dây bật "pựt"
+        return _mx(tone(700, 0.25, 0.35, 150, decay=0.06), bandnoise(0.03, 2000, 6000, 0.15))
+    if name == "splash":
+        n = bandnoise(0.7, 300, 5000, 0.3)
+        return n * np.exp(-np.arange(len(n)) / (SR * 0.2))
+    if name == "plop":
+        return tone(300, 0.18, 0.4, 90, decay=0.06)
+    if name == "eat":
+        return bandnoise(0.12, 1500, 6000, 0.18) * np.exp(-np.arange(int(SR * 0.12)) / (SR * 0.04))
     return np.zeros(10, np.float32)
 
 
+SYNTH = ("chalk", "write", "step", "steprun", "land", "grab", "tap", "click", "jump", "shimmer", "knock", "bike_bell", "beep", "beep2", "sizzle",
+         "latch", "unlatch", "metalstep", "slam", "spray", "pluck", "splash", "plop", "eat")
 _bank = {}
 
 
 def sfx(name, dur=1.0):
-    if name in ("chalk", "write", "step", "steprun", "land", "grab", "tap", "click", "jump", "shimmer"):
+    if name in SYNTH:
         return synth(name, dur)
     fp = BANK_DIR / f"{name}.wav"
     if fp.exists():
@@ -128,7 +179,9 @@ def mix(total_s, lines, events, fps, music=None, music_vol=0.10):
         vol = float(e.get("vol", 1.0)) * (0.55 if e.get("soft") else 1.0)
         st = int(e["f"] / fps * SR)
         fx[st:st + len(a)] += a[: max(0, n - st)] * vol
-    out = voice * 1.0 + fx * 0.85 + room_tone(n)
+    voice = np.tanh(voice * 1.5) / np.tanh(1.5)
+    talk = np.clip(np.convolve((np.abs(voice) > 0.02).astype(np.float32), np.ones(int(SR * 0.25)) / (SR * 0.25), "same") * 3, 0, 1)
+    out = voice * 1.0 + fx * 0.7 * (1 - 0.5 * talk) + room_tone(n)
     if music:
         fp = BANK_DIR / f"music_{music}.wav"
         if fp.exists():
@@ -139,10 +192,7 @@ def mix(total_s, lines, events, fps, music=None, music_vol=0.10):
             m[-fade:] *= np.linspace(1, 0, fade)
             m[:SR] *= np.linspace(0, 1, SR)
             out += m * music_vol * (1 - 0.6 * np.clip(env * 3, 0, 1))
-    peak = np.abs(out).max()
-    if peak > 0.97:
-        out *= 0.97 / peak
-    return out
+    return (np.tanh(out * 1.05) / np.tanh(1.05) * 0.97).astype(np.float32)
 
 
 def write_wav(x, fp):

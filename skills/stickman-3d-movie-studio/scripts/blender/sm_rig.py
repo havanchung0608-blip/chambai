@@ -210,7 +210,8 @@ def build_character(name, spec=None, location=(0, 0, 0), heading=0.0):
     col_hair = hex2rgb(spec.get("hair_color", "#212121"))
     col_pants = hex2rgb(spec.get("pants", spec.get("limbs", "#212121")))
     mats = [_mat(f"{name}_shirt", col_shirt, 0.6), _mat(f"{name}_limb", col_limb, 0.45), _mat(f"{name}_skin", col_skin, 0.5),
-            _mat(f"{name}_shoe", col_shoe, 0.35), _mat(f"{name}_hair", col_hair, 0.6), _mat(f"{name}_pants", col_pants, 0.55)]
+            _mat(f"{name}_shoe", col_shoe, 0.35), _mat(f"{name}_hair", col_hair, 0.6), _mat(f"{name}_pants", col_pants, 0.55),
+            _mat(f"{name}_scarf", hex2rgb(spec.get("scarf", "#e53935")), 0.5), _mat(f"{name}_apron", hex2rgb(spec.get("apron", "#ffffff")), 0.6)]
     me = bpy.data.meshes.new(f"{name}_body")
     bm = bmesh.new()
     dl = bm.verts.layers.deform.verify()
@@ -240,6 +241,23 @@ def build_character(name, spec=None, location=(0, 0, 0), heading=0.0):
         _capsule(bm, (sx * hw, 0, hz), knee, lr * 1.25, dl, gi[f"thigh.{side}"], 5)
         _capsule(bm, knee, ankle, lr * 1.1, dl, gi[f"shin.{side}"], 5)
         sv = _sphere(bm, (sx * hw, -0.06 * S, 0.035 * S), 0.05 * S, dl, gi[f"foot.{side}"], 3, scale=(0.85, 1.9, 0.7), segs=14, rings=8)
+    # khăn quàng (scarf) quanh cổ + hai dải thắt nút phía trước
+    if spec.get("scarf"):
+        for k in range(12):
+            a0, a1 = 2 * math.pi * k / 12, 2 * math.pi * (k + 1) / 12
+            rr = 0.06 * S
+            _capsule(bm, (rr * math.cos(a0), rr * math.sin(a0), chest_top - 0.005 * S), (rr * math.cos(a1), rr * math.sin(a1), chest_top - 0.005 * S), 0.022 * S, dl, gi["chest"], 6, segs=8, rings=2)
+        for sx in (-1, 1):
+            _capsule(bm, (0, -0.07 * S, chest_top - 0.02 * S), (sx * 0.035 * S, -0.1 * S, chest_top - 0.15 * S), 0.02 * S, dl, gi["chest"], 6, segs=8, rings=2)
+        _sphere(bm, (0, -0.075 * S, chest_top - 0.025 * S), 0.026 * S, dl, gi["chest"], 6, segs=10, rings=6)
+    # tạp dề (apron) phía trước thân
+    if spec.get("apron"):
+        res = bmesh.ops.create_cube(bm, size=1.0)
+        for v in res["verts"]:
+            v.co = Vector((v.co.x * 0.2 * S, v.co.y * 0.02 * S - 0.1 * S, v.co.z * 0.42 * S + hz + 0.06 * S))
+            v[dl][gi["spine"] if v.co.z > hz + 0.06 * S else gi["hips"]] = 1.0
+        for f in {f for v in res["verts"] for f in v.link_faces}:
+            f.material_index = 7
     # đầu
     hc = Vector((0, 0, head_c))
     _sphere(bm, hc, p["head_r"], dl, gi["head"], 2, segs=32, rings=20)
@@ -298,6 +316,10 @@ def build_character(name, spec=None, location=(0, 0, 0), heading=0.0):
     arm.location = location
     arm.rotation_euler = (0, 0, heading)
     arm["sm_scale"] = S
+    if spec.get("hidden"):          # vai chỉ có giọng (máy, bản đồ…) — không hiện hình
+        for ob in coll.objects:
+            ob.hide_render = True
+            ob.hide_viewport = True
     arm["sm_head_c"] = head_c
     arm.show_in_front = False
     arm.hide_render = True

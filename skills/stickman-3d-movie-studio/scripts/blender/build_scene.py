@@ -19,6 +19,7 @@ import sm_rig  # noqa: E402
 import sm_anim  # noqa: E402
 import sm_env  # noqa: E402
 import sm_cine  # noqa: E402
+import sm_canteen  # noqa: E402
 from sm_anim import Actor, bake_actor, smooth, ease_io, clamp, lerp, angle_to, yaw_vec  # noqa: E402
 
 argv = sys.argv[sys.argv.index("--") + 1:]
@@ -34,7 +35,69 @@ cam_frames = None
 
 # ---------------- bối cảnh ----------------
 env_name = prod.get("environment", "classroom")
-anchors = sm_env.build_classroom() if env_name == "classroom" else sm_env.build_studio()
+OBJ = {}          # tên → object Blender (đạo cụ điều khiển bằng hành động "anim")
+if env_name == "canteen":
+    anchors = sm_canteen.build_canteen()
+    MACH = sm_canteen.build_machine()
+    BANH = sm_canteen.build_banh()
+    GIAN = sm_canteen.build_gian(prod.get("gian_start", (0.3, 1.25, sm_canteen.TOP)))
+    MISC = sm_canteen.build_misc()
+    for dct in (MACH, BANH, MISC):
+        for k, v in dct.items():
+            if hasattr(v, "name"):
+                OBJ[k] = v
+    OBJ["gian"] = GIAN["gian"]
+    OBJ["bell"] = GIAN["bell"]
+    OBJ["beam"] = GIAN["beam"]
+    for (pv, i, sd) in GIAN["legs"]:
+        OBJ[pv.name] = pv
+    for i, f in enumerate(BANH["feet"]):
+        OBJ[f"feet{i}"] = f
+    for i, c in enumerate(BANH["crust"]):
+        OBJ[f"crust{i}"] = c
+    anchors["A_pt"], anchors["B_pt"] = BANH["A"], BANH["B"]
+elif env_name == "classroom":
+    anchors = sm_env.build_classroom()
+else:
+    anchors = sm_env.build_studio()
+
+
+def P3(p):
+    """Điểm 3D: [x,y,z] | tên anchor | 'banh+[dx,dy,dz]'."""
+    if isinstance(p, str):
+        return anchors[p].copy()
+    return Vector(p)
+
+
+_KF_INIT = set()
+
+
+def kf(ob, path, frame, value, interp="BEZIER"):
+    """Keyframe có khoá trạng thái ban đầu ở frame 1 (để giá trị trước lần đổi đầu tiên không bị 'kéo' theo)."""
+    tgt = ob.data if path == "bevel_factor_end" else ob
+    key = (tgt.name, path)
+    if key not in _KF_INIT:
+        _KF_INIT.add(key)
+        if frame > 1:
+            tgt.keyframe_insert(path, frame=1)
+    if path == "hide_render":
+        tgt.hide_render = bool(value)
+        tgt.hide_viewport = bool(value)
+    elif path == "bevel_factor_end":
+        tgt.bevel_factor_end = value
+    else:
+        setattr(tgt, path, value)
+    tgt.keyframe_insert(path, frame=frame)
+    ad = tgt.animation_data
+    if ad and ad.action:
+        for fc in ad.action.fcurves:
+            if fc.data_path == path:
+                for kp in fc.keyframe_points:
+                    if abs(kp.co[0] - frame) < 0.5:
+                        kp.interpolation = "CONSTANT" if path == "hide_render" else interp
+
+
+ATTACH = []
 
 
 def resolve_point(p):
@@ -124,7 +187,7 @@ for idx, a in enumerate(prod["actions"]):
         f1 = A.walk(f0, path, a.get("gait", "walk"), end_yaw=end_yaw, speed=a.get("speed", 1.0))
     elif do == "turn":
         fa = a["face"]
-        yaw = 0.0 if fa == "camera" else math.pi if fa == "board" else fa if isinstance(fa, (int, float)) else angle_to(A.root[f0], resolve_point(fa))
+        yaw = 0.0 if fa == "camera" else math.pi if fa == "board" else fa if isinstance(fa, (int, float)) else angle_to(tuple(A.root[f0])[:2], resolve_point(fa))
         f1 = A.turn(f0, yaw, a.get("dur", 0.6))
     elif do == "jump":
         f1 = A.jump(f0, a.get("to"), a.get("height", 0.35))
@@ -238,6 +301,128 @@ for idx, a in enumerate(prod["actions"]):
         sm_env.pop_in(ob, f0 + 1, dur=int(0.3 * FPS))
         timeline["events"].append(dict(f=f0, name=a.get("sfx", "write"), dur=0.4))
         f1 = f0 + sec(a.get("dur", 0.4))
+    elif do == "anim":
+        # {"target": tên, "keys": [{"t": giây, "loc": [..], "rot": [độ..], "scale": s|[..], "show": bool, "reveal": 0..1}], "ease": "BEZIER|LINEAR|CONSTANT"}
+        names = a["target"] if isinstance(a["target"], list) else [a["target"]]
+        tmax = 0
+        for nm in names:
+            ob = OBJ.get(nm) or bpy.data.objects.get(nm)
+            if ob is None:
+                print("WARN anim: không có", nm)
+                continue
+            for k in a["keys"]:
+                fk = f0 + sec(k.get("t", 0))
+                tmax = max(tmax, k.get("t", 0))
+                ez = k.get("ease", a.get("ease", "BEZIER"))
+                if "loc" in k:
+                    L = P3(k["loc"]) if not k.get("rel") else ob.location + Vector(k["loc"])
+                    kf(ob, "location", fk, L, ez)
+                if "rot" in k:
+                    kf(ob, "rotation_euler", fk, tuple(math.radians(r) for r in k["rot"]), ez)
+                if "scale" in k:
+                    sc_ = k["scale"]
+                    kf(ob, "scale", fk, (sc_, sc_, sc_) if isinstance(sc_, (int, float)) else tuple(sc_), ez)
+                if "show" in k:
+                    kf(ob, "hide_render", fk, not k["show"])
+                if "reveal" in k:
+                    kf(ob, "bevel_factor_end", fk, k["reveal"], ez)
+        for nm_, t_ in a.get("sfx_at", []):
+            timeline["events"].append(dict(f=f0 + sec(t_), name=nm_, vol=a.get("sfx_vol", 1.0)))
+        f1 = f0 + sec(a.get("dur", tmax))
+    elif do == "screen":
+        for k in [k for k in OBJ if k.startswith("msg_")]:
+            kf(OBJ[k], "hide_render", f0, k != "msg_" + a["msg"])
+        if a.get("beep", True):
+            timeline["events"].append(dict(f=f0, name="beep", vol=0.7))
+        f1 = f0
+    elif do == "pin":
+        n = a["n"]
+        red, grn = OBJ[f"pin{n}"], OBJ[f"pin{n}_g"]
+        z0 = red.location.z
+        if a["state"] == "lock":
+            kf(red, "hide_render", f0, False)
+            kf(red, "location", f0, red.location + Vector((0, 0, 0.04)))
+            kf(red, "location", f0 + sec(0.12), Vector((red.location.x, red.location.y, z0 - 0.04)), "LINEAR")
+            kf(grn, "hide_render", f0, True)
+            timeline["events"].append(dict(f=f0 + sec(0.12), name="latch", vol=1.0))
+            f1 = f0 + sec(a.get("dur", 0.25))
+        else:
+            kf(red, "hide_render", f0, True)
+            kf(grn, "location", f0, Vector((grn.location.x, grn.location.y, z0)))
+            kf(grn, "hide_render", f0, False)
+            kf(grn, "location", f0 + sec(0.25), Vector((grn.location.x, grn.location.y, z0 + 0.025)))
+            timeline["events"].append(dict(f=f0, name="unlatch", vol=1.0))
+            timeline["events"].append(dict(f=f0 + sec(0.25), name="beep2", vol=0.6))
+            f1 = f0 + sec(a.get("dur", 0.6))
+    elif do == "knock":
+        # hai đầu gối gõ "cộc cộc": nhún nhanh theo nhịp, tiếng gỗ
+        cnt, per = a.get("count", 3), a.get("period", 0.3)
+        f1 = f0 + sec(cnt * per)
+        for f in range(f0, min(f1, MAXF - 1)):
+            ph = ((f - f0) / FPS) / per
+            A.hips_extra[f] = A.hips_extra[f] + Vector((0, 0, -0.055 * A.S * abs(math.sin(math.pi * ph))))
+        for i in range(cnt):
+            timeline["events"].append(dict(f=f0 + sec(i * per + per * 0.5), name="knock", vol=1.0))
+    elif do == "gian_walk":
+        pts = [P3(p) for p in a["path"]]
+        dur = a.get("dur", 1.5)
+        f1 = f0 + sec(dur)
+        segl = [(pts[i + 1] - pts[i]).length for i in range(len(pts) - 1)]
+        tot = sum(segl) or 1e-6
+        G = OBJ["gian"]
+        prev_yaw = None
+        for f in range(f0, f1 + 1):
+            k = (f - f0) / max(1, f1 - f0)
+            k = ease_io(k) if a.get("ease", True) else k
+            d = k * tot
+            i = 0
+            while i < len(segl) - 1 and d > segl[i]:
+                d -= segl[i]
+                i += 1
+            u = d / max(1e-6, segl[i])
+            p = pts[i].lerp(pts[i + 1], min(1, u))
+            dv = pts[i + 1] - pts[i]
+            yaw = math.atan2(dv.y, dv.x) if dv.length > 1e-6 else (prev_yaw or 0)
+            prev_yaw = yaw
+            p = p + Vector((0, 0, 0.0012 * abs(math.sin(f * 1.7))))
+            kf(G, "location", f, p, "LINEAR")
+            kf(G, "rotation_euler", f, (0, 0, yaw), "LINEAR")
+            for (pv, li, sd) in GIAN["legs"]:
+                ph = f * 1.9 + (0 if (li + (sd > 0)) % 2 else math.pi)
+                kf(pv, "rotation_euler", f, (0, 0, math.radians(28) * math.sin(ph)), "LINEAR")
+        for (pv, li, sd) in GIAN["legs"]:
+            kf(pv, "rotation_euler", f1 + 1, (0, 0, 0))
+        step = max(2, sec(0.09))
+        for f in range(f0, f1, step):
+            timeline["events"].append(dict(f=f, name="metalstep", vol=0.55))
+        if a.get("face_end") is not None:
+            kf(G, "rotation_euler", f1 + sec(0.3), (0, 0, math.radians(a["face_end"])))
+    elif do == "gian_point":
+        # sáu chân cùng giơ lên chỉ (hoặc hạ xuống khi up = false)
+        up = a.get("up", True)
+        for (pv, li, sd) in GIAN["legs"]:
+            kf(pv, "rotation_euler", f0, tuple(pv.rotation_euler))
+            kf(pv, "rotation_euler", f0 + sec(0.3), (math.radians(-sd * 70) if up else 0, 0, math.radians(a.get("aim", 0)) if up else 0))
+        timeline["events"].append(dict(f=f0, name="boing" if up else "click", vol=0.6))
+        f1 = f0 + sec(a.get("dur", 0.4))
+    elif do == "bell":
+        B = OBJ["bell"]
+        for i in range(6):
+            kf(B, "rotation_euler", f0 + i * 2, (0, 0, math.radians(25 if i % 2 else -25)), "LINEAR")
+        kf(B, "rotation_euler", f0 + 12, (0, 0, 0))
+        timeline["events"].append(dict(f=f0, name="bike_bell", vol=a.get("vol", 1.0)))
+        f1 = f0 + sec(a.get("dur", 1.2))
+    elif do == "attach":
+        ATTACH.append(dict(obj=OBJ.get(a["target"]) or bpy.data.objects.get(a["target"]), who=who, f=f0, off=a.get("head_offset", [0, 0.97, -0.38]), detach=a.get("detach")))
+        f1 = f0
+    elif do == "reach":
+        # với tay tới điểm [x,y,z] (bấm nút, lau bánh, chụp đồ…)
+        side = a.get("hand", "R")
+        tgt = P3(a["at"])
+        f1 = f0 + sec(a.get("dur", 1.0))
+        A.reach(f0, f1, side, lambda f, t=tgt: t, fin=a.get("fin", 0.35), fout=a.get("fout", 0.35), crouch=a.get("crouch", 0.05), lean=a.get("lean", 0.15))
+        if a.get("tap"):
+            A.events.append((f0 + sec(a.get("fin", 0.35)), "tap", {"who": who}))
     elif do == "wait":
         f1 = f0 + sec(a.get("dur", 1.0))
     elif do == "sfx":
@@ -246,7 +431,7 @@ for idx, a in enumerate(prod["actions"]):
     if a.get("cam"):
         c = a["cam"] if isinstance(a["cam"], dict) else {"preset": a["cam"]}
         shots.append(dict(f0=f0 + sec(c.get("offset", 0)), preset=c["preset"], subject=c.get("subject", who), over={k: v for k, v in c.items() if k not in ("preset", "subject", "offset")}))
-    timeline["actions"].append(dict(i=idx, do=do, who=who, f0=f0, f1=f1))
+    timeline["actions"].append(dict(i=idx, do=do, who=who, f0=f0, f1=f1, mark=a.get("mark")))
     prev_start = f0
     if not a.get("with"):
         cursor = max(cursor, f1 + sec(a.get("gap", 0.15)))
@@ -345,6 +530,28 @@ for pid, P in props.items():
             Bk.add("rotation_quaternion", i, f + 1, r[i])
     Bk.write()
 
+# ---------------- gắn đồ lên đầu nhân vật (ria dây…) ----------------
+for at in ATTACH:
+    ob, cid, f = at["obj"], at["who"], at["f"]
+    arm = arms[cid]
+    sc.frame_set(f + 1)
+    pb = arm.pose.bones["head"]
+    Hm = arm.matrix_world @ pb.matrix
+    Rh = sm_rig.P["head_r"] * float(arm.get("sm_scale", 1.0))
+    up = Hm.col[1].xyz.normalized()
+    ctr = Hm.translation + up * (0.95 * Rh)
+    yaw = actors[cid].yaw[f]
+    fwd = -yaw_vec(yaw) if False else yaw_vec(yaw)
+    o = at["off"]
+    pos = ctr + fwd * (o[1] * Rh) + up * (o[2] * Rh) + Vector((math.cos(yaw), math.sin(yaw), 0)) * (o[0] * Rh)
+    ob.matrix_world = Matrix.Translation(pos) @ Matrix.Rotation(yaw, 4, "Z")
+    c = ob.constraints.new("CHILD_OF")
+    c.target, c.subtarget = arm, "head"
+    c.inverse_matrix = Hm.inverted()
+    kf(ob, "hide_render", f + 1, False)
+    if at.get("detach") is not None:
+        kf(ob, "hide_render", at["detach"] + 1, True)
+
 # ---------------- QA: trượt chân, xuyên sàn ----------------
 for cid, A in actors.items():
     arm = arms[cid]
@@ -363,10 +570,18 @@ for cid, A in actors.items():
     qa["floor_penetration_mm"] = max(qa["floor_penetration_mm"], pen * 1000)
 
 # ---------------- ánh sáng, hiệu ứng, render ----------------
-sm_cine.light_classroom(anchors) if env_name == "classroom" else None
+sm_cine.light_classroom(anchors) if env_name == "classroom" else (sm_canteen.light_canteen() if env_name == "canteen" else None)
 if prod.get("dust", True) and env_name == "classroom":
     sm_env.dust_motes(Vector((-3.6, -1.2, 1.7)), (1.8, 4.5, 1.6), count=160)
 sm_cine.setup_render(QUAL, FPS, NF)
+if env_name == "canteen":
+    # hoạt hình: màu tươi, tương phản vừa (AgX làm nhạt màu đồ ăn)
+    sc.view_settings.view_transform = "Standard"
+    try:
+        sc.view_settings.look = "Medium Contrast"
+    except Exception:
+        pass
+    sc.view_settings.exposure = -1.0
 sc.frame_set(1)
 timeline["nframes"] = NF
 timeline["qa"] = qa

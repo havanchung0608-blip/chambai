@@ -117,10 +117,10 @@ def make(a):
         spoken, shown = vi_speech.to_speech(act["text"])
         act["_spoken"], act["_shown"] = act.get("speak", spoken), shown
         ch = film["characters"][act["who"]]
-        key = hashlib.md5(f"{act['_spoken']}|{ch.get('voice')}|{ch.get('ref_audio')}".encode()).hexdigest()[:10]
+        key = hashlib.md5(f"{act['_spoken']}|{ch.get('voice')}|{ch.get('ref_audio')}|{ch.get('speed')}|{ch.get('pitch')}".encode()).hexdigest()[:10]
         act["_wav_key"] = key
         if not list((out / "voice").glob(f"{key}.*")):
-            jobs.append(dict(id=key, text=act["_spoken"], voice=ch.get("voice", "Ngọc Huyền"), ref_audio=ch.get("ref_audio"), gender=ch.get("gender", "nu")))
+            jobs.append(dict(id=key, text=act["_spoken"], voice=ch.get("voice", "Ngọc Huyền"), ref_audio=ch.get("ref_audio"), gender=ch.get("gender", "nu"), speed=ch.get("speed"), pitch=ch.get("pitch")))
     if jobs:
         jf = out / "voice" / "jobs.json"
         jf.write_text(json.dumps(jobs, ensure_ascii=False), encoding="utf-8")
@@ -266,7 +266,7 @@ if __name__ == "__main__":
     m = sub.add_parser("make")
     m.add_argument("film")
     m.add_argument("--out", required=True)
-    m.add_argument("--quality", default="cpu", choices=["draft", "cpu", "hd", "4k"])
+    m.add_argument("--quality", default="cpu", choices=["draft", "cpu", "cpu_fast", "hd", "4k"])
     m.add_argument("--fps", type=int, default=0)
     m.add_argument("--size", default="1920x1080")
     m.add_argument("--tts", default="vieneu", choices=["vieneu", "edge", "piper"])

@@ -1,0 +1,2967 @@
+{
+ "title": "Phi vụ giải cứu bánh tráng trứng",
+ "file": "banh-trang-trung-3d",
+ "fps": 24,
+ "environment": "canteen",
+ "music": null,
+ "max_seconds": 400,
+ "tail": 0.5,
+ "gian_start": [
+  0.25,
+  1.12,
+  0.95
+ ],
+ "characters": {
+  "ti": {
+   "name": "Tí Que",
+   "voice": "Đức Trí",
+   "speed": 1.12,
+   "start": [
+    -0.62,
+    0.8
+   ],
+   "heading": 2.7481420156608576,
+   "spec": {
+    "shirt": "#e3f2fd",
+    "pants": "#1565c0",
+    "scarf": "#e53935",
+    "hair": "short",
+    "hair_color": "#212121",
+    "scale": 0.85
+   }
+  },
+  "co": {
+   "name": "Cô Bảy",
+   "voice": "Thục Đoan",
+   "speed": 0.92,
+   "start": [
+    0.75,
+    2.15
+   ],
+   "heading": 0.0,
+   "spec": {
+    "shirt": "#f48fb1",
+    "apron": "#ffffff",
+    "hair": "bun",
+    "hair_color": "#4e342e",
+    "scale": 1.0
+   }
+  },
+  "may": {
+   "name": "Máy Nướng 3.14",
+   "voice": "Mai Anh",
+   "speed": 0.97,
+   "start": [
+    0,
+    40
+   ],
+   "spec": {
+    "hidden": true
+   }
+  },
+  "gps": {
+   "name": "Giọng bản đồ",
+   "voice": "Ngọc Huyền",
+   "start": [
+    3,
+    40
+   ],
+   "spec": {
+    "hidden": true
+   }
+  },
+  "gian_v": {
+   "name": "Gián Điện",
+   "voice": "Thiền Tâm Đức",
+   "speed": 0.9,
+   "pitch": -3.0,
+   "start": [
+    6,
+    40
+   ],
+   "spec": {
+    "hidden": true
+   }
+  }
+ },
+ "actions": [
+  {
+   "do": "wait",
+   "dur": 0.0,
+   "mark": "S1",
+   "cam": {
+    "preset": "establishing_wide",
+    "subject": [
+     "ti",
+     "co"
+    ],
+    "dist": 6.5,
+    "h": 1.6
+   }
+  },
+  {
+   "do": "sfx",
+   "name": "crowd",
+   "vol": 0.35,
+   "len": 6.0
+  },
+  {
+   "do": "sfx",
+   "name": "sizzle",
+   "vol": 0.5,
+   "dur": 3.0
+  },
+  {
+   "do": "wait",
+   "dur": 2.2
+  },
+  {
+   "do": "wait",
+   "dur": 0.0,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.03,
+     1.22,
+     1.3
+    ],
+    "dist": 0.5,
+    "h": 0.1,
+    "az": 60,
+    "lens": 50,
+    "fstop": 5.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "m_drop_mesh",
+   "keys": [
+    {
+     "t": 0.0,
+     "show": true
+    }
+   ]
+  },
+  {
+   "do": "anim",
+   "target": "m_drop_mesh",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      0.01,
+      1.33,
+      1.38
+     ]
+    },
+    {
+     "t": 1.2,
+     "loc": [
+      -0.03,
+      1.185,
+      1.378
+     ],
+     "ease": "LINEAR"
+    }
+   ]
+  },
+  {
+   "do": "reach",
+   "who": "ti",
+   "at": [
+    -0.16,
+    1.18,
+    1.36
+   ],
+   "dur": 1.6,
+   "fin": 0.5,
+   "with": true,
+   "offset": 0.4,
+   "extend": false
+  },
+  {
+   "do": "anim",
+   "target": "m_drop_mesh",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      -0.03,
+      1.185,
+      1.378
+     ]
+    },
+    {
+     "t": 0.22,
+     "loc": [
+      -0.05,
+      1.16,
+      1.3
+     ]
+    },
+    {
+     "t": 0.45,
+     "loc": [
+      -0.08,
+      1.158,
+      1.19
+     ],
+     "ease": "LINEAR"
+    }
+   ]
+  },
+  {
+   "do": "anim",
+   "target": "btn_crisp",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      -0.08,
+      1.16,
+      1.17
+     ]
+    },
+    {
+     "t": 0.06,
+     "loc": [
+      -0.08,
+      1.168,
+      1.17
+     ]
+    },
+    {
+     "t": 0.25,
+     "loc": [
+      -0.08,
+      1.16,
+      1.17
+     ]
+    }
+   ],
+   "sfx_at": [
+    [
+     "click",
+     0.0
+    ],
+    [
+     "beep2",
+     0.05
+    ]
+   ]
+  },
+  {
+   "do": "anim",
+   "target": "m_drop_mesh",
+   "keys": [
+    {
+     "t": 0.1,
+     "show": false
+    }
+   ]
+  },
+  {
+   "do": "anim",
+   "target": "lid",
+   "keys": [
+    {
+     "t": 0,
+     "rot": [
+      -70,
+      0,
+      0
+     ]
+    },
+    {
+     "t": 0.16,
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "ease": "LINEAR"
+    }
+   ],
+   "sfx_at": [
+    [
+     "slam",
+     0.16
+    ]
+   ],
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.3,
+     1.15,
+     1.22
+    ],
+    "dist": 0.8,
+    "h": 0.15,
+    "az": 55,
+    "lens": 42,
+    "fstop": 6.0
+   }
+  },
+  {
+   "do": "pin",
+   "n": 55,
+   "state": "lock",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.45,
+     1.08,
+     1.16
+    ],
+    "dist": 0.55,
+    "h": 0.06,
+    "az": 45,
+    "lens": 45,
+    "fstop": 7.0
+   }
+  },
+  {
+   "do": "pin",
+   "n": 56,
+   "state": "lock"
+  },
+  {
+   "do": "pin",
+   "n": 57,
+   "state": "lock"
+  },
+  {
+   "do": "pin",
+   "n": 58,
+   "state": "lock"
+  },
+  {
+   "do": "pin",
+   "n": 59,
+   "state": "lock"
+  },
+  {
+   "do": "wait",
+   "dur": 0.4
+  },
+  {
+   "do": "screen",
+   "msg": "forever",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.04,
+     1.16,
+     1.27
+    ],
+    "dist": 0.45,
+    "h": 0.03,
+    "az": 25,
+    "lens": 50,
+    "fstop": 6.0
+   }
+  },
+  {
+   "do": "say",
+   "who": "may",
+   "text": "Quý khách vừa chọn độ giòn... vĩnh viễn.",
+   "sub": "Quý khách vừa chọn độ giòn… vĩnh viễn."
+  },
+  {
+   "do": "turn",
+   "who": "ti",
+   "face": "camera",
+   "dur": 0.4,
+   "cam": {
+    "preset": "close_up",
+    "subject": "ti",
+    "az": 0
+   }
+  },
+  {
+   "do": "say",
+   "who": "ti",
+   "text": "Cô Bảy, con thề con chưa đụng cái nút!",
+   "gesture": "shrug",
+   "emotion": {
+    "brow_up": 0.8,
+    "mouth_O": 0.3
+   }
+  },
+  {
+   "do": "knock",
+   "who": "ti",
+   "count": 3,
+   "period": 0.32,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.62,
+     0.8,
+     0.42
+    ],
+    "dist": 1.1,
+    "h": 0.05,
+    "az": 20,
+    "lens": 40,
+    "fstop": 4.0
+   }
+  },
+  {
+   "do": "wait",
+   "dur": 0.3
+  },
+  {
+   "do": "turn",
+   "who": "co",
+   "face": [
+    -0.62,
+    0.8
+   ],
+   "dur": 0.5,
+   "cam": {
+    "preset": "medium_close",
+    "subject": "co",
+    "az": -35
+   }
+  },
+  {
+   "do": "say",
+   "who": "co",
+   "text": "Miệng con nói xong rồi. Hai cái đầu gối... còn muốn khai thêm kìa.",
+   "emotion": {
+    "smile": 0.5
+   }
+  },
+  {
+   "do": "turn",
+   "who": "ti",
+   "face": [
+    0.3,
+    2.0
+   ],
+   "dur": 0.4,
+   "cam": {
+    "preset": "wide",
+    "subject": [
+     "ti",
+     "co"
+    ],
+    "dist": 4.2,
+    "h": 0.9
+   }
+  },
+  {
+   "do": "anim",
+   "target": "wire_reel",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      0.55,
+      1.45,
+      0.98
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ]
+    },
+    {
+     "t": 0.4,
+     "loc": [
+      0.15,
+      1.1,
+      1.55
+     ],
+     "rot": [
+      90,
+      0,
+      360
+     ]
+    },
+    {
+     "t": 0.85,
+     "loc": [
+      -0.57,
+      0.98,
+      1.0
+     ],
+     "rot": [
+      90,
+      0,
+      720
+     ]
+    }
+   ],
+   "sfx_at": [
+    [
+     "swish",
+     0.0
+    ],
+    [
+     "grab",
+     0.85
+    ]
+   ],
+   "cam": {
+    "preset": "wide",
+    "subject": [
+     "ti",
+     "co"
+    ],
+    "dist": 4.2,
+    "h": 0.9
+   }
+  },
+  {
+   "do": "gesture",
+   "who": "ti",
+   "name": "cheer",
+   "dur": 1.2,
+   "with": true,
+   "offset": 0.7
+  },
+  {
+   "do": "wait",
+   "dur": 0.6
+  },
+  {
+   "do": "wait",
+   "dur": 0.0,
+   "mark": "S2",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.04,
+     1.16,
+     1.27
+    ],
+    "dist": 0.45,
+    "h": 0.03,
+    "az": 25,
+    "lens": 50,
+    "fstop": 6.0
+   }
+  },
+  {
+   "do": "screen",
+   "msg": "p55"
+  },
+  {
+   "do": "say",
+   "who": "may",
+   "text": "Chốt năm mươi lăm. Vui lòng quấn dây cách nhiệt đúng một vòng mép bánh.",
+   "sub": "Chốt 55: quấn dây đúng một vòng mép bánh."
+  },
+  {
+   "do": "reach",
+   "who": "ti",
+   "at": [
+    -0.35000000000000003,
+    1.21,
+    1.225
+   ],
+   "dur": 2.4,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.31,
+     1.145
+    ],
+    "dist": 0.45,
+    "h": 0.25,
+    "az": 45,
+    "lens": 48,
+    "fstop": 9.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "radius_wire",
+   "keys": [
+    {
+     "t": 0,
+     "reveal": 0.0
+    },
+    {
+     "t": 1.0,
+     "reveal": 1.0
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "say",
+   "who": "ti",
+   "text": "Từ tâm ra mép mười xen-ti-mét. Vậy cắt mười xen-ti-mét dây là đủ!",
+   "sub": "Từ tâm ra mép 10 cm. Cắt 10 cm dây là đủ!",
+   "cam": {
+    "preset": "medium_close",
+    "subject": "ti",
+    "az": 25
+   }
+  },
+  {
+   "do": "reach",
+   "who": "ti",
+   "at": [
+    -0.45,
+    1.21,
+    1.225
+   ],
+   "dur": 1.8,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.33,
+     1.145
+    ],
+    "dist": 0.3,
+    "h": 0.42,
+    "az": 50,
+    "lens": 42,
+    "fstop": 11.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "short_wire",
+   "keys": [
+    {
+     "t": 0,
+     "reveal": 0.0
+    },
+    {
+     "t": 1.2,
+     "reveal": 1.0
+    }
+   ],
+   "sfx_at": [
+    [
+     "chalk",
+     0.0
+    ]
+   ]
+  },
+  {
+   "do": "say",
+   "who": "ti",
+   "text": "Ủa... sao hụt xa vậy?",
+   "sub": "Ủa… sao hụt xa vậy?",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.33,
+     1.145
+    ],
+    "dist": 0.3,
+    "h": 0.42,
+    "az": 50,
+    "lens": 42,
+    "fstop": 11.0
+   }
+  },
+  {
+   "do": "reach",
+   "who": "ti",
+   "at": [
+    -0.6000000000000001,
+    0.8800000000000001,
+    1.245
+   ],
+   "dur": 0.6,
+   "fin": 0.15,
+   "cam": {
+    "preset": "medium_close",
+    "subject": "ti",
+    "az": 25
+   }
+  },
+  {
+   "do": "anim",
+   "target": "short_wire",
+   "keys": [
+    {
+     "t": 0.0,
+     "show": false
+    }
+   ],
+   "sfx_at": [
+    [
+     "pluck",
+     0.0
+    ],
+    [
+     "boing",
+     0.08
+    ]
+   ]
+  },
+  {
+   "do": "attach",
+   "who": "ti",
+   "target": "ria",
+   "head_offset": [
+    0,
+    0.98,
+    -0.42
+   ],
+   "with": true
+  },
+  {
+   "do": "turn",
+   "who": "ti",
+   "face": "camera",
+   "dur": 0.35,
+   "cam": {
+    "preset": "close_up",
+    "subject": "ti",
+    "az": 0
+   }
+  },
+  {
+   "do": "emote",
+   "who": "ti",
+   "keys": {
+    "brow_up": 1.0,
+    "mouth_O": 0.7
+   },
+   "dur": 1.2
+  },
+  {
+   "do": "turn",
+   "who": "co",
+   "face": [
+    -0.62,
+    0.8
+   ],
+   "dur": 0.3,
+   "cam": {
+    "preset": "medium_close",
+    "subject": "co",
+    "az": -35
+   }
+  },
+  {
+   "do": "say",
+   "who": "co",
+   "text": "Mười phân là từ tâm ra mép. Con tính lấy đoạn từ nhà ra đầu hẻm... mà quấn nguyên cái xóm hả?",
+   "sub": "Mười phân là từ tâm ra mép. Con tính quấn nguyên cái xóm hả?",
+   "emotion": {
+    "brow_up": 0.4,
+    "smile": 0.3
+   }
+  },
+  {
+   "do": "wait",
+   "dur": 0.5,
+   "cam": {
+    "preset": "close_up",
+    "subject": "ti",
+    "az": 0
+   }
+  },
+  {
+   "do": "wait",
+   "dur": 0.0,
+   "mark": "S3",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.45,
+     1.08,
+     1.16
+    ],
+    "dist": 0.55,
+    "h": 0.06,
+    "az": 45,
+    "lens": 45,
+    "fstop": 7.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "ria",
+   "keys": [
+    {
+     "t": 0,
+     "show": false
+    }
+   ]
+  },
+  {
+   "do": "turn",
+   "who": "ti",
+   "face": [
+    -0.4,
+    1.33
+   ],
+   "dur": 0.01
+  },
+  {
+   "do": "pin",
+   "n": 55,
+   "state": "open"
+  },
+  {
+   "do": "screen",
+   "msg": "p56",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.04,
+     1.16,
+     1.27
+    ],
+    "dist": 0.45,
+    "h": 0.03,
+    "az": 25,
+    "lens": 50,
+    "fstop": 6.0
+   }
+  },
+  {
+   "do": "say",
+   "who": "may",
+   "text": "Chốt năm mươi sáu. Hàn kín phần mép cong giữa hai điểm A và B.",
+   "sub": "Chốt 56: hàn mép cong giữa hai điểm A và B."
+  },
+  {
+   "do": "gian_walk",
+   "path": [
+    [
+     0.25,
+     1.12,
+     0.95
+    ],
+    [
+     -0.18,
+     1.04,
+     0.95
+    ],
+    [
+     -0.18,
+     1.04,
+     1.13
+    ],
+    [
+     -0.3,
+     1.18,
+     1.135
+    ],
+    [
+     -0.47071067811865475,
+     1.2592893218813452,
+     1.147
+    ]
+   ],
+   "dur": 3.0,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.1,
+     1.1,
+     1.03
+    ],
+    "dist": 0.7,
+    "h": 0.15,
+    "az": 30,
+    "lens": 45,
+    "fstop": 6.0
+   }
+  },
+  {
+   "do": "sfx",
+   "name": "beep2",
+   "vol": 0.8
+  },
+  {
+   "do": "gian_walk",
+   "path": [
+    [
+     -0.47071067811865475,
+     1.2592893218813452,
+     1.147
+    ],
+    [
+     -0.32928932188134524,
+     1.2592893218813452,
+     1.147
+    ]
+   ],
+   "dur": 1.6,
+   "ease": false,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.3,
+     1.155
+    ],
+    "dist": 0.32,
+    "h": 0.14,
+    "az": 45,
+    "lens": 50,
+    "fstop": 9.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "foot_0_-1",
+   "keys": [
+    {
+     "t": 0.05,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_0_1",
+   "keys": [
+    {
+     "t": 0.05,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_1_-1",
+   "keys": [
+    {
+     "t": 0.16999999999999998,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_1_1",
+   "keys": [
+    {
+     "t": 0.16999999999999998,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_2_-1",
+   "keys": [
+    {
+     "t": 0.29,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_2_1",
+   "keys": [
+    {
+     "t": 0.29,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_3_-1",
+   "keys": [
+    {
+     "t": 0.41,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_3_1",
+   "keys": [
+    {
+     "t": 0.41,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_4_-1",
+   "keys": [
+    {
+     "t": 0.53,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_4_1",
+   "keys": [
+    {
+     "t": 0.53,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_5_-1",
+   "keys": [
+    {
+     "t": 0.65,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_5_1",
+   "keys": [
+    {
+     "t": 0.65,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_6_-1",
+   "keys": [
+    {
+     "t": 0.77,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_6_1",
+   "keys": [
+    {
+     "t": 0.77,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_7_-1",
+   "keys": [
+    {
+     "t": 0.89,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_7_1",
+   "keys": [
+    {
+     "t": 0.89,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_8_-1",
+   "keys": [
+    {
+     "t": 1.01,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_8_1",
+   "keys": [
+    {
+     "t": 1.01,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_9_-1",
+   "keys": [
+    {
+     "t": 1.1300000000000001,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_9_1",
+   "keys": [
+    {
+     "t": 1.1300000000000001,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_10_-1",
+   "keys": [
+    {
+     "t": 1.25,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_10_1",
+   "keys": [
+    {
+     "t": 1.25,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_11_-1",
+   "keys": [
+    {
+     "t": 1.3699999999999999,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "foot_11_1",
+   "keys": [
+    {
+     "t": 1.3699999999999999,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "say",
+   "who": "gps",
+   "text": "Bạn đã đến nơi.",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.33,
+     1.145
+    ],
+    "dist": 0.3,
+    "h": 0.42,
+    "az": 50,
+    "lens": 42,
+    "fstop": 11.0
+   }
+  },
+  {
+   "do": "turn",
+   "who": "ti",
+   "face": "camera",
+   "dur": 0.3,
+   "cam": {
+    "preset": "close_up",
+    "subject": "ti",
+    "az": 0
+   }
+  },
+  {
+   "do": "say",
+   "who": "ti",
+   "text": "Đúng địa chỉ. Sai nguyên con đường!",
+   "gesture": "facepalm"
+  },
+  {
+   "do": "walk",
+   "who": "co",
+   "to": [
+    [
+     -0.05,
+     1.95
+    ]
+   ],
+   "face": [
+    -0.4,
+    1.33
+   ],
+   "cam": {
+    "preset": "medium",
+    "subject": "co",
+    "az": -30
+   }
+  },
+  {
+   "do": "reach",
+   "who": "co",
+   "at": [
+    -0.4,
+    1.31,
+    1.175
+   ],
+   "dur": 1.6,
+   "hand": "R",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.31,
+     1.145
+    ],
+    "dist": 0.45,
+    "h": 0.25,
+    "az": 45,
+    "lens": 48,
+    "fstop": 9.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": [
+    "foot_0_-1",
+    "foot_0_1",
+    "foot_1_-1",
+    "foot_1_1",
+    "foot_2_-1",
+    "foot_2_1",
+    "foot_3_-1",
+    "foot_3_1",
+    "foot_4_-1",
+    "foot_4_1",
+    "foot_5_-1",
+    "foot_5_1",
+    "foot_6_-1",
+    "foot_6_1",
+    "foot_7_-1",
+    "foot_7_1",
+    "foot_8_-1",
+    "foot_8_1",
+    "foot_9_-1",
+    "foot_9_1",
+    "foot_10_-1",
+    "foot_10_1",
+    "foot_11_-1",
+    "foot_11_1"
+   ],
+   "keys": [
+    {
+     "t": 0.4,
+     "show": false
+    }
+   ],
+   "sfx_at": [
+    [
+     "spray",
+     0.2
+    ]
+   ],
+   "with": true
+  },
+  {
+   "do": "wait",
+   "dur": 0.4
+  },
+  {
+   "do": "wait",
+   "dur": 0.0,
+   "mark": "S4",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.45,
+     1.08,
+     1.16
+    ],
+    "dist": 0.55,
+    "h": 0.06,
+    "az": 45,
+    "lens": 45,
+    "fstop": 7.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "weld_arc",
+   "keys": [
+    {
+     "t": 0,
+     "reveal": 1.0
+    }
+   ]
+  },
+  {
+   "do": "pin",
+   "n": 56,
+   "state": "open"
+  },
+  {
+   "do": "screen",
+   "msg": "p57",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.04,
+     1.16,
+     1.27
+    ],
+    "dist": 0.45,
+    "h": 0.03,
+    "az": 25,
+    "lens": 50,
+    "fstop": 6.0
+   }
+  },
+  {
+   "do": "say",
+   "who": "may",
+   "text": "Chốt năm mươi bảy. Vui lòng khai báo phần mặt bánh cần phủ trứng.",
+   "sub": "Chốt 57: khai báo phần mặt bánh cần phủ trứng."
+  },
+  {
+   "do": "say",
+   "who": "ti",
+   "text": "Dễ! Con bấm lại chế độ vừa dùng!",
+   "sub": "Dễ! Bấm lại chế độ vừa dùng!",
+   "cam": {
+    "preset": "medium_close",
+    "subject": "ti",
+    "az": 25
+   }
+  },
+  {
+   "do": "walk",
+   "who": "ti",
+   "to": [
+    [
+     -0.28,
+     0.8
+    ]
+   ],
+   "face": [
+    -0.4,
+    1.33
+   ],
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.3,
+     1.15,
+     1.22
+    ],
+    "dist": 0.8,
+    "h": 0.15,
+    "az": 55,
+    "lens": 42,
+    "fstop": 6.0
+   }
+  },
+  {
+   "do": "reach",
+   "who": "ti",
+   "at": [
+    -0.08,
+    1.15,
+    1.17
+   ],
+   "dur": 1.0,
+   "tap": true
+  },
+  {
+   "do": "sfx",
+   "name": "beep"
+  },
+  {
+   "do": "anim",
+   "target": "egg_ring",
+   "keys": [
+    {
+     "t": 0.3,
+     "show": true
+    }
+   ],
+   "sfx_at": [
+    [
+     "spray",
+     0.0
+    ],
+    [
+     "sizzle",
+     0.2
+    ]
+   ],
+   "dur": 1.6,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.33,
+     1.145
+    ],
+    "dist": 0.3,
+    "h": 0.42,
+    "az": 50,
+    "lens": 42,
+    "fstop": 11.0
+   }
+  },
+  {
+   "do": "walk",
+   "who": "ti",
+   "to": [
+    [
+     -0.62,
+     0.8
+    ]
+   ],
+   "face": [
+    -0.4,
+    1.33
+   ],
+   "gait": "back",
+   "with": true,
+   "extend": false
+  },
+  {
+   "do": "wait",
+   "dur": 0.8
+  },
+  {
+   "do": "reach",
+   "who": "co",
+   "at": [
+    -0.4,
+    1.27,
+    1.42
+   ],
+   "dur": 4.6,
+   "hand": "R",
+   "cam": {
+    "preset": "medium",
+    "subject": "co",
+    "az": -30
+   }
+  },
+  {
+   "do": "anim",
+   "target": "banh",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      -0.4,
+      1.33,
+      1.145
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "t": 0.6,
+     "loc": [
+      -0.4,
+      1.27,
+      1.42
+     ],
+     "rot": [
+      -62,
+      0,
+      0
+     ]
+    },
+    {
+     "t": 4.0,
+     "loc": [
+      -0.4,
+      1.27,
+      1.42
+     ],
+     "rot": [
+      -62,
+      0,
+      0
+     ]
+    },
+    {
+     "t": 4.6,
+     "loc": [
+      -0.4,
+      1.33,
+      1.145
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ]
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "say",
+   "who": "co",
+   "text": "Bánh này mà bán, chắc cô phải dặn khách cắn vòng vòng. Cắn vô giữa... là lộ.",
+   "sub": "Bánh này mà bán, cô phải dặn khách cắn vòng vòng!",
+   "offset": 0.6,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.27,
+     1.42
+    ],
+    "dist": 0.9,
+    "h": 0.05,
+    "az": 10,
+    "lens": 40,
+    "fstop": 5.0
+   },
+   "with": true
+  },
+  {
+   "do": "wait",
+   "dur": 0.4,
+   "cam": {
+    "preset": "medium_close",
+    "subject": "ti",
+    "az": 25
+   }
+  },
+  {
+   "do": "wait",
+   "dur": 0.0,
+   "mark": "S5",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.45,
+     1.08,
+     1.16
+    ],
+    "dist": 0.55,
+    "h": 0.06,
+    "az": 45,
+    "lens": 45,
+    "fstop": 7.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "egg_ring",
+   "keys": [
+    {
+     "t": 0,
+     "show": false
+    }
+   ]
+  },
+  {
+   "do": "anim",
+   "target": [
+    "egg_full",
+    "banh_dot0",
+    "banh_dot1",
+    "banh_dot2",
+    "banh_dot3",
+    "banh_dot4",
+    "banh_dot5",
+    "banh_dot6",
+    "banh_dot7",
+    "banh_dot8",
+    "banh_dot9",
+    "banh_dot10",
+    "banh_dot11",
+    "banh_dot12",
+    "banh_dot13",
+    "banh_dot14",
+    "banh_dot15",
+    "banh_dot16",
+    "banh_dot17"
+   ],
+   "keys": [
+    {
+     "t": 0,
+     "show": true
+    }
+   ]
+  },
+  {
+   "do": "pin",
+   "n": 57,
+   "state": "open"
+  },
+  {
+   "do": "screen",
+   "msg": "p58",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.04,
+     1.16,
+     1.27
+    ],
+    "dist": 0.45,
+    "h": 0.03,
+    "az": 25,
+    "lens": 50,
+    "fstop": 6.0
+   }
+  },
+  {
+   "do": "say",
+   "who": "co",
+   "text": "Giờ rưới tương kín một miếng hình quạt, góc ở tâm chín mươi độ.",
+   "sub": "Rưới tương kín miếng hình quạt 90°.",
+   "cam": {
+    "preset": "medium_close",
+    "subject": "co",
+    "az": -35
+   }
+  },
+  {
+   "do": "say",
+   "who": "ti",
+   "text": "Dạ! Con chọn lại năm pi xen-ti-mét nha cô!",
+   "sub": "Con chọn lại 5π cm nha cô!",
+   "cam": {
+    "preset": "medium_close",
+    "subject": "ti",
+    "az": 25
+   }
+  },
+  {
+   "do": "reach",
+   "who": "ti",
+   "at": [
+    -0.08,
+    1.15,
+    1.17
+   ],
+   "dur": 2.6,
+   "fin": 0.5,
+   "with": true,
+   "extend": false
+  },
+  {
+   "do": "gian_walk",
+   "path": [
+    [
+     -0.32928932188134524,
+     1.2592893218813452,
+     1.147
+    ],
+    [
+     -0.47071067811865475,
+     1.2592893218813452,
+     1.147
+    ]
+   ],
+   "dur": 0.8,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.3,
+     1.155
+    ],
+    "dist": 0.32,
+    "h": 0.14,
+    "az": 45,
+    "lens": 50,
+    "fstop": 9.0
+   }
+  },
+  {
+   "do": "gian_walk",
+   "path": [
+    [
+     -0.46858935777509514,
+     1.261410642224905,
+     1.147
+    ],
+    [
+     -0.4570151694723699,
+     1.2515253515456302,
+     1.147
+    ],
+    [
+     -0.44403707847473606,
+     1.2435723671537284,
+     1.147
+    ],
+    [
+     -0.4299746484543699,
+     1.2377475179193702,
+     1.147
+    ],
+    [
+     -0.41517414310890244,
+     1.2341942309622718,
+     1.147
+    ],
+    [
+     -0.4,
+     1.233,
+     1.147
+    ],
+    [
+     -0.3848258568910976,
+     1.2341942309622718,
+     1.147
+    ],
+    [
+     -0.3700253515456301,
+     1.2377475179193702,
+     1.147
+    ],
+    [
+     -0.355962921525264,
+     1.2435723671537284,
+     1.147
+    ],
+    [
+     -0.3429848305276301,
+     1.2515253515456302,
+     1.147
+    ],
+    [
+     -0.3314106422249049,
+     1.261410642224905,
+     1.147
+    ],
+    [
+     -0.32928932188134524,
+     1.2592893218813452,
+     1.147
+    ]
+   ],
+   "dur": 1.8
+  },
+  {
+   "do": "gian_walk",
+   "path": [
+    [
+     -0.32928932188134524,
+     1.2592893218813452,
+     1.147
+    ],
+    [
+     -0.365,
+     1.245,
+     1.147
+    ]
+   ],
+   "dur": 0.5,
+   "face_end": 135
+  },
+  {
+   "do": "gian_point",
+   "up": true,
+   "aim": 0,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.33,
+     1.145
+    ],
+    "dist": 0.3,
+    "h": 0.42,
+    "az": 50,
+    "lens": 42,
+    "fstop": 11.0
+   }
+  },
+  {
+   "do": "wait",
+   "dur": 0.9
+  },
+  {
+   "do": "say",
+   "who": "ti",
+   "text": "À! Năm pi là đường em vừa bò. Giờ cô muốn ăn tương... nguyên miếng!",
+   "sub": "À! 5π là đường em vừa bò. Cô muốn tương nguyên miếng!",
+   "cam": {
+    "preset": "medium_close",
+    "subject": "ti",
+    "az": 25
+   }
+  },
+  {
+   "do": "gian_point",
+   "up": false
+  },
+  {
+   "do": "wait",
+   "dur": 0.0,
+   "mark": "S6",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.45,
+     1.08,
+     1.16
+    ],
+    "dist": 0.55,
+    "h": 0.06,
+    "az": 45,
+    "lens": 45,
+    "fstop": 7.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "sauce_q",
+   "keys": [
+    {
+     "t": 0,
+     "show": true
+    }
+   ]
+  },
+  {
+   "do": "pin",
+   "n": 58,
+   "state": "open"
+  },
+  {
+   "do": "screen",
+   "msg": "idle",
+   "beep": false,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.04,
+     1.16,
+     1.27
+    ],
+    "dist": 0.45,
+    "h": 0.03,
+    "az": 25,
+    "lens": 50,
+    "fstop": 6.0
+   }
+  },
+  {
+   "do": "say",
+   "who": "may",
+   "text": "Quý khách dùng mấy giọt tương?"
+  },
+  {
+   "do": "say",
+   "who": "ti",
+   "text": "Hai giọt. Nghe kỹ chữ giọt nha!",
+   "sub": "Hai giọt. Nghe kỹ chữ GIỌT nha!",
+   "cam": {
+    "preset": "medium_close",
+    "subject": "ti",
+    "az": 25
+   }
+  },
+  {
+   "do": "anim",
+   "target": "m_drop_mesh",
+   "keys": [
+    {
+     "t": 0.0,
+     "show": true
+    }
+   ],
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.03,
+     1.22,
+     1.3
+    ],
+    "dist": 0.5,
+    "h": 0.1,
+    "az": 60,
+    "lens": 50,
+    "fstop": 5.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "m_drop_mesh",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      0.01,
+      1.33,
+      1.38
+     ]
+    },
+    {
+     "t": 0.6,
+     "loc": [
+      -0.2,
+      1.3,
+      1.36
+     ]
+    },
+    {
+     "t": 1.0,
+     "loc": [
+      -0.38,
+      1.31,
+      1.15
+     ],
+     "ease": "LINEAR"
+    }
+   ],
+   "sfx_at": [
+    [
+     "plop",
+     1.0
+    ]
+   ],
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.31,
+     1.145
+    ],
+    "dist": 0.45,
+    "h": 0.25,
+    "az": 45,
+    "lens": 48,
+    "fstop": 9.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "m_drop_mesh",
+   "keys": [
+    {
+     "t": 0.05,
+     "show": false
+    }
+   ]
+  },
+  {
+   "do": "gesture",
+   "who": "ti",
+   "name": "shrug",
+   "dur": 1.0,
+   "cam": {
+    "preset": "medium_close",
+    "subject": "ti",
+    "az": 25
+   }
+  },
+  {
+   "do": "anim",
+   "target": "m_drop2",
+   "keys": [
+    {
+     "t": 0.0,
+     "show": true
+    }
+   ],
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.03,
+     1.22,
+     1.3
+    ],
+    "dist": 0.5,
+    "h": 0.1,
+    "az": 60,
+    "lens": 50,
+    "fstop": 5.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "m_drop2",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      0.01,
+      1.33,
+      1.38
+     ]
+    },
+    {
+     "t": 0.7,
+     "loc": [
+      0.02,
+      1.18,
+      1.37
+     ]
+    },
+    {
+     "t": 1.15,
+     "loc": [
+      0.01,
+      1.162,
+      1.19
+     ],
+     "ease": "LINEAR"
+    }
+   ],
+   "sfx_at": [
+    [
+     "click",
+     1.15
+    ]
+   ]
+  },
+  {
+   "do": "anim",
+   "target": "lid",
+   "keys": [
+    {
+     "t": 0,
+     "rot": [
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "t": 0.12,
+     "rot": [
+      -115,
+      0,
+      0
+     ],
+     "ease": "LINEAR"
+    }
+   ],
+   "sfx_at": [
+    [
+     "boing",
+     0.0
+    ],
+    [
+     "whoosh",
+     0.1
+    ]
+   ],
+   "cam": {
+    "preset": "wide",
+    "subject": [
+     -0.9,
+     0.4,
+     1.95
+    ],
+    "dist": 1.9,
+    "h": -0.2,
+    "az": 30,
+    "lens": 35,
+    "fstop": 8.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "m_drop2",
+   "keys": [
+    {
+     "t": 0.0,
+     "show": false
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "banh",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      -0.4,
+      1.33,
+      1.145
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "t": 0.9,
+     "loc": [
+      -0.8,
+      0.6,
+      2.25
+     ],
+     "rot": [
+      180,
+      40,
+      540
+     ]
+    },
+    {
+     "t": 2.6,
+     "loc": [
+      -1.15,
+      0.0,
+      2.05
+     ],
+     "rot": [
+      250,
+      60,
+      720
+     ],
+     "ease": "LINEAR"
+    }
+   ],
+   "extend": false,
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "sauce_puddle",
+   "keys": [
+    {
+     "t": 0.0,
+     "show": true
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "walk",
+   "who": "ti",
+   "to": [
+    [
+     -0.75,
+     0.45
+    ],
+    [
+     -0.85,
+     0.05
+    ]
+   ],
+   "gait": "run",
+   "speed": 1.4,
+   "with": true,
+   "offset": 0.2
+  },
+  {
+   "do": "jump",
+   "who": "ti",
+   "to": [
+    -0.95,
+    -0.45
+   ],
+   "height": 0.15
+  },
+  {
+   "do": "walk",
+   "who": "co",
+   "to": [
+    [
+     0.2,
+     1.95
+    ]
+   ],
+   "face": [
+    -1.35,
+    -0.25
+   ],
+   "with": true,
+   "offset": -1.5
+  },
+  {
+   "do": "anim",
+   "target": "cheese_ring",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      0.6,
+      1.35,
+      1.0
+     ],
+     "scale": 0.01
+    },
+    {
+     "t": 0.4,
+     "loc": [
+      0.3,
+      1.2,
+      1.4
+     ],
+     "scale": 1.0
+    },
+    {
+     "t": 1.3,
+     "loc": [
+      -1.35,
+      -0.25,
+      0.97
+     ],
+     "scale": 1.0
+    }
+   ],
+   "sfx_at": [
+    [
+     "magic",
+     0.0
+    ],
+    [
+     "whoosh",
+     0.4
+    ]
+   ],
+   "offset": 0.4,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -1.35,
+     -0.25,
+     0.97
+    ],
+    "dist": 1.3,
+    "h": 0.4,
+    "az": -45,
+    "lens": 40,
+    "fstop": 6.0
+   },
+   "with": true
+  },
+  {
+   "do": "screen",
+   "msg": "p59"
+  },
+  {
+   "do": "say",
+   "who": "may",
+   "text": "Cảnh báo! Chốt năm mươi chín: tính diện tích vòng đỡ!",
+   "sub": "Chốt 59: tính diện tích vòng đỡ!",
+   "cam": {
+    "preset": "wide",
+    "subject": [
+     -1.1,
+     0.0,
+     1.6
+    ],
+    "dist": 1.9,
+    "h": -0.2,
+    "az": 30,
+    "lens": 35,
+    "fstop": 8.0
+   }
+  },
+  {
+   "do": "wait",
+   "dur": 0.0,
+   "mark": "S7",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -1.35,
+     -0.25,
+     0.97
+    ],
+    "dist": 1.3,
+    "h": 0.4,
+    "az": -45,
+    "lens": 40,
+    "fstop": 6.0
+   }
+  },
+  {
+   "do": "pin",
+   "n": 59,
+   "state": "open",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.45,
+     1.08,
+     1.16
+    ],
+    "dist": 0.55,
+    "h": 0.06,
+    "az": 45,
+    "lens": 45,
+    "fstop": 7.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "banh",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      -1.15,
+      0.0,
+      2.05
+     ],
+     "rot": [
+      250,
+      60,
+      720
+     ]
+    },
+    {
+     "t": 0.7,
+     "loc": [
+      -1.35,
+      -0.25,
+      0.98
+     ],
+     "rot": [
+      360,
+      0,
+      720
+     ],
+     "ease": "LINEAR"
+    }
+   ],
+   "sfx_at": [
+    [
+     "whoosh",
+     0.0
+    ],
+    [
+     "plop",
+     0.7
+    ],
+    [
+     "land",
+     0.7
+    ]
+   ],
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -1.35,
+     -0.25,
+     0.97
+    ],
+    "dist": 1.3,
+    "h": 0.4,
+    "az": -45,
+    "lens": 40,
+    "fstop": 6.0
+   }
+  },
+  {
+   "do": "wait",
+   "dur": 1.3
+  },
+  {
+   "do": "gian_walk",
+   "path": [
+    [
+     -0.24,
+     1.11,
+     1.12
+    ],
+    [
+     -0.2,
+     1.11,
+     1.12
+    ]
+   ],
+   "dur": 0.3,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.2,
+     1.11,
+     1.14
+    ],
+    "dist": 0.3,
+    "h": 0.05,
+    "az": 40,
+    "lens": 50,
+    "fstop": 8.0
+   }
+  },
+  {
+   "do": "bell"
+  },
+  {
+   "do": "wait",
+   "dur": 1.0
+  },
+  {
+   "do": "wait",
+   "dur": 0.0,
+   "mark": "S8",
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.31,
+     1.145
+    ],
+    "dist": 0.45,
+    "h": 0.25,
+    "az": 45,
+    "lens": 48,
+    "fstop": 9.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": [
+    "banh_base",
+    "egg_full",
+    "sauce_q",
+    "banh_dot0",
+    "banh_dot1",
+    "banh_dot2",
+    "banh_dot3",
+    "banh_dot4",
+    "banh_dot5",
+    "banh_dot6",
+    "banh_dot7",
+    "banh_dot8",
+    "banh_dot9",
+    "banh_dot10",
+    "banh_dot11",
+    "banh_dot12",
+    "banh_dot13",
+    "banh_dot14",
+    "banh_dot15",
+    "banh_dot16",
+    "banh_dot17"
+   ],
+   "keys": [
+    {
+     "t": 0,
+     "show": false
+    }
+   ]
+  },
+  {
+   "do": "anim",
+   "target": [
+    "banh_rest",
+    "banh_rest_crust",
+    "slice_inner",
+    "crust_0",
+    "crust_1",
+    "crust_2",
+    "crust_3",
+    "crust_4",
+    "crust_5",
+    "crust_6",
+    "crust_7"
+   ],
+   "keys": [
+    {
+     "t": 0,
+     "show": true
+    }
+   ]
+  },
+  {
+   "do": "anim",
+   "target": "gian",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      -0.4,
+      1.1300000000000001,
+      1.12
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ]
+    }
+   ]
+  },
+  {
+   "do": "anim",
+   "target": "lid",
+   "keys": [
+    {
+     "t": 0,
+     "rot": [
+      -110,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "do": "walk",
+   "who": "ti",
+   "to": [
+    [
+     -0.62,
+     0.8
+    ]
+   ],
+   "face": [
+    -0.4,
+    1.33
+   ],
+   "speed": 2.0
+  },
+  {
+   "do": "say",
+   "who": "ti",
+   "text": "Thưởng em nguyên miếng chín mươi độ nè, Gián!",
+   "sub": "Thưởng em miếng 90° nè, Gián!",
+   "cam": {
+    "preset": "medium_close",
+    "subject": "ti",
+    "az": 25
+   }
+  },
+  {
+   "do": "anim",
+   "target": "slice",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      -0.4,
+      1.33,
+      1.145
+     ]
+    },
+    {
+     "t": 0.6,
+     "loc": [
+      -0.4,
+      1.2850000000000001,
+      1.145
+     ]
+    }
+   ],
+   "sfx_at": [
+    [
+     "swish",
+     0.0
+    ]
+   ],
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.3,
+     1.155
+    ],
+    "dist": 0.32,
+    "h": 0.14,
+    "az": 45,
+    "lens": 50,
+    "fstop": 9.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "crust_0",
+   "keys": [
+    {
+     "t": 0.3,
+     "show": false
+    }
+   ],
+   "sfx_at": [
+    [
+     "eat",
+     0.3
+    ]
+   ]
+  },
+  {
+   "do": "anim",
+   "target": "crust_1",
+   "keys": [
+    {
+     "t": 0.6499999999999999,
+     "show": false
+    }
+   ],
+   "sfx_at": [
+    [
+     "eat",
+     0.6499999999999999
+    ]
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "crust_2",
+   "keys": [
+    {
+     "t": 1.0,
+     "show": false
+    }
+   ],
+   "sfx_at": [
+    [
+     "eat",
+     1.0
+    ]
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "crust_3",
+   "keys": [
+    {
+     "t": 1.3499999999999999,
+     "show": false
+    }
+   ],
+   "sfx_at": [
+    [
+     "eat",
+     1.3499999999999999
+    ]
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "crust_4",
+   "keys": [
+    {
+     "t": 1.7,
+     "show": false
+    }
+   ],
+   "sfx_at": [
+    [
+     "eat",
+     1.7
+    ]
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "crust_5",
+   "keys": [
+    {
+     "t": 2.05,
+     "show": false
+    }
+   ],
+   "sfx_at": [
+    [
+     "eat",
+     2.05
+    ]
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "crust_6",
+   "keys": [
+    {
+     "t": 2.3999999999999995,
+     "show": false
+    }
+   ],
+   "sfx_at": [
+    [
+     "eat",
+     2.3999999999999995
+    ]
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "crust_7",
+   "keys": [
+    {
+     "t": 2.7499999999999996,
+     "show": false
+    }
+   ],
+   "sfx_at": [
+    [
+     "eat",
+     2.7499999999999996
+    ]
+   ],
+   "with": true
+  },
+  {
+   "do": "wait",
+   "dur": 0.4
+  },
+  {
+   "do": "anim",
+   "target": "slice",
+   "keys": [
+    {
+     "t": 0,
+     "loc": [
+      -0.4,
+      1.2850000000000001,
+      1.145
+     ]
+    },
+    {
+     "t": 0.6,
+     "loc": [
+      -0.4,
+      1.33,
+      1.145
+     ]
+    }
+   ],
+   "sfx_at": [
+    [
+     "swish",
+     0.1
+    ]
+   ]
+  },
+  {
+   "do": "say",
+   "who": "ti",
+   "text": "Anh cho em nguyên miếng hai mươi lăm pi xen-ti-mét vuông. Sao em ăn có mỗi cái mép?",
+   "sub": "Anh cho em nguyên 25π cm². Sao em ăn có mỗi cái mép?",
+   "cam": {
+    "preset": "medium_close",
+    "subject": "ti",
+    "az": 25
+   }
+  },
+  {
+   "do": "anim",
+   "target": "gian",
+   "keys": [
+    {
+     "t": 0,
+     "rot": [
+      0,
+      0,
+      90
+     ]
+    },
+    {
+     "t": 0.4,
+     "rot": [
+      0,
+      -28,
+      90
+     ]
+    }
+   ],
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.1300000000000001,
+     1.14
+    ],
+    "dist": 0.28,
+    "h": 0.05,
+    "az": 75,
+    "lens": 50,
+    "fstop": 9.0
+   }
+  },
+  {
+   "do": "wait",
+   "dur": 0.4
+  },
+  {
+   "do": "say",
+   "who": "gian_v",
+   "text": "Dạ... hợp đồng ghi: bò sát mép năm pi xen-ti-mét. Ăn vô trong là phát sinh công việc. Anh có duyệt tăng ca không?",
+   "sub": "Dạ, hợp đồng ghi bò sát mép 5π cm. Ăn vô trong là phát sinh. Duyệt tăng ca không?"
+  },
+  {
+   "do": "turn",
+   "who": "ti",
+   "face": "camera",
+   "dur": 0.3
+  },
+  {
+   "do": "knock",
+   "who": "ti",
+   "count": 3,
+   "period": 0.32,
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.62,
+     0.8,
+     0.42
+    ],
+    "dist": 1.1,
+    "h": 0.05,
+    "az": 20,
+    "lens": 40,
+    "fstop": 4.0
+   }
+  },
+  {
+   "do": "wait",
+   "dur": 0.2
+  },
+  {
+   "do": "reach",
+   "who": "co",
+   "at": [
+    -0.4,
+    1.33,
+    1.195
+   ],
+   "dur": 1.6,
+   "cam": {
+    "preset": "medium",
+    "subject": "co",
+    "az": -30
+   }
+  },
+  {
+   "do": "anim",
+   "target": [
+    "rest_root",
+    "slice"
+   ],
+   "keys": [
+    {
+     "t": 0.6,
+     "loc": [
+      -0.4,
+      1.33,
+      1.145
+     ]
+    },
+    {
+     "t": 1.5,
+     "loc": [
+      1.25,
+      1.3,
+      1.04
+     ]
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": [
+    "banh_rest",
+    "banh_rest_crust",
+    "slice_inner"
+   ],
+   "keys": [
+    {
+     "t": 1.6,
+     "show": false
+    }
+   ],
+   "with": true
+  },
+  {
+   "do": "anim",
+   "target": "gian",
+   "keys": [
+    {
+     "t": 0,
+     "rot": [
+      0,
+      0,
+      90
+     ]
+    },
+    {
+     "t": 0.3,
+     "rot": [
+      0,
+      0,
+      -90
+     ]
+    }
+   ],
+   "cam": {
+    "preset": "insert_hand",
+    "subject": [
+     -0.4,
+     1.21,
+     1.24
+    ],
+    "dist": 0.75,
+    "h": 0.1,
+    "az": 60,
+    "lens": 50,
+    "fstop": 9.0
+   }
+  },
+  {
+   "do": "anim",
+   "target": "gian_beam",
+   "keys": [
+    {
+     "t": 0.3,
+     "show": true
+    }
+   ],
+   "sfx_at": [
+    [
+     "shimmer",
+     0.3
+    ]
+   ]
+  },
+  {
+   "do": "wait",
+   "dur": 1.2
+  }
+ ]
+}

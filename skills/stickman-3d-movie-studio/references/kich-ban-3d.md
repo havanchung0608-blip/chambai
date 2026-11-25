@@ -44,3 +44,28 @@ Tự sinh: bước chân, nhảy/tiếp đất, cầm đồ, chạm bảng, ph�
 ## 7. Toạ độ lớp học (`classroom`)
 Sàn z = 0; bảng trên tường sau y ≈ 3,12, tâm bảng x = −0,3, z = 1,65; cửa ra vào phải (anchor `door_out` (6.4, 1.5), `door_in`); bàn GV tâm (2.75, 1.35), mặt bàn z = 0,785; vùng đứng trước bảng y ≈ 2,0–2,4; dãy bàn HS y = −0,9 / −2,6 / −4,3 (x = −2,6 / −0,3 / 2,0) — đi giữa các dãy ở x ≈ −1,45 hoặc 0,85. Máy quay tự giới hạn trong phòng.
 Đứng vẽ compa: đứng cách tâm hình ~0,25 m về phía TAY KHÔNG vẽ, y ≈ 2,35, quay mặt vào bảng; máy đặt phía tay vẽ (`board_three_quarter`) để người không che hình.
+
+
+## 8. Bối cảnh CĂN TIN (`"environment": "canteen"`) và đạo cụ diễn hoạt
+Toạ độ: sàn z = 0; quầy x −2,2…2,2, y 1,0…1,7, mặt quầy z = 0,95; tâm bánh trên vỉ máy (−0,40; 1,33; 1,145), R = 10 cm.
+Đạo cụ dựng sẵn (`sm_canteen.py`): máy nướng (`lid` bản lề nắp kính, `pin55…pin59` + `_g` bản xanh, `btn_crisp`, `btn_lid`, `msg_*` màn hình, `m_drop_mesh`, `m_drop2`),
+bánh (`banh` gốc; lớp `banh_base`, `egg_ring`, `egg_full`, `sauce_q` hình quạt 90°, `radius_wire`, `short_wire`, `weld_arc` cung AB, `foot_i_s` dấu chân, `slice`/`rest_root` khi cắt miếng),
+Gián Điện (`gian`, chân `gian_leg{i}{±1}`, `bell`, `gian_beam`), `wire_reel`, `ria`, `basin`, `sauce_puddle`, `cheese_ring`, `co_box`.
+Vai chỉ có giọng (máy, bản đồ…): `"spec": {"hidden": true}`, đặt `start` xa (0, 40). Nhân vật thêm `scarf` (khăn quàng), `apron` (tạp dề); `speed`, `pitch` (bán cung) cho giọng.
+
+| do | Tham số | Ghi chú |
+|---|---|---|
+| `anim` | `target` (tên hoặc danh sách), `keys` [{`t`, `loc`, `rot` (độ), `scale`, `show`, `reveal` (0–1, nét curve)}], `ease`, `sfx_at` [[tên, giây]] | keyframe đạo cụ; trạng thái trước lần đổi đầu tiên được giữ nguyên |
+| `screen` | `msg` (`idle`, `forever`, `p55`…`p59`, `count3`…) | đổi chữ màn hình máy + tiếng bíp |
+| `pin` | `n` (55–59), `state` (`lock`/`open`) | chốt đỏ sập "cạch" / bật xanh + bíp |
+| `reach` | `who`, `at` [x,y,z], `dur`, `hand`, `tap` | với tay bấm nút, lau bánh, nhấc bánh |
+| `knock` | `who`, `count`, `period` | đầu gối gõ "cộc cộc" (nhún + tiếng gỗ) |
+| `gian_walk` | `path` [[x,y,z]…], `dur`, `ease`, `face_end` | robot gián 6 chân bò theo đường gấp khúc, chân đánh nhịp, tiếng bước kim loại |
+| `gian_point` | `up`, `aim` | sáu chân cùng giơ lên chỉ |
+| `bell` | | chuông xe đạp "kính coong" trên lưng gián |
+| `attach` | `who`, `target`, `head_offset` [ngang, trước, lên] (đơn vị bán kính đầu) | gắn đồ lên đầu (bộ ria bằng dây) |
+| (mọi action) | `mark` | mốc cắt đoạn khi ghép xen với phần Toán 2D |
+
+Tiếng động tổng hợp mới: `knock`, `bike_bell`, `beep`, `beep2`, `sizzle`, `latch`, `unlatch`, `metalstep`, `slam`, `spray`, `pluck`, `splash`, `plop`, `eat`, `boing`.
+Chất lượng `cpu_fast`: 1280×720, không motion blur/SSR (~2,4 s/khung trên 4 CPU) — dùng cho phim dài.
+Ví dụ đầy đủ: `examples/banh-trang-trung/` (make_film3d.py → film3d.json; toan2d.film.js cho phần Toán; assemble.py ghép).

@@ -202,6 +202,7 @@ class CameraDirector:
 QUALITY = {
     "draft":   dict(res=(960, 540), samples=4, mb=False, shadow=1024, gtao=True, ssr=False, bloom=True),
     "cpu":     dict(res=(1280, 720), samples=8, mb=True, shadow=1024, gtao=True, ssr=True, bloom=True),
+    "cpu_fast": dict(res=(1280, 720), samples=6, mb=False, shadow=1024, gtao=True, ssr=False, bloom=True),
     "hd":      dict(res=(1920, 1080), samples=16, mb=True, shadow=2048, gtao=True, ssr=True, bloom=True),
     "4k":      dict(res=(3840, 2160), samples=32, mb=True, shadow=4096, gtao=True, ssr=True, bloom=True),
 }
