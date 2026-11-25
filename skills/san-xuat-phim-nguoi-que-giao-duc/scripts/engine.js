@@ -1185,9 +1185,9 @@
         if (b.show) arr(b.show).forEach((it) => { const nm = it.sfx !== undefined ? it.sfx : it.anim ? ANIM_SFX[it.anim] || null : "pop"; if (nm) sfx.push({ t: B.start, name: nm, dur: it.dur || 1, vol: it.anim ? 0.55 : 1 }); d = Math.max(d, it.anim ? it.dur || 1 : 0.4); });
         if (b.title) { d = Math.max(d, b.title.dur || 3.2); sfx.push({ t: B.start, name: "whoosh" }); }
         if (b.quiz) {
-          const th = b.quiz.think || 5; B.quizThink = th; d = Math.max(d, th + 2.6);
+          const th = b.quiz.think != null ? b.quiz.think : 5; B.quizThink = th; d = Math.max(d, th + (b.quiz.answer >= 0 ? 2.6 : 0.8));
           for (let k = 0; k < th; k++) sfx.push({ t: B.start + 0.8 + k, name: "tick" });
-          sfx.push({ t: B.start + 0.8 + th, name: "correct" });
+          if (b.quiz.answer != null && b.quiz.answer >= 0) sfx.push({ t: B.start + 0.8 + th, name: "correct" });
           if (!b.say) says.push({ id: id + "q", t: B.start, text: b.quiz.say || "", who: "narrator", voice: "nu", dur: 0, skip: true });
         }
         if (b.wait) d = Math.max(d, b.wait);
