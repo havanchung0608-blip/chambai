@@ -235,6 +235,7 @@
     victory: (t) => ({ fa: [158, 176], ba: [30, 150], fl: [20, 0], bl: [-20, -4], head: -8, lift: Math.abs(Math.sin(t * 4)) * 6 }),
     kneel: () => ({ fa: [30, 20], ba: [20, 10], fl: [80, 0], bl: [-20, -110], lean: 10, head: 10 }),
     dance: (t) => ({ fa: [120 + Math.sin(t * 8) * 50, 160 + Math.sin(t * 8) * 30], ba: [-120 + Math.sin(t * 8 + 3) * 50, -160 + Math.sin(t * 8 + 3) * 30], fl: [10 + Math.sin(t * 8) * 18, 0], bl: [-10 + Math.sin(t * 8) * 18, 0], lean: Math.sin(t * 4) * 10, head: Math.sin(t * 8) * 10, lift: Math.abs(Math.sin(t * 8)) * 16 }),
+    dig: (t) => ({ fa: [58 + Math.sin(t * 9) * 34, 26], ba: [44 + Math.sin(t * 9) * 34, 18], fl: [16, -4], bl: [-14, -6], lean: 28 + Math.sin(t * 9) * 7, head: 18 }),
     tired: (t) => ({ fa: [28, 8], ba: [24, 4], fl: [14, -6], bl: [-12, -8], lean: 26 + Math.sin(t * 7) * 3, head: 14 + Math.sin(t * 7) * 4 }),
     skate: (t) => ({ fa: [78, 98 + Math.sin(t * 3) * 8], ba: [-72, -92 + Math.sin(t * 3 + 1) * 8], fl: [30, -18], bl: [-24, -42], lean: 6 + Math.sin(t * 2.5) * 3 }),
     nod: (t) => ({ fa: [14, 4], ba: [-14, -4], fl: [7, 0], bl: [-7, 0], head: Math.sin(t * 8) * 9 })
@@ -452,6 +453,10 @@
     else if (kind === "book") { ctx.fillStyle = "#3f7fd6"; ctx.fillRect(-22, -30, 44, 34); ctx.fillStyle = "#fff"; ctx.fillRect(-18, -26, 36, 4); }
     else if (kind === "phone") { ctx.fillStyle = "#333"; roundRect(ctx, -12, -34, 24, 40, 4); ctx.fill(); }
     else if (kind === "flag") { ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, 10); ctx.lineTo(0, -120); ctx.stroke(); ctx.fillStyle = "#e53935"; ctx.beginPath(); ctx.moveTo(0, -120); ctx.lineTo(dir * 70, -100 + Math.sin(life * 6) * 6); ctx.lineTo(0, -80); ctx.fill(); }
+    else if (kind === "shovel") { ctx.rotate(dir > 0 ? rad(20) : rad(-20)); ctx.strokeStyle = "#6d4c41"; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(0, -40); ctx.lineTo(0, 78); ctx.stroke(); ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-14, -40); ctx.lineTo(14, -40); ctx.stroke();
+      ctx.fillStyle = "#b0bec5"; ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-18, 74); ctx.lineTo(18, 74); ctx.lineTo(14, 108); ctx.quadraticCurveTo(0, 124, -14, 108); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    else if (kind === "map") { ctx.fillStyle = "#f3dfa8"; ctx.strokeStyle = "#6d4c41"; ctx.lineWidth = 3; ctx.fillRect(-34, -46, 68, 50); ctx.strokeRect(-34, -46, 68, 50); ctx.fillStyle = "#c8a26b"; ctx.fillRect(-40, -50, 8, 58); ctx.fillRect(32, -50, 8, 58);
+      ctx.strokeStyle = "#c62828"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(4, -30); ctx.lineTo(18, -16); ctx.moveTo(18, -30); ctx.lineTo(4, -16); ctx.stroke(); ctx.setLineDash([4, 4]); ctx.strokeStyle = "#6d4c41"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-26, -8); ctx.quadraticCurveTo(-10, -40, 8, -24); ctx.stroke(); ctx.setLineDash([]); }
     else { ctx.translate(0, -20); drawItem(ctx, { type: kind, x: 0, y: 0, scale: 0.45 }, life); }
     ctx.restore();
   }
@@ -715,6 +720,23 @@
       far: (ctx, life) => { skyFill(ctx, "#81d4fa", "#e1f5fe", 760); ctx.strokeStyle = INK; ctx.lineWidth = 5; hcircle(ctx, 1550, 160, 75, 90, "#ffd54f"); clouds(ctx, life, 4); },
       mid: (ctx, life) => { ctx.fillStyle = "#29b6f6"; ctx.fillRect(-6000, 700, 14000, 300); ctx.strokeStyle = "#e1f5fe"; ctx.lineWidth = 5; for (let r = 0; r < 4; r++) { ctx.beginPath(); for (let x = -3000; x < 5000; x += 40) ctx.lineTo(x, 740 + r * 55 + Math.sin(x * 0.02 + life * 2 + r) * 8); ctx.stroke(); } },
       main: (ctx, life) => { ctx.fillStyle = "#ffe0a3"; ctx.beginPath(); ctx.moveTo(-8000, GROUND - 40); ctx.lineTo(10000, GROUND - 40); ctx.lineTo(10000, 4000); ctx.lineTo(-8000, 4000); ctx.fill(); tile(ctx, 2000, () => { palm(ctx, 250, life); ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(1500, GROUND); ctx.lineTo(1500, 640); ctx.stroke(); ctx.fillStyle = "#e53935"; ctx.beginPath(); ctx.moveTo(1320, 680); ctx.quadraticCurveTo(1500, 520, 1680, 680); ctx.closePath(); ctx.fill(); ctx.stroke(); }); }
+    },
+    treasuremap: {
+      base: "#ecd9a8",
+      main: (ctx, life) => {
+        ctx.fillStyle = "#ecd9a8"; ctx.fillRect(-8000, -4000, 18000, 9000);
+        for (let i = 0; i < 30; i++) { const x = hash(i * 5.3) * 2200 - 140, y = hash(i * 2.9) * 1200 - 60, r = 90 + hash(i * 1.7) * 240; const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, "rgba(150,100,40,.13)"); g.addColorStop(1, "rgba(150,100,40,0)"); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, 2 * r, 2 * r); }
+        ctx.strokeStyle = "rgba(120,80,30,.13)"; ctx.lineWidth = 2;
+        for (let x = -2000; x <= 4000; x += 100) { ctx.beginPath(); ctx.moveTo(x, -2000); ctx.lineTo(x, 3000); ctx.stroke(); }
+        for (let y = -2000; y <= 3000; y += 100) { ctx.beginPath(); ctx.moveTo(-2000, y); ctx.lineTo(4000, y); ctx.stroke(); }
+        // sóng biển ở góc, la bàn, viền bản đồ
+        ctx.strokeStyle = "rgba(2,119,189,.45)"; ctx.lineWidth = 4;
+        [[90, 960], [250, 1010], [1700, 1000], [1840, 950], [60, 70], [1860, 60]].forEach(([x, y], i) => { ctx.beginPath(); for (let k = 0; k <= 3; k++) ctx.arc(x + k * 34 - 51, y + Math.sin(life * 2 + i) * 3, 17, Math.PI, 0); ctx.stroke(); });
+        ctx.save(); ctx.translate(250, 800); ctx.rotate(Math.sin(life * 0.6) * 0.05); ctx.fillStyle = "rgba(109,76,65,.85)"; ctx.strokeStyle = "rgba(109,76,65,.85)"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(0, 0, 62, 0, 7); ctx.stroke(); for (let k = 0; k < 4; k++) { ctx.rotate(Math.PI / 2); ctx.beginPath(); ctx.moveTo(0, -78); ctx.lineTo(13, 0); ctx.lineTo(-13, 0); ctx.closePath(); k === 3 ? (ctx.fillStyle = "#c62828") : (ctx.fillStyle = "rgba(109,76,65,.85)"); ctx.fill(); }
+        ctx.restore(); ctx.fillStyle = "#c62828"; ctx.font = `bold 34px ${FONT}`; ctx.textAlign = "center"; ctx.fillText("B", 250, 700); ctx.textAlign = "left";
+        ctx.strokeStyle = "rgba(109,76,65,.6)"; ctx.lineWidth = 10; ctx.strokeRect(14, 14, 1892, 1052); ctx.lineWidth = 3; ctx.strokeRect(30, 30, 1860, 1020);
+      }
     },
     chalkgrid: {
       base: "#1f3d30", dark: true,
@@ -1027,7 +1049,7 @@
       for (let i = 0; i <= n * 10; i++) { const x = (i * u) / 10, len = i % 10 === 0 ? 30 : i % 5 === 0 ? 20 : 11; if (x > L + 1) break; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, len); ctx.stroke(); }
       ctx.fillStyle = "#3e2723"; ctx.font = `bold 22px ${FONT}`; ctx.textAlign = "center";
       for (let i = 0; i <= n; i++) ctx.fillText(String(i), i * u, 54);
-      ctx.font = `italic 18px ${FONT}`; ctx.textAlign = "left"; ctx.fillText("cm", L - 30, h - 6);
+      ctx.font = `italic 18px ${FONT}`; ctx.textAlign = "left"; ctx.fillText(it.unitText || "cm", L - 30, h - 6);
     },
     // THƯỚC PARABOL (thước cong): mép cong trùng đồ thị fn trên hệ trục `axes`; gốc (0,0) của đạo cụ = ĐỈNH parabol,
     // nên đặt x, y = toạ độ điểm O trên màn hình; bay vào bằng anim "move" (x, y, rot, scale)
@@ -1054,6 +1076,24 @@
       ctx.fillStyle = "rgba(255,255,255,.4)"; ctx.fillRect(32, -9, 116, 6);
       ctx.fillStyle = "#b0bec5"; ctx.fillRect(150, -11, 14, 22); ctx.strokeRect(150, -11, 14, 22);
       ctx.fillStyle = "#f48fb1"; roundRect(ctx, 164, -11, 20, 22, 6); ctx.fill(); ctx.stroke(); ctx.restore();
+    },
+    // RƯƠNG KHO BÁU: đáy tại (0,0); open 0→1 (tween) mở nắp, có hào quang vàng; empty: true = rương rỗng
+    chest(ctx, it, life) {
+      const o = clamp(it.open || 0, 0, 1), w = it.w || 200, h = it.h || 116, tl = life || 0;
+      if (o > 0 && !it.empty) {
+        ctx.save(); const g = ctx.createRadialGradient(0, -h, 10, 0, -h, 300 * o); g.addColorStop(0, "rgba(255,236,120,.95)"); g.addColorStop(1, "rgba(255,236,120,0)"); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, -h, 300 * o, 0, 7); ctx.fill();
+        ctx.globalAlpha *= 0.4 * o; ctx.fillStyle = "#fff59d"; for (let i = 0; i < 12; i++) { const a = tl * 0.8 + (i * Math.PI) / 6; ctx.beginPath(); ctx.moveTo(0, -h); ctx.lineTo(Math.cos(a - 0.09) * 420, -h + Math.sin(a - 0.09) * 420); ctx.lineTo(Math.cos(a + 0.09) * 420, -h + Math.sin(a + 0.09) * 420); ctx.closePath(); ctx.fill(); }
+        ctx.restore();
+      }
+      ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.fillStyle = it.color || "#8d5524"; roundRect(ctx, -w / 2, -h, w, h, 10); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "rgba(0,0,0,.16)"; for (let y = -h + 26; y < 0; y += 28) ctx.fillRect(-w / 2 + 6, y, w - 12, 3);
+      ctx.fillStyle = "#ffca28"; [-w / 2 + 22, w / 2 - 38].forEach((x) => { ctx.fillRect(x, -h, 16, h); ctx.strokeRect(x, -h, 16, h); });
+      if (o > 0) { if (!it.empty) { ctx.fillStyle = "#ffd54f"; ctx.strokeStyle = "#b8860b"; ctx.lineWidth = 3; for (let i = 0; i < 9; i++) { const cx = -w / 2 + 30 + i * ((w - 60) / 8), cy = -h - 6 - Math.abs(Math.sin(i * 1.7)) * 16 * o; ctx.beginPath(); ctx.ellipse(cx, cy, 15, 9, 0, 0, 7); ctx.fill(); ctx.stroke(); } }
+        else { ctx.fillStyle = "#3e2723"; ctx.fillRect(-w / 2 + 8, -h - 4, w - 16, 8); } }
+      ctx.save(); ctx.translate(-w / 2, -h); ctx.rotate(-o * rad(108)); ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.fillStyle = it.color || "#8d5524";
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -28); ctx.quadraticCurveTo(w / 2, -80, w, -28); ctx.lineTo(w, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#ffca28"; ctx.fillRect(22, -44, 16, 44); ctx.strokeRect(22, -44, 16, 44); ctx.fillRect(w - 38, -44, 16, 44); ctx.strokeRect(w - 38, -44, 16, 44); ctx.restore();
+      if (o < 0.3) { ctx.fillStyle = "#ffca28"; ctx.lineWidth = 3; roundRect(ctx, -16, -h - 10, 32, 34, 6); ctx.fill(); ctx.stroke(); ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(0, -h + 4, 5, 0, 7); ctx.fill(); }
     },
     skateboard(ctx, it) { ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.fillStyle = it.color || "#ff7043"; roundRect(ctx, -78, -34, 156, 14, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = "#ffeb3b"; [-48, 48].forEach((wx) => { ctx.save(); ctx.translate(wx, -11); ctx.rotate((it.x || 0) / 10); ctx.beginPath(); ctx.arc(0, 0, 10, 0, 7); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(8, 0); ctx.stroke(); ctx.restore(); }); },
     table(ctx, it) { const w = it.w || 420, h = it.h || 190; ctx.lineWidth = 6; ctx.strokeStyle = INK; hrect(ctx, -w / 2, -h, w, 22, it._seed, it.color || "#b07a43"); hline(ctx, [[-w / 2 + 30, -h + 22], [-w / 2 + 30, 0]], it._seed + 1); hline(ctx, [[w / 2 - 30, -h + 22], [w / 2 - 30, 0]], it._seed + 2); },

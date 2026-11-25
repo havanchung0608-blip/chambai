@@ -108,11 +108,13 @@ Tư thế: `guard` (thủ thế, nhún), `punch` (đấm thẳng), `punch2` (đ�
 | `skateboard` | `color`; tween `x` để ván tự lăn (bánh xe quay theo x) | gag ván trượt bỏ chạy |
 | `ruler` (thước kẻ trong suốt có vạch mm/cm) | `w` (dài), `unit` (px/cm), `rot`; gốc (0,0) = vạch 0 trên mép kẻ | kẻ trục, đoạn thẳng: `move` thước tới A với `rot` = góc AB, rồi `seg` `create` + `pencil` `move` cùng thời lượng |
 | `pruler` (thước parabol / thước cong) | `axes`, `fn`, `x0`, `x1`, `thick`, `color`, `text`; gốc (0,0) = ĐỈNH → đặt x, y = điểm O trên màn hình; a < 0 tự lật ngược | vẽ đồ thị y = ax²: thước bay vào (`move` x, y, rot, scale), rồi `graph` `create` + `pencil` có `follow: "<id đồ thị>"` (phấn bám đúng đầu nét đang vẽ) |
+| `chest` (rương kho báu) | `open` (0→1, dùng `tween`), `empty` (rương rỗng), `w`, `h`, `color` | phim tìm kho báu: hào quang vàng, đồng xu khi mở |
 | `pencil` (phấn/bút chì) | `color`, `lead`; đầu nhọn tại (0,0) | đi dọc mép thước khi kẻ |
 | `panel` | `w`, `h`, `title`, `titleColor`, `size`, `border` | khung công thức kiểu Manim (nền tối bo góc) |
 | `image` | `src` (URL hoặc data:), `w`, `h` | ảnh ngoài (hạn chế: làm file phụ thuộc mạng) |
 
 ## 8. Phông nền (`bg`)
+`treasuremap`: bản đồ kho báu giấy da nhìn từ trên xuống (lưới mờ, la bàn, sóng biển, viền) — hợp bài hình học dạng "đi tìm". Vật cầm tay mới: `hold: "shovel"` (xẻng), `hold: "map"` (bản đồ); tư thế `dig` (đào đất).
 Phông nhiều lớp có chiều sâu: `park`, `street`, `city`, `rooftop` (đêm), `forest`, `castle`, `night`, `lab`, `beach`, `manim`, `manimgrid`. Phông một lớp: `dojo` (võ đường), `paper` (giấy trơn), `grid` (giấy ô li), `whiteboard` (bảng trắng: vùng viết x 520–1820, y 90–690), `classroom` (bảng xanh phấn: x 560–1780, y 110–650; chữ phấn trắng), `park`, `street`, `market`, `home`, `space`, `stage`.
 Bảng ở bên phải → đặt người giảng ở x ≈ 250–330.
 
