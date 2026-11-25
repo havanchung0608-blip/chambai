@@ -234,6 +234,7 @@
     fistbow: () => ({ fa: [70, 140], ba: [66, 150], fl: [4, 0], bl: [-4, 0], lean: 24, head: 14 }),
     victory: (t) => ({ fa: [158, 176], ba: [30, 150], fl: [20, 0], bl: [-20, -4], head: -8, lift: Math.abs(Math.sin(t * 4)) * 6 }),
     kneel: () => ({ fa: [30, 20], ba: [20, 10], fl: [80, 0], bl: [-20, -110], lean: 10, head: 10 }),
+    skate: (t) => ({ fa: [78, 98 + Math.sin(t * 3) * 8], ba: [-72, -92 + Math.sin(t * 3 + 1) * 8], fl: [30, -18], bl: [-24, -42], lean: 6 + Math.sin(t * 2.5) * 3 }),
     nod: (t) => ({ fa: [14, 4], ba: [-14, -4], fl: [7, 0], bl: [-7, 0], head: Math.sin(t * 8) * 9 })
   };
   /* ------------- chuyển động như người thật: bàn chân bám đất (IK) ------------- */
@@ -325,6 +326,14 @@
     const seed = ch._seed || 1;
     ctx.save();
     ctx.translate(ch.x + (ch._sway || 0) * S * dir, (ch.y || GROUND) - (P.lift || 0) * S);
+    if (ch.tilt) ctx.rotate(rad(ch.tilt));
+    if (ch.skate) {
+      // ván trượt: mặt ván + 2 bánh, nhân vật đứng trên ván
+      ctx.save(); ctx.scale(S, S); ctx.lineWidth = 5; ctx.strokeStyle = INK;
+      ctx.fillStyle = "#ff7043"; roundRect(ctx, -78, -34, 156, 14, 7); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#ffeb3b"; [-48, 48].forEach((wx) => { ctx.beginPath(); ctx.arc(wx, -11, 10, 0, 7); ctx.fill(); ctx.stroke(); });
+      ctx.restore(); ctx.translate(0, -34 * S);
+    }
     ctx.scale(S * (ch._turnSx || 1), S);
     if (P.rot) { ctx.translate(0, -40); ctx.rotate(rad(P.rot) * dir); }
     ctx.translate(0, -footY);
@@ -1000,6 +1009,7 @@
           s.connect(f); f.connect(g); g.connect(this.master); s.start(t); s.stop(t + 0.1 * big); break;
         }
         case "jump": this.tone(260, t, 0.22, "sine", 0.18, 620); break;
+        case "skate": { const d = clamp(dur || 2, 0.3, 8), s = this.noise(d), f = c.createBiquadFilter(), g = c.createGain(); f.type = "lowpass"; f.frequency.value = 700; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.22, t + 0.15); g.gain.setValueAtTime(0.22, t + d - 0.2); g.gain.linearRampToValueAtTime(0.0001, t + d); s.connect(f); f.connect(g); g.connect(this.master); s.start(t); s.stop(t + d + 0.05); break; }
         case "shimmer": [1568, 2093, 2637, 3136].forEach((f, i) => this.tone(f, t + i * 0.06, 0.5, "sine", 0.06)); break;
         case "whoosh": case "marker": case "chalk": case "applause": {
           const d = name === "whoosh" ? 0.45 : name === "applause" ? 2.2 : clamp(dur || 1, 0.3, 3);
@@ -1103,6 +1113,7 @@
           });
           B.writes = ws; d = Math.max(d, off);
         }
+        if (b.ride) { const rd = b.ride.dur || 3; d = Math.max(d, rd); sfx.push({ t: B.start, name: "skate", dur: rd, vol: 0.9 }); }
         if (b.move) arr(b.move).forEach((m) => {
           const dur = m.dur || 1.5; d = Math.max(d, dur);
           const c = (sc.cast || {})[m.who] || {}, base = (film.cast || {})[m.who] || {};
@@ -1205,6 +1216,9 @@
         if (a.face) ch.face = a.face;
         if (a.flip != null && !!a.flip !== !!ch.flip) { ch.flip = a.flip; ch.flipT = B.start; }
         if (a.hold !== undefined) ch.holding = a.hold;
+        if (a.skate !== undefined) ch.skate = a.skate;
+        if (a.tilt !== undefined) ch.tilt = a.tilt;
+        if (a.y !== undefined) ch.y = a.y;
         if (a.x != null) ch.x = a.x;
         if (a.enter) { ch.hidden = false; }
         if (a.exit) { ch.hidden = true; }
@@ -1212,11 +1226,13 @@
       arr(b.move).forEach((m) => {
         const ch = cast[m.who]; if (!ch) return; const dur = m.dur || 1.5, k = p(dur);
         const from = ch.x, to = m.to != null ? m.to : from + (m.by || 0), style = m.style || "walk", S0 = ch.scale || 1;
+        const fy = ch.y || GROUND, ty = m.y != null ? m.y : fy;
         if (style !== "slide" && Math.abs(to - from) > 1 && (to < from) !== !!ch.flip) { ch.flip = to < from; ch.flipT = B.start; }
         let g;
-        if (style === "slide") { ch.x = lerp(from, to, 1 - Math.pow(1 - k, 3)); g = null; }
-        else if (style === "jump" || style === "flykick") { const q = clamp((k - 0.22) / 0.6, 0, 1); ch.x = lerp(from, to, q * q * (3 - 2 * q)); g = { style, k }; }
-        else { const dist = Math.abs(to - from), n = Math.max(1, Math.round(dist / ((style === "run" ? 150 : 96) * S0))), tr = trap(k, 0.18); ch.x = lerp(from, to, tr); g = { style, u: tr * n, n, L: Math.max(1, dist) / n / S0 }; }
+        if (style === "slide") { const e = 1 - Math.pow(1 - k, 3); ch.x = lerp(from, to, e); ch.y = lerp(fy, ty, e); g = null; }
+        else if (style === "skate") { const e = easeIO(k); ch.x = lerp(from, to, e); ch.y = lerp(fy, ty, e); g = null; ch.skate = k < 1 || !!m.keep; ch.tilt = 0; }
+        else if (style === "jump" || style === "flykick") { const q = clamp((k - 0.22) / 0.6, 0, 1), e = q * q * (3 - 2 * q); ch.x = lerp(from, to, e); ch.y = lerp(fy, ty, e); g = { style, k }; }
+        else { const dist = Math.abs(to - from), n = Math.max(1, Math.round(dist / ((style === "run" ? 150 : 96) * S0))), tr = trap(k, 0.18); ch.x = lerp(from, to, tr); ch.y = lerp(fy, ty, tr); g = { style, u: tr * n, n, L: Math.max(1, dist) / n / S0 }; }
         if (k < 1 && g) { ch._gait = g; if (style === "jump" || style === "flykick") ch._jumpLift = Math.sin(clamp((k - 0.22) / 0.6, 0, 1) * Math.PI) * (m.height || 130); }
         else if (k >= 1) {
           ch._gait = null; ch._jumpLift = 0;
@@ -1230,6 +1246,26 @@
       });
       arr(b.hide).forEach((id) => { if (items[id]) items[id]._dead = B.start; });
       arr(b.set).forEach((s) => { if (items[s.id]) Object.assign(items[s.id], s); });
+      if (b.ride) {
+        // trượt ván dọc đồ thị (graph) hoặc đường gấp khúc (path, toạ độ màn hình); bánh xe "vẽ" nét đồ thị
+        const r = b.ride, ch = cast[r.who];
+        if (ch) {
+          const d = r.dur || 3, k0 = p(d), k = r.ease === "linear" ? k0 : r.ease === "in" ? k0 * k0 : r.ease === "out" ? 1 - (1 - k0) * (1 - k0) : easeIO(k0);
+          let X, Y, ang = 0;
+          if (r.graph && items[r.graph] && items[items[r.graph].axes]) {
+            const G = items[r.graph], A = items[G.axes], M = axesMap(A), f = mfn(G.fn || "x"), u = lerp(r.from, r.to, k), e = 0.01;
+            X = (A.x || 0) + M.sx(u); Y = (A.y || 0) + M.sy(f(u));
+            ang = Math.atan2(M.sy(f(u + e)) - M.sy(f(u)), M.sx(u + e) - M.sx(u));
+            if (r.trail !== false) { const x0 = G.x0 != null ? G.x0 : M.xmin, x1 = G.x1 != null ? G.x1 : M.xmax; G._prog = Math.max(G._prog || 0, clamp((u - x0) / (x1 - x0), 0, 1)); }
+          } else if (r.path) {
+            const P = r.path; let L = 0; const seg = []; for (let i = 1; i < P.length; i++) { const dd = Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); seg.push(dd); L += dd; }
+            let left = L * k, i = 0; while (i < seg.length - 1 && left > seg[i]) { left -= seg[i]; i++; }
+            const q = seg[i] ? clamp(left / seg[i], 0, 1) : 1; X = lerp(P[i][0], P[i + 1][0], q); Y = lerp(P[i][1], P[i + 1][1], q);
+            ang = Math.atan2(P[i + 1][1] - P[i][1], P[i + 1][0] - P[i][0]);
+          }
+          if (X != null) { ch.x = X; ch.y = Y; ch.tilt = (ang * 180) / Math.PI; if (ch.tilt > 90) ch.tilt -= 180; if (ch.tilt < -90) ch.tilt += 180; ch.skate = r.board !== false && !(k0 >= 1 && r.stay === false); ch.flip = r.to != null && r.from != null ? r.to < r.from : !!ch.flip; if (k0 >= 1 && r.stay === false) ch.tilt = 0; }
+        }
+      }
       arr(b.tween).forEach((tw) => {
         const it = items[tw.id] || cast[tw.id]; if (!it) return; const k = easeIO(p(tw.dur || 0.8));
         Object.keys(tw).forEach((key) => { if (["id", "dur"].includes(key)) return; const from = it[key] == null ? (key === "scale" || key === "alpha" ? 1 : 0) : it[key]; if (typeof tw[key] === "number") it[key] = lerp(from, tw[key], k); else if (k >= 1) it[key] = tw[key]; });
@@ -1288,7 +1324,9 @@
       if (it._dead != null) { const k = (t - it._dead) / 0.3; if (k >= 1) return; it.alpha = (it.alpha == null ? 1 : it.alpha) * (1 - k); }
       if (it._born != null && it.pop !== false) { const k = clamp((t - it._born) / 0.45, 0, 1); it._pop = k >= 1 ? 1 : Math.max(0.001, easeOutBack(k)); }
       if (it.type === "dot" && it.ax && S.items[it.ax] && it.at) { const A = S.items[it.ax], M = axesMap(A); it.x = (A.x || 0) + M.sx(it.at[0]); it.y = (A.y || 0) + M.sy(it.at[1]);
-        if (it.guides !== false) { const k = it._pop == null ? 1 : Math.min(1, it._pop); ctx.save(); ctx.setLineDash([14, 10]); ctx.lineWidth = 4; ctx.strokeStyle = it.guideColor || "rgba(255,255,255,.75)"; ctx.globalAlpha *= clamp(k, 0, 1) * (it.alpha == null ? 1 : it.alpha);
+        let flying = false;
+        if (it.fly && it._born != null) { const kf = clamp((t - it._born) / (it.flyDur || 0.7), 0, 1); if (kf < 1) { flying = true; const tx = it.x, ty = it.y; it.x = lerp(it.fly[0], tx, kf); it.y = lerp(it.fly[1], ty, kf) - Math.sin(Math.PI * kf) * (it.arc || 220); } }
+        if (it.guides !== false && !flying) { const k = it._pop == null ? 1 : Math.min(1, it._pop); ctx.save(); ctx.setLineDash([14, 10]); ctx.lineWidth = 4; ctx.strokeStyle = it.guideColor || "rgba(255,255,255,.75)"; ctx.globalAlpha *= clamp(k, 0, 1) * (it.alpha == null ? 1 : it.alpha);
           const x0 = (A.x || 0) + M.sx(0), y0 = (A.y || 0) + M.sy(0); ctx.beginPath(); ctx.moveTo(it.x, it.y); ctx.lineTo(it.x, y0); ctx.moveTo(it.x, it.y); ctx.lineTo(x0, it.y); ctx.stroke(); ctx.restore(); } }
       if (it.type === "dot" && it.on && S.items[it.on]) { const G = S.items[it.on], A = S.items[G.axes]; if (A) { const M = axesMap(A), u = it.u != null ? it.u : 0; let y = mfn(G.fn || "x")(u); if (G._fn2) y = lerp(y, mfn(G._fn2)(u), G._mix || 0); it.x = (A.x || 0) + M.sx(u); it.y = (A.y || 0) + M.sy(y); } }
       drawItem(ctx, it, life);
@@ -1345,6 +1383,7 @@
         }
       }
       ch._talk = talk;
+      if (ch.skate && (ch.pose === "idle" || ch.pose === "skate")) P = poseAt("skate", life);
       ch._pose = P;
       ctx.save(); applyCam(ctx, C, dp); if (dof > 0.5 && dp < 0.8) ctx.filter = `blur(${(dof * (1 - dp)).toFixed(1)}px)`;
       drawFigure(ctx, ch, life);

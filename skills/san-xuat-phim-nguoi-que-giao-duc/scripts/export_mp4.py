@@ -237,6 +237,13 @@ def synth(name, dur=1.0):
         sc *= np.exp(-np.arange(len(sc)) / (SR * 0.015))
         n = max(len(th), len(sc)); out = np.zeros(n, np.float32); out[:len(th)] += th; out[:len(sc)] += sc
         return out
+    if name == "skate":
+        d = max(0.3, min(8.0, dur or 2))
+        n = bandnoise(d, 120, 900, 0.22)
+        t = np.arange(len(n)) / SR
+        g = np.minimum(1, t / 0.15) * np.minimum(1, (d - t) / 0.25)
+        n = n * g * (0.8 + 0.2 * np.sin(2 * np.pi * 11 * t))
+        return n.astype(np.float32)
     if name == "shimmer":
         out = np.zeros(int(SR * 0.8), np.float32)
         for i, f in enumerate([1568, 2093, 2637, 3136]):
