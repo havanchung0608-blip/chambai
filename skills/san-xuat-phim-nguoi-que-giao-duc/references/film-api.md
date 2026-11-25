@@ -133,6 +133,14 @@ Tiếng thật TiengDong.com (sau khi chạy `fetch_tiengdong.py`): `punch` (t�
 - `show` nhận `at` (giây) để hiện trễ trong cùng nhịp — dùng để viết lần lượt từng dòng.
 - Tư thế hài: `dance` (nhảy múa), `tired` (thở dốc, cúi người), kèm `dizzy`, `facepalm`, `lie` (ngất).
 
+## 10c. Giọng đọc nổi bật, người kể chuyện
+- Bộ trộn âm (`export_mp4.py`) chuẩn hoá độ lớn từng câu thoại + nén mềm; khi có lời, tiếng động tự lùi ~45 %, nhạc nền lùi ~80 % → giọng luôn to và rõ hơn âm thanh.
+- Người kể chuyện: thêm vai ẩn `ke: { name: "", voice: "nam", hidden: true }` (có trong `cast` của mọi cảnh) → phụ đề không ghi tên; giọng gợi ý `Thiền Tâm Đức`, tốc độ 0.93.
+- Mỗi vai có thể có `speed` (giữ cao độ) và `pitch` (bán cung) trong jobs TTS: hải tặc `Quang Sơn` pitch −2.5 (trầm khàn), học sinh speed 1.03–1.05.
+- Nhấn nhá: viết lời bằng dấu câu — "…" để ngừng gây hồi hộp, "!" để nhấn, chữ IN HOA ở phụ đề cho từ khoá.
+- `subSize` (khung FILM) đặt cỡ phụ đề (mặc định 78; 84 cho phim chiếu lớp); tên người nói được tính khi ngắt dòng.
+- THẺ GHI NHỚ: panel `screen: true` giữa màn hình, chữ 110–120 + dòng phụ 88, `circumscribe` + tiếng "ding/tada" — dùng mỗi khi chốt kiến thức.
+
 ## 11. Mẹo bố cục
 - Phụ đề chiếm từ y ≈ 925 (1 dòng) / 823 (2 dòng) trở xuống: nhân vật ở cảnh nền bảng nên đứng trên bục (`box` tại y 940, nhân vật y 880) và giữ phụ đề 1 dòng.
 - Hai nhân vật đối thoại: x ≈ 650 và 1270, người bên phải `flip: true`.

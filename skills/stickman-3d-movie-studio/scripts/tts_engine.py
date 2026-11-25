@@ -14,6 +14,31 @@ import subprocess
 import sys
 
 
+def _shape(fp, speed=None, pitch=None):
+    """Tốc độ (giữ cao độ) và cao độ (bán cung) riêng cho từng vai: hải tặc trầm khàn, trẻ con trong, người kể chậm rãi."""
+    speed, pitch = float(speed or 1), float(pitch or 0)
+    if abs(speed - 1) < 1e-3 and abs(pitch) < 1e-3:
+        return
+    sr = 24000
+    try:
+        import soundfile as sf
+        sr = sf.info(fp).samplerate
+    except Exception:
+        pass
+    r = 2 ** (pitch / 12.0)
+    tempo = speed / r                      # asetrate đổi cả tốc độ → bù bằng atempo
+    chain = []
+    while tempo > 2.0:
+        chain.append("atempo=2.0"); tempo /= 2.0
+    while tempo < 0.5:
+        chain.append("atempo=0.5"); tempo /= 0.5
+    chain.append(f"atempo={tempo:.4f}")
+    flt = f"asetrate={int(sr * r)},aresample={sr}," + ",".join(chain)
+    tmp = fp + ".tmp.wav"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", fp, "-af", flt, tmp], check=True)
+    os.replace(tmp, fp)
+
+
 def run_vieneu(jobs, outdir):
     from vieneu import Vieneu
     tts = Vieneu()
@@ -36,6 +61,7 @@ def run_vieneu(jobs, outdir):
         audio = tts.infer(text=j["text"], voice=voice)
         fp = os.path.join(outdir, f"{j['id']}.wav")
         tts.save(audio, fp)
+        _shape(fp, j.get("speed"), j.get("pitch"))
         done[j["id"]] = fp
         print("TTS", j["id"], v, flush=True)
     return done

@@ -1095,6 +1095,19 @@
       ctx.fillStyle = "#ffca28"; ctx.fillRect(22, -44, 16, 44); ctx.strokeRect(22, -44, 16, 44); ctx.fillRect(w - 38, -44, 16, 44); ctx.strokeRect(w - 38, -44, 16, 44); ctx.restore();
       if (o < 0.3) { ctx.fillStyle = "#ffca28"; ctx.lineWidth = 3; roundRect(ctx, -16, -h - 10, 32, 34, 6); ctx.fill(); ctx.stroke(); ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(0, -h + 4, 5, 0, 7); ctx.fill(); }
     },
+    // THUYỀN BUỒM: (0,0) = mặt sàn thuyền (nhân vật đứng ở y của thuyền), tự dập dềnh theo sóng
+    boat(ctx, it, life) {
+      const t = life || 0, w = it.w || 560; ctx.translate(0, Math.sin(t * 2.2) * 6); ctx.rotate(Math.sin(t * 1.6) * 0.025);
+      ctx.lineWidth = 6; ctx.strokeStyle = INK;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -430); ctx.stroke();
+      ctx.fillStyle = it.sail || "#fffde7"; ctx.beginPath(); ctx.moveTo(8, -420); ctx.quadraticCurveTo(170 + Math.sin(t * 3) * 10, -260, 8, -90); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#c62828"; ctx.beginPath(); ctx.moveTo(0, -430); ctx.lineTo(70, -410 + Math.sin(t * 6) * 6); ctx.lineTo(0, -390); ctx.fill();
+      if (it.logo) { ctx.fillStyle = "#3e2723"; ctx.font = `bold 60px ${FONT}`; ctx.textAlign = "center"; ctx.fillText(it.logo, 60, -230); ctx.textAlign = "left"; }
+      ctx.fillStyle = it.color || "#8d5524"; ctx.beginPath(); ctx.moveTo(-w / 2 - 30, -10); ctx.lineTo(w / 2 + 40, -10); ctx.lineTo(w / 2 - 30, 110); ctx.lineTo(-w / 2 + 40, 110); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "rgba(0,0,0,.15)"; for (let y = 22; y < 110; y += 30) ctx.fillRect(-w / 2 + 10, y, w - 10, 4);
+      ctx.fillStyle = "#ffca28"; ctx.fillRect(-w / 2 - 20, -18, w + 50, 12); ctx.strokeRect(-w / 2 - 20, -18, w + 50, 12);
+      ctx.fillStyle = "rgba(255,255,255,.85)"; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(-w / 2 + 40 + i * (w / 5) + Math.sin(t * 3 + i) * 6, 112, 22, Math.PI, 0); ctx.fill(); }
+    },
     skateboard(ctx, it) { ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.fillStyle = it.color || "#ff7043"; roundRect(ctx, -78, -34, 156, 14, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = "#ffeb3b"; [-48, 48].forEach((wx) => { ctx.save(); ctx.translate(wx, -11); ctx.rotate((it.x || 0) / 10); ctx.beginPath(); ctx.arc(0, 0, 10, 0, 7); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(8, 0); ctx.stroke(); ctx.restore(); }); },
     table(ctx, it) { const w = it.w || 420, h = it.h || 190; ctx.lineWidth = 6; ctx.strokeStyle = INK; hrect(ctx, -w / 2, -h, w, 22, it._seed, it.color || "#b07a43"); hline(ctx, [[-w / 2 + 30, -h + 22], [-w / 2 + 30, 0]], it._seed + 1); hline(ctx, [[w / 2 - 30, -h + 22], [w / 2 - 30, 0]], it._seed + 2); },
     tree(ctx, it) { tree(ctx, 0, 0, it.s || 1, it._seed); },
@@ -1617,12 +1630,14 @@
     return true;
   }
   function drawSub(ctx, sp, film) {
-    const size = 78, text = sp.text; const lines = wrapText(ctx, text, 1640, size).slice(-2);
-    const h = lines.length * size * 1.3 + 30, y = H - h - 24;
-    ctx.save(); ctx.fillStyle = "rgba(10,10,20,.62)"; roundRect(ctx, 60, y, W - 120, h, 18); ctx.fill();
-    ctx.fillStyle = "#fff"; ctx.font = `${size}px ${FONT}`; ctx.textAlign = "center";
+    // tên người nói được tính vào khi ngắt dòng → không bao giờ tràn ngang
+    const size = (film && film.subSize) || 78;
     const name = sp.who && film.cast && film.cast[sp.who] && film.cast[sp.who].name;
-    lines.forEach((l, i) => ctx.fillText((i === 0 && name ? name + ": " : "") + l, W / 2, y + 15 + size + i * size * 1.3));
+    const lines = wrapText(ctx, (name ? name + ": " : "") + sp.text, 1720, size).slice(-2);
+    const h = lines.length * size * 1.3 + 30, y = H - h - 24;
+    ctx.save(); ctx.fillStyle = "rgba(10,10,20,.62)"; roundRect(ctx, 40, y, W - 80, h, 18); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.font = `${size}px ${FONT}`; ctx.textAlign = "center";
+    lines.forEach((l, i) => ctx.fillText(l, W / 2, y + 15 + size + i * size * 1.3));
     ctx.restore();
   }
   function drawTitle(ctx, T) {

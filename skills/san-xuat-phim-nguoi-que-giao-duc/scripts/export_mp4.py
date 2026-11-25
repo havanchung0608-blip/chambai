@@ -272,6 +272,20 @@ def music_bed(total):
     return out[:int(SR * total)] * 0.05
 
 
+def _voice_clip(a, target_rms=0.19):
+    """Giọng đọc rõ, to, đều: chuẩn hoá độ lớn từng câu + nén nhẹ (đỉnh không vỡ tiếng)."""
+    a = a.astype(np.float32)
+    if len(a) == 0:
+        return a
+    loud = np.abs(a) > 0.01
+    rms = float(np.sqrt(np.mean(a[loud] ** 2))) if loud.any() else 0.0
+    if rms > 1e-4:
+        a = a * (target_rms / rms)
+    # nén mềm: phần to bị ép lại, phần nhỏ (cuối câu, phụ âm) được nâng → nghe "dày", nổi trên nhạc
+    a = np.tanh(a * 1.6) / np.tanh(1.6)
+    return a * 0.92
+
+
 def mix(total, says, files, sfx_events, music):
     n = int(SR * (total + 0.5))
     voice = np.zeros(n, np.float32)
@@ -280,12 +294,15 @@ def mix(total, says, files, sfx_events, music):
         fp = files.get(s["id"])
         if not fp:
             continue
-        a = decode(fp); st = int(s["t"] * SR)
+        a = _voice_clip(decode(fp)); st = int(s["t"] * SR)
         voice[st:st + len(a)] += a[: max(0, n - st)]
     for e in sfx_events:
         a = sfx(e["name"], e.get("dur", 1), e.get("len")) * float(e.get("vol") or 1); st = int(e["t"] * SR)
         fx[st:st + len(a)] += a[: max(0, n - st)]
-    out = voice * 1.0 + fx * 0.8
+    # GIỌNG LÀ CHÍNH: khi có lời đọc, tiếng động lùi xuống ~45 %, nhạc nền lùi xuống ~20 %
+    talk = np.convolve((np.abs(voice) > 0.02).astype(np.float32), np.ones(int(SR * 0.25)) / (SR * 0.25), "same")
+    talk = np.clip(talk * 3, 0, 1)
+    out = voice * 1.0 + fx * 0.6 * (1 - 0.55 * talk)
     if music:
         key = music if isinstance(music, str) else None
         src = BANK.get("music_" + key) if key else None
@@ -293,15 +310,13 @@ def mix(total, says, files, sfx_events, music):
             src = BANK.get(key)
         if src is not None and len(src) > SR:
             reps = int(np.ceil(n / len(src))) + 1
-            m = np.tile(src, reps)[:n] * 0.55
+            m = np.tile(src, reps)[:n] * 0.4
             fade = min(n, int(SR * 2)); m[-fade:] *= np.linspace(1, 0, fade)
         else:
-            m = music_bed(total + 0.5)[:n]
-        duck = np.convolve((np.abs(voice) > 0.01).astype(np.float32), np.ones(int(SR * 0.3)) / (SR * 0.3), "same")
-        out += m * (1 - 0.55 * np.clip(duck * 3, 0, 1))
-    peak = np.abs(out).max()
-    if peak > 0.98:
-        out *= 0.98 / peak
+            m = music_bed(total + 0.5)[:n] * 0.75
+        out += m * (1 - 0.8 * talk)
+    # giới hạn mềm thay vì hạ cả bản: tiếng nổ lớn không làm giọng nhỏ đi
+    out = np.tanh(out * 1.05) / np.tanh(1.05) * 0.97
     return out
 
 
