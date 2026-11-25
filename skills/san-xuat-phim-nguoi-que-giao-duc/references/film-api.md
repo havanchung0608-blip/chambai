@@ -105,6 +105,8 @@ Tư thế: `guard` (thủ thế, nhún), `punch` (đấm thẳng), `punch2` (đ�
 | `arrow` | `dx`, `dy`, `label`, `color` | chỉ hướng, mũi tên suy luận |
 | `apple`, `coin`, `money` (`label`), `book`, `star`, `bulb`, `heart`, `check`, `cross`, `question` | | minh hoạ |
 | `table`, `tree`, `house`, `car` (`spin`) | | bối cảnh |
+| `skateboard` | `color`; tween `x` để ván tự lăn (bánh xe quay theo x) | gag ván trượt bỏ chạy |
+| `panel` | `w`, `h`, `title`, `titleColor`, `size`, `border` | khung công thức kiểu Manim (nền tối bo góc) |
 | `image` | `src` (URL hoặc data:), `w`, `h` | ảnh ngoài (hạn chế: làm file phụ thuộc mạng) |
 
 ## 8. Phông nền (`bg`)
@@ -118,7 +120,16 @@ Không hỗ trợ: ma trận, hệ phương trình nhiều dòng (viết thành 
 ## 10. Âm thanh
 Tiếng thật TiengDong.com (sau khi chạy `fetch_tiengdong.py`): `punch` (tự xoay vòng punch/punch2/punch3/boxing), `kickhit`, `swish`, `swish2`, `fall`, `bell`, `crowd`, `ko`, `victory`, `tension`, `action`, `kungfu`, `wrong`. Tổng hợp: `step`, `steprun`, `jump`, `land` (tự có khi di chuyển), `pop`, `ding` (chốt kiến thức), `correct`, `wrong`, `tick`, `boing`, `tada`, `bell` (vào tiết), `click`, `step`, `whoosh` (chuyển cảnh), `marker`/`chalk` (tự có khi viết), `applause`.
 
+## 10b. Bảng công thức Manim gắn màn hình (không bao giờ bị máy quay cắt)
+- Mọi đạo cụ có `screen: true` được vẽ theo toạ độ MÀN HÌNH 1920×1080, sau lớp thế giới: máy quay zoom/lia không làm lệch, không cắt chữ.
+- Mẫu: `show: [{ id: "pn", type: "panel", screen: true, x: 1460, y: 420, w: 820, h: 600, title: "Thay x = −2:" }, { id: "l1", type: "text", screen: true, text: "y = 2·(−2)^2", x: 1110, y: 300, align: "left", size: 86, anim: "write" }]`.
+- Các dòng biến đổi: `anim: { do: "transform", id: "l2", to: { text: "= 2·4" }, at: 0.6 }` rồi `{ do: "circumscribe", id: "l3" }`; đổi tiêu đề khung bằng `set: { id: "pn", title: "Thay x = −1:" }`.
+- `text` có `panel: true` → tự vẽ nền tối bo góc vừa khít công thức. `graph` có `glow: 22` (phát sáng); `dot` tự phát sáng trên nền tối.
+- `show` nhận `at` (giây) để hiện trễ trong cùng nhịp — dùng để viết lần lượt từng dòng.
+- Tư thế hài: `dance` (nhảy múa), `tired` (thở dốc, cúi người), kèm `dizzy`, `facepalm`, `lie` (ngất).
+
 ## 11. Mẹo bố cục
+- Phụ đề chiếm từ y ≈ 925 (1 dòng) / 823 (2 dòng) trở xuống: nhân vật ở cảnh nền bảng nên đứng trên bục (`box` tại y 940, nhân vật y 880) và giữ phụ đề 1 dòng.
 - Hai nhân vật đối thoại: x ≈ 650 và 1270, người bên phải `flip: true`.
 - Bong bóng tự né mép; lời > 4 dòng bong bóng sẽ tự ẩn, chỉ còn phụ đề → tách câu.
 - Đạo cụ "trên bàn": bàn `table` ở y 960 cao 190 → đặt đồ ở y ≈ 690–740.
