@@ -69,6 +69,20 @@
   const rulerOut = (extra) => Object.assign({
     anim: [{ do: "move", id: "ru", x: 2500, y: -200, rot: 540, scale: 0.4, dur: 0.7, sfx: false }, { do: "fadeout", id: "pc", dur: 0.3, sfx: false }],
     sfx: [{ name: "whoosh" }], wait: 0.1, gap: 0 }, extra || {});
+  // ---------- THƯỚC PARABOL: thước cong bay vào, đỉnh thước trùng O, phấn chạy dọc mép cong vẽ đồ thị ----------
+  const prTrace = (gid, ax, M, fn, x0, x1, color, D, flashes, from, say) => [
+    { show: { id: "pr", type: "pruler", axes: ax, fn, x0, x1, x: from[0], y: from[1], rot: -540, scale: 0.3, pop: false, sfx: false, z: 4 },
+      anim: { do: "move", id: "pr", x: M(0, 0)[0], y: M(0, 0)[1], rot: 0, scale: 1, dur: 1.0, sfx: false },
+      act: { thay: { pose: "give" } }, sfx: [{ name: "swish" }, { name: "magic", at: 0.1, vol: 0.7 }, { name: "click", at: 1.0 }, { name: "click", at: 1.07 }],
+      fx: { type: "hit", x: M(0, 0)[0], y: M(0, 0)[1] + 40, at: 1.0, dur: 0.5, color }, shake: { at: 1.0, amp: 8, dur: 0.2 }, wait: 0.3, gap: 0 },
+    Object.assign({ show: [{ id: gid, type: "graph", axes: ax, fn, x0, x1, color, width: 11, glow: 22, z: 5, anim: "create", dur: D, sfx: "chalk" },
+        { id: "pc", type: "pencil", follow: gid, x: M(x0, 0)[0], y: M(x0, 0)[1], z: 6, pop: false, sfx: false }],
+      anim: flashes.map(([id, at]) => ({ do: "flash", id, at, dur: 0.5, sfx: "ding" })), act: { thay: { pose: "point" } }, gap: 0 }, say),
+    { anim: [{ do: "move", id: "pr", x: 2500, y: -300, rot: 360, scale: 0.4, dur: 0.8, sfx: false }, { do: "fadeout", id: "pc", dur: 0.3, sfx: false }],
+      sfx: [{ name: "whoosh" }, { name: "shimmer", at: 0.3 }], wait: 0.2, gap: 0 },
+    { hide: ["pc", "pr"], wait: 0.1, gap: 0 }
+  ];
+
   // kẻ hai trục bằng thước rồi hiện vạch chia, nhãn (Manim fade-in)
   const axesByRuler = (AX, from, sayX, sayY) => {
     const M = mapper(AX), y0 = M(0, 0)[1], x0 = M(0, 0)[0];
@@ -201,16 +215,18 @@
             fx: [{ type: "hit", on: "bin", part: "chest", text: "OÁI!", dur: 0.8 }, { type: "dust", on: "bin", part: "legs", dy: 100, dur: 0.7 }], shake: { amp: 26, dur: 0.45 },
             sfx: [{ name: "fall" }, { name: "ko", at: 0.2, vol: 0.8 }, { name: "boing", at: 0.4 }], show: { id: "x1", type: "cross", x: 1280, y: 760, scale: 1.2, sfx: "wrong" }, wait: 1.2, gap: 0 },
           { who: "bin", say: "Ui da! Vấp ở góc nhọn rồi!", sub: "Ui da! Vấp ở góc nhọn rồi!", bubble: false, act: { bin: { pose: "dizzy", face: "sad" } }, emote: { who: "bin", icon: "?" } },
-          { who: "na", say: "Thước chỉ để kẻ trục thôi Bin! Parabol là đường cong trơn, không có góc nhọn!", sub: "Thước chỉ để kẻ trục! Parabol cong trơn", bubble: false, pose: "pointup", cam: { x: 960, y: 540, zoom: 1, dur: 1.0 } },
-          { who: "thay", say: "Đúng! Nối bằng một đường cong trơn. Cả lớp, lên ván nào!", sub: "Nối bằng một đường cong trơn!", bubble: false, pose: "cheer",
-            act: { bin: { pose: "idle", face: "happy", snap: 0.5 } }, hide: "x1", anim: ["b1", "b2", "b3", "b4"].map((id) => ({ do: "fadeout", id, dur: 0.6 })) },
+          { who: "na", say: "Thước thẳng chỉ để kẻ trục thôi Bin! Parabol là đường cong trơn, không có góc nhọn!", sub: "Thước thẳng chỉ kẻ trục! Parabol cong trơn", bubble: false, pose: "pointup", cam: { x: 960, y: 540, zoom: 1, dur: 1.0 } },
+          { who: "thay", say: "Đúng! Phải nối bằng một đường cong trơn. Thầy có bảo bối đây: thước parabol!", sub: "Nối bằng đường cong trơn: thước parabol!", bubble: false, pose: "pointup",
+            emote: { who: "thay", icon: "!" }, act: { bin: { pose: "idle", face: "happy", snap: 0.5 } }, move: { who: "bin", to: col(4), y: TB_Y, dur: 1.2, style: "jump", height: 260, spin: 360 }, hide: "x1", anim: ["b1", "b2", "b3", "b4"].map((id) => ({ do: "fadeout", id, dur: 0.6 })) },
+          ...prTrace("g1", "ax", M1, "2*x^2", -2.05, 2.05, YEL, 3.6, [["p0", 0.1], ["p1", 1.45], ["p2", 1.8], ["p3", 2.15], ["p4", 3.5]], [POD_X + 40, POD_Y - 150],
+            { who: "thay", say: "Đặt đỉnh thước trùng gốc O, phấn chạy dọc mép cong, đi qua đủ năm điểm.", sub: "Đỉnh thước trùng O, phấn qua đủ 5 điểm", bubble: false }),
+          { who: "bin", say: "Oa! Cong đẹp quá! Cả lớp lên ván kiểm tra nào!", sub: "Oa! Lên ván kiểm tra nào!", bubble: false, pose: "cheer", face: "happy", sfx: [{ name: "wow", vol: 0.6 }] },
           { move: [{ who: "thay", to: M1(-2.05, f1(-2.05))[0], y: M1(-2.05, f1(-2.05))[1], dur: 1.3, style: "jump", height: 300, spin: 360 },
                    { who: "na", to: M1(-2.05, f1(-2.05))[0] - 8, y: M1(-2.05, f1(-2.05))[1], dur: 1.4, style: "jump", height: 280, spin: -360 },
                    { who: "bin", to: M1(-2.05, f1(-2.05))[0] - 16, y: M1(-2.05, f1(-2.05))[1], dur: 1.5, style: "jump", height: 300, spin: 360 }],
             act: { thay: { skate: true }, na: { skate: true }, bin: { skate: true } }, cam: { x: 1400, y: 540, zoom: 1.15, dur: 1.0, letterbox: true }, sfx: [{ name: "swish" }, { name: "swish2", at: 0.2 }, { name: "land", at: 1.4 }] },
           { who: "na", say: "Wiii! Ván trượt qua đủ năm điểm, thành đường cong trơn: parabol!", sub: "Qua cả 5 điểm → parabol", bubble: false, pose: "skate",
-            show: { id: "g1", type: "graph", axes: "ax", fn: "2*x^2", x0: -2.05, x1: 2.05, color: YEL, width: 11, glow: 22, _prog: 0, pop: false, sfx: false },
-            ride: [{ who: "thay", graph: "g1", from: -2.05, to: 2.05, dur: 4.0 }, { who: "na", graph: "g1", from: -2.05, to: 1.95, dur: 4.0, delay: 0.5, trail: false }, { who: "bin", graph: "g1", from: -2.05, to: 1.85, dur: 4.0, delay: 1.0, trail: false }],
+            ride: [{ who: "thay", graph: "g1", from: -2.05, to: 2.05, dur: 4.0, trail: false }, { who: "na", graph: "g1", from: -2.05, to: 1.95, dur: 4.0, delay: 0.5, trail: false }, { who: "bin", graph: "g1", from: -2.05, to: 1.85, dur: 4.0, delay: 1.0, trail: false }],
             fx: [{ type: "speed", on: "thay", dir: 1, at: 1.3, dur: 1.4 }],
             anim: [{ do: "flash", id: "p1", at: 1.45, dur: 0.5, sfx: "ding" }, { do: "flash", id: "p2", at: 2.0, dur: 0.5, sfx: "ding" }, { do: "flash", id: "p3", at: 2.55, dur: 0.5, sfx: "ding" }, { do: "flash", id: "p4", at: 3.9, dur: 0.5, sfx: "ding" }],
             sfx: [{ name: "wow", at: 2.0, vol: 0.7 }] },
@@ -258,14 +274,15 @@
           hop(2, false, 0.5, "bin"), plotHit("ax2", M2, P2[2], 2, CYAN, undefined, true, "bin"),
           { who: "thay", say: "Lần này đỉnh O là điểm cao nhất hay thấp nhất?", sub: "O cao nhất hay thấp nhất?", bubble: false, pose: "ask" },
           { who: "bin", say: "Cao nhất ạ! Vì a âm!", sub: "Cao nhất! Vì a < 0", bubble: false, pose: "cheer", face: "happy" },
-          { who: "thay", say: "Đúng! Cả lớp leo đồi kiểm tra nào!", sub: "Leo đồi kiểm tra nào!", bubble: false, pose: "cheer",
+          ...prTrace("g2", "ax2", M2, "-0.5*x^2", -4.05, 4.05, CYAN, 3.0, [["r0", 0.1], ["r1", 1.2], ["r2", 1.5], ["r3", 1.8], ["r4", 2.9]], [POD_X + 40, POD_Y - 150],
+            { who: "thay", say: "Lật ngược thước parabol, đỉnh trùng O, vẽ một đường cong trơn qua năm điểm!", sub: "Lật ngược thước parabol, vẽ qua 5 điểm", bubble: false }),
+          { who: "thay", say: "Cả lớp leo đồi kiểm tra nào!", sub: "Leo đồi kiểm tra nào!", bubble: false, pose: "cheer",
             move: [{ who: "thay", to: M2(-4.05, f2(-4.05))[0], y: M2(-4.05, f2(-4.05))[1], dur: 1.3, style: "jump", height: 260, spin: 360 },
                    { who: "na", to: M2(-4.05, f2(-4.05))[0] - 8, y: M2(-4.05, f2(-4.05))[1], dur: 1.4, style: "jump", height: 300, spin: -360 },
                    { who: "bin", to: M2(-4.05, f2(-4.05))[0] - 16, y: M2(-4.05, f2(-4.05))[1], dur: 1.5, style: "jump", height: 300, spin: 360 }],
             act: { thay: { skate: true }, na: { skate: true }, bin: { skate: true } }, sfx: [{ name: "swish" }, { name: "swish2", at: 0.2 }, { name: "land", at: 1.4 }], cam: { x: 1380, y: 500, zoom: 1.0, dur: 1.0, letterbox: true } },
           { who: "na", say: "Leo dốc nào!", sub: "Leo dốc nào!", bubble: false, pose: "skate",
-            show: { id: "g2", type: "graph", axes: "ax2", fn: "-0.5*x^2", x0: -4.05, x1: 4.05, color: CYAN, width: 11, glow: 22, _prog: 0, pop: false, sfx: false },
-            ride: [{ who: "thay", graph: "g2", from: -4.05, to: -1.7, dur: 2.6, ease: "out" }, { who: "na", graph: "g2", from: -4.05, to: -2.2, dur: 2.6, delay: 0.4, ease: "out", trail: false }, { who: "bin", graph: "g2", from: -4.05, to: -2.6, dur: 2.6, delay: 0.8, ease: "out", trail: false }],
+            ride: [{ who: "thay", graph: "g2", from: -4.05, to: -1.7, dur: 2.6, ease: "out", trail: false }, { who: "na", graph: "g2", from: -4.05, to: -2.2, dur: 2.6, delay: 0.4, ease: "out", trail: false }, { who: "bin", graph: "g2", from: -4.05, to: -2.6, dur: 2.6, delay: 0.8, ease: "out", trail: false }],
             sfx: [{ name: "tension", vol: 0.5 }] },
           // GAG: thầy hết hơi giữa dốc, hai trò đẩy lên
           { who: "thay", say: "Hộc hộc... dốc quá! Thầy hết hơi rồi!", sub: "Hộc hộc... dốc quá! Hết hơi rồi!", bubble: false, act: { thay: { pose: "tired", face: "worried" } },

@@ -107,6 +107,7 @@ Tư thế: `guard` (thủ thế, nhún), `punch` (đấm thẳng), `punch2` (đ�
 | `table`, `tree`, `house`, `car` (`spin`) | | bối cảnh |
 | `skateboard` | `color`; tween `x` để ván tự lăn (bánh xe quay theo x) | gag ván trượt bỏ chạy |
 | `ruler` (thước kẻ trong suốt có vạch mm/cm) | `w` (dài), `unit` (px/cm), `rot`; gốc (0,0) = vạch 0 trên mép kẻ | kẻ trục, đoạn thẳng: `move` thước tới A với `rot` = góc AB, rồi `seg` `create` + `pencil` `move` cùng thời lượng |
+| `pruler` (thước parabol / thước cong) | `axes`, `fn`, `x0`, `x1`, `thick`, `color`, `text`; gốc (0,0) = ĐỈNH → đặt x, y = điểm O trên màn hình; a < 0 tự lật ngược | vẽ đồ thị y = ax²: thước bay vào (`move` x, y, rot, scale), rồi `graph` `create` + `pencil` có `follow: "<id đồ thị>"` (phấn bám đúng đầu nét đang vẽ) |
 | `pencil` (phấn/bút chì) | `color`, `lead`; đầu nhọn tại (0,0) | đi dọc mép thước khi kẻ |
 | `panel` | `w`, `h`, `title`, `titleColor`, `size`, `border` | khung công thức kiểu Manim (nền tối bo góc) |
 | `image` | `src` (URL hoặc data:), `w`, `h` | ảnh ngoài (hạn chế: làm file phụ thuộc mạng) |

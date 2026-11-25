@@ -747,9 +747,9 @@
     if (pts.length < 2 || prog <= 0) return;
     const P = close ? pts.concat([pts[0]]) : pts; let L = 0; const seg = [];
     for (let i = 1; i < P.length; i++) { const d = Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); seg.push(d); L += d; }
-    let left = L * clamp(prog, 0, 1); ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]);
-    for (let i = 1; i < P.length && left > 0; i++) { const d = seg[i - 1]; if (d <= left) { ctx.lineTo(P[i][0], P[i][1]); left -= d; } else { const k = left / d; ctx.lineTo(lerp(P[i - 1][0], P[i][0], k), lerp(P[i - 1][1], P[i][1], k)); left = 0; } }
-    ctx.stroke();
+    let left = L * clamp(prog, 0, 1), tip = P[0]; ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]);
+    for (let i = 1; i < P.length && left > 0; i++) { const d = seg[i - 1]; if (d <= left) { ctx.lineTo(P[i][0], P[i][1]); left -= d; tip = P[i]; } else { const k = left / d; tip = [lerp(P[i - 1][0], P[i][0], k), lerp(P[i - 1][1], P[i][1], k)]; ctx.lineTo(tip[0], tip[1]); left = 0; } }
+    ctx.stroke(); return tip;
   }
   function graphPts(G, A) {
     const M = axesMap(A), f1 = mfn(G.fn || "x"), f2 = G._fn2 ? mfn(G._fn2) : null, mix = G._mix == null ? 1 : G._mix;
@@ -776,7 +776,7 @@
       if (it.glow) { ctx.shadowColor = col; ctx.shadowBlur = it.glow === true ? 18 : it.glow; }
       const runs = []; let cur = []; pts.forEach((p) => { if (!p) { if (cur.length > 1) runs.push(cur); cur = []; } else cur.push(p); }); if (cur.length > 1) runs.push(cur);
       const total = runs.reduce((s, r) => s + r.length, 0); let budget = (it._prog == null ? 1 : it._prog) * total;
-      runs.forEach((r) => { if (budget <= 0) return; const n = Math.min(r.length, budget); strokeProg(ctx, r, n >= r.length ? 1 : n / r.length); budget -= r.length; });
+      runs.forEach((r) => { if (budget <= 0) return; const n = Math.min(r.length, budget); const tp = strokeProg(ctx, r, n >= r.length ? 1 : n / r.length); if (tp) it._tip = [(A.x || 0) + tp[0], (A.y || 0) + tp[1]]; budget -= r.length; });
       if (it.label && (it._prog == null || it._prog >= 1)) { const l = runs.length ? runs[runs.length - 1] : null; if (l) { const e = l[l.length - 1]; drawTex(ctx, it.label, e[0] + 20, e[1] - 20, it.size || 56, col, "left", 1); } }
     },
     table(ctx, it) {
@@ -1028,6 +1028,22 @@
       ctx.fillStyle = "#3e2723"; ctx.font = `bold 22px ${FONT}`; ctx.textAlign = "center";
       for (let i = 0; i <= n; i++) ctx.fillText(String(i), i * u, 54);
       ctx.font = `italic 18px ${FONT}`; ctx.textAlign = "left"; ctx.fillText("cm", L - 30, h - 6);
+    },
+    // THƯỚC PARABOL (thước cong): mép cong trùng đồ thị fn trên hệ trục `axes`; gốc (0,0) của đạo cụ = ĐỈNH parabol,
+    // nên đặt x, y = toạ độ điểm O trên màn hình; bay vào bằng anim "move" (x, y, rot, scale)
+    pruler(ctx, it) {
+      const A = CUR_ITEMS[it.axes]; if (!A) return; const M = axesMap(A), f = mfn(it.fn || "x^2"), x0 = it.x0 != null ? it.x0 : -2, x1 = it.x1 != null ? it.x1 : 2;
+      const ox = M.sx(0), oy = M.sy(f(0)), sgn = f(1) - f(0) >= 0 ? 1 : -1, T = it.thick || 70, pts = [];
+      for (let i = 0; i <= 160; i++) { const v = lerp(x0, x1, i / 160), y = f(v); if (!isFinite(y) || y < M.ymin - 0.6 || y > M.ymax + 0.6) continue; pts.push([M.sx(v) - ox, M.sy(y) - oy]); }
+      if (pts.length < 3) return;
+      const outer = pts.map((p, i) => { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)]; let tx = b[0] - a[0], ty = b[1] - a[1]; const l = Math.hypot(tx, ty) || 1; tx /= l; ty /= l; return [p[0] - ty * T * sgn, p[1] + tx * T * sgn]; });
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = 18; ctx.shadowOffsetY = 6;
+      ctx.fillStyle = it.color || "rgba(129,212,250,.62)"; ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); outer.slice().reverse().forEach((p) => ctx.lineTo(p[0], p[1])); ctx.closePath(); ctx.fill(); ctx.restore();
+      ctx.strokeStyle = "#01579b"; ctx.lineWidth = 3; ctx.stroke();
+      ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = 5; ctx.beginPath(); outer.forEach((p, i) => { const q = [lerp(pts[i][0], p[0], 0.78), lerp(pts[i][1], p[1], 0.78)]; i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.stroke();
+      ctx.strokeStyle = "#01579b"; ctx.lineWidth = 2; pts.forEach((p, i) => { if (i % 8) return; const o = outer[i], k = i % 40 === 0 ? 0.42 : 0.22; ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(lerp(p[0], o[0], k), lerp(p[1], o[1], k)); ctx.stroke(); });
+      const mid = outer[Math.floor(outer.length / 2)]; ctx.fillStyle = "#01579b"; ctx.font = `bold 30px ${FONT}`; ctx.textAlign = "center"; ctx.fillText(it.text || "THƯỚC PARABOL", mid[0], mid[1] - sgn * T * 0.38 + 9);
+      ctx.beginPath(); ctx.arc(mid[0] + 120, mid[1] - sgn * T * 0.45, 9, 0, 7); ctx.stroke();
     },
     // PHẤN/BÚT CHÌ: đầu nhọn tại (0,0), thân chếch lên phải
     pencil(ctx, it) {
@@ -1433,6 +1449,7 @@
         if (it.fly && it._born != null) { const kf = clamp((t - it._born) / (it.flyDur || 0.7), 0, 1); if (kf < 1) { flying = true; const tx = it.x, ty = it.y; it.x = lerp(it.fly[0], tx, kf); it.y = lerp(it.fly[1], ty, kf) - Math.sin(Math.PI * kf) * (it.arc || 220); } }
         if (it.guides !== false && !flying) { const k = it._pop == null ? 1 : Math.min(1, it._pop); ctx.save(); ctx.setLineDash([14, 10]); ctx.lineWidth = 4; ctx.strokeStyle = it.guideColor || "rgba(255,255,255,.75)"; ctx.globalAlpha *= clamp(k, 0, 1) * (it.alpha == null ? 1 : it.alpha);
           const x0 = (A.x || 0) + M.sx(0), y0 = (A.y || 0) + M.sy(0); ctx.beginPath(); ctx.moveTo(it.x, it.y); ctx.lineTo(it.x, y0); ctx.moveTo(it.x, it.y); ctx.lineTo(x0, it.y); ctx.stroke(); ctx.restore(); } }
+      if (it.follow && S.items[it.follow] && S.items[it.follow]._tip) { it.x = S.items[it.follow]._tip[0]; it.y = S.items[it.follow]._tip[1]; }
       if (it.type === "dot" && it.on && S.items[it.on]) { const G = S.items[it.on], A = S.items[G.axes]; if (A) { const M = axesMap(A), u = it.u != null ? it.u : 0; let y = mfn(G.fn || "x")(u); if (G._fn2) y = lerp(y, mfn(G._fn2)(u), G._mix || 0); it.x = (A.x || 0) + M.sx(u); it.y = (A.y || 0) + M.sy(y); } }
       drawItem(ctx, it, life);
       drawManimFx(ctx, it);
