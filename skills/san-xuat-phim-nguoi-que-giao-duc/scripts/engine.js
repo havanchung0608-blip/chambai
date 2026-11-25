@@ -804,7 +804,7 @@
       }));
     },
     dot(ctx, it) { const r = it.r || 15; ctx.fillStyle = it.color || "#ff5252"; if (DARK || it.glow) { ctx.shadowColor = it.color || "#ff5252"; ctx.shadowBlur = 14; } ctx.beginPath(); ctx.arc(0, 0, r * (it._prog == null ? 1 : it._prog), 0, 7); ctx.fill(); if (it.label) { const L = it.labelSide === "left"; drawTex(ctx, it.label, L ? -24 : 24, -24, it.size || 52, it.color || "#ff5252", L ? "right" : "left", it._lp == null ? 1 : it._lp); } },
-    seg(ctx, it) { ctx.strokeStyle = it.color || (DARK ? "#fff" : INK); ctx.lineWidth = it.width || 6; strokeProg(ctx, [[it.x1 || 0, it.y1 || 0], [it.x2 || 200, it.y2 || 0]], it._prog == null ? 1 : it._prog); },
+    seg(ctx, it) { ctx.strokeStyle = it.color || (DARK ? "#fff" : INK); ctx.lineWidth = it.width || 6; if (it.dash) ctx.setLineDash([18, 12]); strokeProg(ctx, [[it.x1 || 0, it.y1 || 0], [it.x2 || 200, it.y2 || 0]], it._prog == null ? 1 : it._prog); },
     poly(ctx, it) {
       const P = it.points || [[0, -120], [-140, 100], [140, 100]], pr = it._prog == null ? 1 : it._prog, col = it.color || (DARK ? "#58c4dd" : "#1e88e5");
       if (it.fill && pr >= 1) { ctx.save(); ctx.globalAlpha *= it.fillAlpha || 0.35; ctx.fillStyle = it.fill === true ? col : it.fill; ctx.beginPath(); P.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath(); ctx.fill(); ctx.restore(); }
@@ -1016,6 +1016,29 @@
     sign(ctx, it) { const w = it.w || 420, h = it.h || 130; ctx.lineWidth = 6; ctx.strokeStyle = INK; hline(ctx, [[0, h / 2], [0, h / 2 + 140]], it._seed); hrect(ctx, -w / 2, -h / 2, w, h, it._seed + 1, it.color || "#fff8e1"); drawTex(ctx, it.text || "", 0, 22, it.size || 60, INK, "center", 1); },
     card(ctx, it) { const w = it.w || 520, h = it.h || 140; ctx.save(); ctx.shadowColor = "rgba(0,0,0,.18)"; ctx.shadowBlur = 18; ctx.fillStyle = it.color || "#fffef6"; roundRect(ctx, -w / 2, -h / 2, w, h, 22); ctx.fill(); ctx.restore(); ctx.lineWidth = 5; ctx.strokeStyle = it.border || "#f2a900"; roundRect(ctx, -w / 2, -h / 2, w, h, 22); ctx.stroke(); drawTex(ctx, it.text || "", 0, (it.size || 64) * 0.35, it.size || 64, it.textColor || INK, "center", 1); },
     panel(ctx, it) { const w = it.w || 800, h = it.h || 500; ctx.save(); ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 30; ctx.fillStyle = it.color || "rgba(8,22,16,.9)"; roundRect(ctx, -w / 2, -h / 2, w, h, 34); ctx.fill(); ctx.restore(); ctx.strokeStyle = it.border || "rgba(255,241,118,.7)"; ctx.lineWidth = 4; roundRect(ctx, -w / 2, -h / 2, w, h, 34); ctx.stroke(); if (it.title) drawTex(ctx, it.title, -w / 2 + 40, -h / 2 + 70, it.size || 54, it.titleColor || "#80deea", "left", 1); },
+    // THƯỚC KẺ trong suốt: gốc (0,0) là vạch 0 nằm trên MÉP KẺ, thước kéo dài theo trục x cục bộ (xoay bằng rot)
+    ruler(ctx, it) {
+      const L = it.w || 820, h = it.h || 78, u = it.unit || 40, n = Math.floor(L / u);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6;
+      ctx.fillStyle = it.color || "rgba(255,228,120,.78)"; roundRect(ctx, -24, 0, L + 48, h, 8); ctx.fill(); ctx.restore();
+      ctx.strokeStyle = "#8d6e00"; ctx.lineWidth = 3; roundRect(ctx, -24, 0, L + 48, h, 8); ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,.35)"; ctx.fillRect(-20, h - 16, L + 40, 7);              // vệt sáng mặt nhựa
+      ctx.strokeStyle = "#3e2723"; ctx.lineWidth = 2;
+      for (let i = 0; i <= n * 10; i++) { const x = (i * u) / 10, len = i % 10 === 0 ? 30 : i % 5 === 0 ? 20 : 11; if (x > L + 1) break; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, len); ctx.stroke(); }
+      ctx.fillStyle = "#3e2723"; ctx.font = `bold 22px ${FONT}`; ctx.textAlign = "center";
+      for (let i = 0; i <= n; i++) ctx.fillText(String(i), i * u, 54);
+      ctx.font = `italic 18px ${FONT}`; ctx.textAlign = "left"; ctx.fillText("cm", L - 30, h - 6);
+    },
+    // PHẤN/BÚT CHÌ: đầu nhọn tại (0,0), thân chếch lên phải
+    pencil(ctx, it) {
+      ctx.save(); ctx.rotate(rad(-58)); ctx.lineWidth = 3; ctx.strokeStyle = "#3e2723";
+      ctx.fillStyle = "#ffe0b2"; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(30, -11); ctx.lineTo(30, 11); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = it.lead || "#f5f5ec"; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(11, -4); ctx.lineTo(11, 4); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = it.color || "#ffca28"; ctx.fillRect(30, -11, 120, 22); ctx.strokeRect(30, -11, 120, 22);
+      ctx.fillStyle = "rgba(255,255,255,.4)"; ctx.fillRect(32, -9, 116, 6);
+      ctx.fillStyle = "#b0bec5"; ctx.fillRect(150, -11, 14, 22); ctx.strokeRect(150, -11, 14, 22);
+      ctx.fillStyle = "#f48fb1"; roundRect(ctx, 164, -11, 20, 22, 6); ctx.fill(); ctx.stroke(); ctx.restore();
+    },
     skateboard(ctx, it) { ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.fillStyle = it.color || "#ff7043"; roundRect(ctx, -78, -34, 156, 14, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = "#ffeb3b"; [-48, 48].forEach((wx) => { ctx.save(); ctx.translate(wx, -11); ctx.rotate((it.x || 0) / 10); ctx.beginPath(); ctx.arc(0, 0, 10, 0, 7); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(8, 0); ctx.stroke(); ctx.restore(); }); },
     table(ctx, it) { const w = it.w || 420, h = it.h || 190; ctx.lineWidth = 6; ctx.strokeStyle = INK; hrect(ctx, -w / 2, -h, w, 22, it._seed, it.color || "#b07a43"); hline(ctx, [[-w / 2 + 30, -h + 22], [-w / 2 + 30, 0]], it._seed + 1); hline(ctx, [[w / 2 - 30, -h + 22], [w / 2 - 30, 0]], it._seed + 2); },
     tree(ctx, it) { tree(ctx, 0, 0, it.s || 1, it._seed); },

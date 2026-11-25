@@ -16,6 +16,7 @@
   const AX1 = { id: "ax", type: "axes", x: 1450, y: 580, w: 760, h: 600, xmin: -3, xmax: 3, ymin: -0.5, ymax: 8.5, step: 1, stepY: 2, size: 56, xlabel: "x", ylabel: "y", color: "#f5f5ec" };
   const AX2 = { id: "ax2", type: "axes", x: 1460, y: 600, w: 780, h: 600, xmin: -5, xmax: 5, ymin: -8.5, ymax: 0.5, step: 1, stepY: 2, size: 56, xlabel: "x", ylabel: "y", color: "#f5f5ec" };
   const M1 = mapper(AX1), M2 = mapper(AX2);
+  const Q1 = [[-2, 8], [-1, 2], [0, 0], [1, 2], [2, 8]].map((p) => M1(p[0], p[1]));
   const P1 = [[-2, 8], [-1, 2], [0, 0], [1, 2], [2, 8]];
   const P2 = [[-4, -8], [-2, -2], [0, 0], [2, -2], [4, -8]];
   const f1 = (x) => 2 * x * x, f2 = (x) => -0.5 * x * x;
@@ -50,6 +51,37 @@
       wait: last ? 2.2 : 1.5, gap: 0 };
   };
   const bang = (text, x, y, color, at) => ({ type: "hit", x, y, dur: 0.7, text, color: color || "#ffd54f", at: at || 0 });
+
+  // ---------- THƯỚC KẺ + PHẤN: thước bay vào, mép thước trùng đoạn AB, đầu phấn chạy dọc mép kẻ ----------
+  const RW = 860, ang = (A, B) => Math.atan2(B[1] - A[1], B[0] - A[0]) * 180 / Math.PI;
+  const rulerIn = (A, B, from, extra) => Object.assign({
+    show: { id: "ru", type: "ruler", w: RW, x: from[0], y: from[1], rot: ang(A, B) - 720, scale: 0.25, pop: false, sfx: false, z: 5 },
+    anim: { do: "move", id: "ru", x: A[0], y: A[1], rot: ang(A, B), scale: 1, dur: 0.9, sfx: false },
+    fx: { type: "speed", x: A[0], y: A[1], dir: 1, dur: 0.6 },
+    sfx: [{ name: "swish" }, { name: "whoosh", at: 0.15 }, { name: "click", at: 0.9 }, { name: "click", at: 0.97 }], shake: { at: 0.9, amp: 6, dur: 0.15 }, wait: 0.25, gap: 0 }, extra || {});
+  const rulerMove = (A, B, extra) => Object.assign({
+    anim: [{ do: "move", id: "ru", x: A[0], y: A[1], rot: ang(A, B), dur: 0.55, sfx: false }, { do: "move", id: "pc", x: A[0], y: A[1], dur: 0.55, sfx: false }],
+    sfx: [{ name: "swish2", vol: 0.6 }, { name: "click", at: 0.55 }], wait: 0.15, gap: 0 }, extra || {});
+  const rulerDraw = (id, A, B, D, color, width, extra) => Object.assign({
+    show: [{ id: "pc", type: "pencil", x: A[0], y: A[1], z: 6, pop: false, sfx: false },
+      { id, type: "seg", x: 0, y: 0, x1: A[0], y1: A[1], x2: B[0], y2: B[1], color: color || CHALK, width: width || 5, anim: "create", dur: D, sfx: "chalk" }],
+    anim: { do: "move", id: "pc", x: B[0], y: B[1], dur: D, sfx: false }, gap: 0 }, extra || {});
+  const rulerOut = (extra) => Object.assign({
+    anim: [{ do: "move", id: "ru", x: 2500, y: -200, rot: 540, scale: 0.4, dur: 0.7, sfx: false }, { do: "fadeout", id: "pc", dur: 0.3, sfx: false }],
+    sfx: [{ name: "whoosh" }], wait: 0.1, gap: 0 }, extra || {});
+  // kẻ hai trục bằng thước rồi hiện vạch chia, nhãn (Manim fade-in)
+  const axesByRuler = (AX, from, sayX, sayY) => {
+    const M = mapper(AX), y0 = M(0, 0)[1], x0 = M(0, 0)[0];
+    const XA = [AX.x - AX.w / 2 - 20, y0], XB = [AX.x + AX.w / 2 + 44, y0], YA = [x0, AX.y + AX.h / 2 + 20], YB = [x0, AX.y - AX.h / 2 - 44];
+    return [
+      rulerIn(XA, XB, from),
+      rulerDraw("axx", XA, XB, 1.6, CHALK, 5, sayX),
+      rulerMove(YA, YB),
+      rulerDraw("axy", YA, YB, 1.4, CHALK, 5, sayY),
+      rulerOut({ show: Object.assign({}, AX, { anim: "fadein", dur: 0.8, sfx: "shimmer" }) }),
+      { hide: ["axx", "axy", "pc"], wait: 0.4, gap: 0 }
+    ];
+  };
   const Q3 = { q: "Đồ thị y = −3x² nằm ở đâu?", options: ["Phía trên trục hoành", "Phía dưới trục hoành", "Bên phải trục tung", "Đi qua điểm (1; 3)"] };
 
   window.FILM = {
@@ -142,8 +174,12 @@
           hop(4, true, 0.9, "bin"),
           calcCol("bin", "Hai: hai nhân bốn bằng tám! Lần này em đúng rồi!", "x = 2: y = 2·2² = 8", "y = 2·2^2", "= 2·4", "= 8", "2"),
           kick("tb", 5, 4, TB_Y + 168, "bin"),
-          { who: "thay", say: "Tuyệt vời! Bước hai: biểu diễn các điểm. Đá từng cột cho điểm bay lên nào!", sub: "Bước 2: Biểu diễn các điểm", bubble: false, pose: "pointup",
-            anim: fadeCalc(["l1", "l2", "l3", "pn"]), show: Object.assign({}, AX1, { anim: "create", dur: 1.0, at: 0.5 }), sfx: [{ name: "swish", at: 0.5 }] },
+          { who: "thay", say: "Tuyệt vời! Bước hai: biểu diễn các điểm. Trước hết, thầy dùng thước kẻ hệ trục toạ độ!", sub: "Bước 2: Kẻ hệ trục bằng thước", bubble: false, pose: "pointup",
+            anim: fadeCalc(["l1", "l2", "l3", "pn"]) },
+          ...axesByRuler(AX1, [POD_X + 40, POD_Y - 150],
+            { who: "thay", say: "Đặt mép thước thẳng, kẻ trục hoành O ích.", sub: "Kẻ trục hoành Ox", bubble: false, pose: "point" },
+            { who: "thay", say: "Xoay thước, kẻ trục tung O i dài.", sub: "Kẻ trục tung Oy", bubble: false, pose: "point" }),
+          { who: "thay", say: "Giờ đá từng cột cho điểm bay lên nào!", sub: "Biểu diễn các điểm", bubble: false, pose: "cheer" },
           plotHit("ax", M1, P1[4], 4, PINK, "left", false, "bin"),
           plotHit("ax", M1, P1[3], 3, PINK, undefined, false, "na"),
           hop(2, false, 0.5, "bin"), plotHit("ax", M1, P1[2], 2, PINK, undefined, false, "bin"),
@@ -154,17 +190,20 @@
             show: { id: "oy", type: "seg", x: 0, y: 0, x1: M1(0, -0.4)[0], y1: M1(0, -0.4)[1], x2: M1(0, 8.4)[0], y2: M1(0, 8.4)[1], color: CYAN, width: 6, dash: true, anim: "create", dur: 0.6 },
             anim: [{ do: "flash", id: "p0", at: 0.6, dur: 0.6, sfx: "ding" }, { do: "flash", id: "p4", at: 0.6, dur: 0.6 }, { do: "flash", id: "p1", at: 1.4, dur: 0.6, sfx: "ding" }, { do: "flash", id: "p3", at: 1.4, dur: 0.6 }] },
           { who: "thay", say: "Giỏi lắm! Bước ba: nối các điểm. Nối thế nào đây các em?", sub: "Bước 3: Nối các điểm thế nào?", bubble: false, pose: "ask", hide: "oy" },
-          { who: "bin", say: "Dễ ạ! Em nối bằng đoạn thẳng cho nhanh!", sub: "Nối bằng đoạn thẳng cho nhanh?", bubble: false, pose: "cheer",
-            show: { id: "bad", type: "poly", points: P1.map((p) => M1(p[0], p[1])), close: false, color: RED, width: 8, anim: "create", dur: 1.3 } },
+          { who: "bin", say: "Dễ ạ! Em lấy thước nối bằng đoạn thẳng cho nhanh!", sub: "Lấy thước nối đoạn thẳng cho nhanh?", bubble: false, pose: "cheer" },
+          rulerIn(Q1[0], Q1[1], [col(0), TB_Y - 120], { act: { bin: { pose: "give" } } }),
+          rulerDraw("b1", Q1[0], Q1[1], 0.55, RED, 8), rulerMove(Q1[1], Q1[2]), rulerDraw("b2", Q1[1], Q1[2], 0.45, RED, 8),
+          rulerMove(Q1[2], Q1[3]), rulerDraw("b3", Q1[2], Q1[3], 0.45, RED, 8), rulerMove(Q1[3], Q1[4]), rulerDraw("b4", Q1[3], Q1[4], 0.55, RED, 8),
+          rulerOut({ hide: "pc", act: { bin: { pose: "cheer" } } }),
           { move: { who: "bin", to: M1(-2, 8)[0], y: M1(-2, 8)[1], dur: 1.0, style: "jump", height: 220, spin: 360 }, act: { bin: { skate: true, pose: "skate" } }, sfx: [{ name: "swish" }], gap: 0 },
           { ride: { who: "bin", path: [M1(-2, 8), M1(-1, 2), M1(0, 0)], dur: 1.4, ease: "in" }, cam: { x: 1450, y: 700, zoom: 1.5, dur: 1.4 }, sfx: [{ name: "whoosh", at: 0.6 }], gap: 0 },
           { act: { bin: { pose: "lie", skate: false, tilt: 0, face: "surprised", snap: 0.12 } }, move: { who: "bin", by: 90, dur: 0.5, style: "slide" },
             fx: [{ type: "hit", on: "bin", part: "chest", text: "OÁI!", dur: 0.8 }, { type: "dust", on: "bin", part: "legs", dy: 100, dur: 0.7 }], shake: { amp: 26, dur: 0.45 },
             sfx: [{ name: "fall" }, { name: "ko", at: 0.2, vol: 0.8 }, { name: "boing", at: 0.4 }], show: { id: "x1", type: "cross", x: 1280, y: 760, scale: 1.2, sfx: "wrong" }, wait: 1.2, gap: 0 },
           { who: "bin", say: "Ui da! Vấp ở góc nhọn rồi!", sub: "Ui da! Vấp ở góc nhọn rồi!", bubble: false, act: { bin: { pose: "dizzy", face: "sad" } }, emote: { who: "bin", icon: "?" } },
-          { who: "na", say: "Parabol là đường cong trơn, không có góc nhọn đâu Bin!", sub: "Parabol là đường cong trơn, không gãy!", bubble: false, pose: "pointup", cam: { x: 960, y: 540, zoom: 1, dur: 1.0 } },
+          { who: "na", say: "Thước chỉ để kẻ trục thôi Bin! Parabol là đường cong trơn, không có góc nhọn!", sub: "Thước chỉ để kẻ trục! Parabol cong trơn", bubble: false, pose: "pointup", cam: { x: 960, y: 540, zoom: 1, dur: 1.0 } },
           { who: "thay", say: "Đúng! Nối bằng một đường cong trơn. Cả lớp, lên ván nào!", sub: "Nối bằng một đường cong trơn!", bubble: false, pose: "cheer",
-            act: { bin: { pose: "idle", face: "happy", snap: 0.5 } }, hide: "x1", anim: { do: "fadeout", id: "bad", dur: 0.6 } },
+            act: { bin: { pose: "idle", face: "happy", snap: 0.5 } }, hide: "x1", anim: ["b1", "b2", "b3", "b4"].map((id) => ({ do: "fadeout", id, dur: 0.6 })) },
           { move: [{ who: "thay", to: M1(-2.05, f1(-2.05))[0], y: M1(-2.05, f1(-2.05))[1], dur: 1.3, style: "jump", height: 300, spin: 360 },
                    { who: "na", to: M1(-2.05, f1(-2.05))[0] - 8, y: M1(-2.05, f1(-2.05))[1], dur: 1.4, style: "jump", height: 280, spin: -360 },
                    { who: "bin", to: M1(-2.05, f1(-2.05))[0] - 16, y: M1(-2.05, f1(-2.05))[1], dur: 1.5, style: "jump", height: 300, spin: 360 }],
@@ -209,7 +248,9 @@
           { who: "bin", say: "Em tính nốt! Âm hai, không, âm hai, âm tám!", sub: "y = −2; 0; −2; −8", bubble: false,
             move: { who: "bin", to: col(4), y: TB_Y, dur: 2.6, style: "run" }, tween: { id: "tb2", revealY: 5, dur: 2.8 }, anim: fadeCalc(["l1", "l2", "l3", "pn"]),
             act: { thay: { pose: "dance" } }, sfx: [{ name: "punch2", at: 0.9 }, { name: "punch", at: 1.5 }, { name: "punch2", at: 2.1 }, { name: "punch", at: 2.7 }] },
-          { show: Object.assign({}, AX2, { anim: "create", dur: 0.9 }), act: { thay: { pose: "point" } }, sfx: [{ name: "swish", at: 0.2 }], wait: 0.9, gap: 0 },
+          ...axesByRuler(AX2, [POD_X + 40, POD_Y - 150],
+            { who: "thay", say: "Thầy kẻ trục hoành bằng thước.", sub: "Kẻ trục hoành Ox bằng thước", bubble: false, pose: "point" },
+            { who: "thay", say: "Rồi trục tung.", sub: "Kẻ trục tung Oy", bubble: false, pose: "point" }),
           plotHit("ax2", M2, P2[4], 4, CYAN, "left", false, "bin"),
           plotHit("ax2", M2, P2[0], 0, CYAN, undefined, false, "na"),
           hop(3, false, 0.5, "bin"), plotHit("ax2", M2, P2[3], 3, CYAN, undefined, false, "bin"),
