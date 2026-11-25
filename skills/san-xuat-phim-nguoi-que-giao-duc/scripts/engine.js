@@ -1170,7 +1170,7 @@
           B.writes = ws; d = Math.max(d, off);
         }
         arr(b.plot).forEach((pl) => { const a0 = B.start + (pl.delay || 0), D = pl.dur || 2.4, sp = (k) => (k * D) / 2.4; sfx.push({ t: a0, name: "whoosh", vol: 0.5 }); sfx.push({ t: a0 + sp(0.75), name: "swish2", vol: 0.5 }); sfx.push({ t: a0 + sp(1.4), name: "pop" }); sfx.push({ t: a0 + sp(1.45), name: "shimmer", vol: 0.6 }); d = Math.max(d, (pl.delay || 0) + D); });
-        if (b.ride) { const rd = b.ride.dur || 3; d = Math.max(d, rd); sfx.push({ t: B.start, name: "skate", dur: rd, vol: 0.9 }); }
+        arr(b.ride).forEach((r) => { const rd = r.dur || 3, dl = r.delay || 0; d = Math.max(d, rd + dl); sfx.push({ t: B.start + dl, name: "skate", dur: rd, vol: 0.9 }); });
         if (b.move) arr(b.move).forEach((m) => {
           const dur = m.dur || 1.5; d = Math.max(d, dur);
           const c = (sc.cast || {})[m.who] || {}, base = (film.cast || {})[m.who] || {};
@@ -1304,11 +1304,12 @@
       });
       arr(b.hide).forEach((id) => { if (items[id]) items[id]._dead = B.start; });
       arr(b.set).forEach((s) => { if (items[s.id]) Object.assign(items[s.id], s); });
-      if (b.ride) {
+      arr(b.ride).forEach((r) => {
         // trượt ván dọc đồ thị (graph) hoặc đường gấp khúc (path, toạ độ màn hình); bánh xe "vẽ" nét đồ thị
-        const r = b.ride, ch = cast[r.who];
-        if (ch) {
-          const d = r.dur || 3, k0 = p(d), k = r.ease === "linear" ? k0 : r.ease === "in" ? k0 * k0 : r.ease === "out" ? 1 - (1 - k0) * (1 - k0) : easeIO(k0);
+        // nhiều người trượt cùng lúc: ride là mảng, mỗi người có thể "delay" (trượt nối đuôi)
+        const ch = cast[r.who];
+        if (ch && t >= B.start + (r.delay || 0)) {
+          const d = r.dur || 3, k0 = clamp((t - B.start - (r.delay || 0)) / d, 0, 1), k = r.ease === "linear" ? k0 : r.ease === "in" ? k0 * k0 : r.ease === "out" ? 1 - (1 - k0) * (1 - k0) : easeIO(k0);
           let X, Y, ang = 0;
           if (r.graph && items[r.graph] && items[items[r.graph].axes]) {
             const G = items[r.graph], A = items[G.axes], M = axesMap(A), f = mfn(G.fn || "x"), u = lerp(r.from, r.to, k), e = 0.01;
@@ -1323,7 +1324,7 @@
           }
           if (X != null) { ch.x = X; ch.y = Y; ch.tilt = (ang * 180) / Math.PI; if (ch.tilt > 90) ch.tilt -= 180; if (ch.tilt < -90) ch.tilt += 180; ch.skate = r.board !== false && !(k0 >= 1 && r.stay === false); ch.flip = r.to != null && r.from != null ? r.to < r.from : !!ch.flip; if (k0 >= 1 && r.stay === false) ch.tilt = 0; }
         }
-      }
+      });
       arr(b.tween).forEach((tw) => {
         const it = items[tw.id] || cast[tw.id]; if (!it) return; const k = easeIO(p(tw.dur || 0.8));
         Object.keys(tw).forEach((key) => { if (["id", "dur"].includes(key)) return; const from = it[key] == null ? (key === "scale" || key === "alpha" ? 1 : 0) : it[key]; if (typeof tw[key] === "number") it[key] = lerp(from, tw[key], k); else if (k >= 1) it[key] = tw[key]; });
