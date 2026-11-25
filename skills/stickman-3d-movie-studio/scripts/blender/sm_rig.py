@@ -437,7 +437,7 @@ def build_face(name, coll, hc, R, S, spec):
 
 
 def _glasses(name, coll, hc, R, S, arm):
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.026 * S, minor_radius=0.004 * S, location=(0, 0, 0))
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.031 * S, minor_radius=0.0065 * S, location=(0, 0, 0))
     g1 = bpy.context.object
     g1.rotation_euler = (math.pi / 2, 0, 0)
     g1.location = _on_head(hc, R, 0.048 * S, 0.02 * S, 0.012 * S)
