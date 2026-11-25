@@ -54,7 +54,7 @@
           { show: dot("p2", "ax", [-1, 2], "(−1; 2)"), set: { id: "tb", hiCol: 2 }, wait: 0.9, gap: 0 },
           { show: dot("p3", "ax", [0, 0], "O", { size: 60 }), set: { id: "tb", hiCol: 3 }, wait: 0.9, gap: 0 },
           { show: dot("p4", "ax", [1, 2], "(1; 2)"), set: { id: "tb", hiCol: 4 }, wait: 0.9, gap: 0 },
-          { show: dot("p5", "ax", [2, 8], "(2; 8)"), set: { id: "tb", hiCol: 5 }, wait: 1.0 },
+          { show: dot("p5", "ax", [2, 8], "(2; 8)", { labelSide: "left" }), set: { id: "tb", hiCol: 5 }, wait: 1.0 },
           { who: "thay", say: "Các em thấy không, các cặp điểm đối xứng với nhau qua trục O y.", sub: "Các cặp điểm đối xứng qua Oy", bubble: false, pose: "point", face: "happy",
             set: { id: "tb", hiCol: 0 }, anim: [{ do: "flash", id: "p1", dur: 0.7 }, { do: "flash", id: "p5", dur: 0.7 }, { do: "flash", id: "p2", at: 1.2, dur: 0.7 }, { do: "flash", id: "p4", at: 1.2, dur: 0.7 }] },
           { who: "thay", say: "Bước ba: nối các điểm bằng một đường cong trơn, ta được parabol.", sub: "Bước 3: Nối thành đường cong trơn", bubble: false, pose: "explain",
@@ -91,7 +91,7 @@
           { show: dot("r2", "ax2", [-2, -2], "(−2; −2)", { color: "#80deea" }), set: { id: "tb2", hiCol: 2 }, wait: 0.85, gap: 0 },
           { show: dot("r3", "ax2", [0, 0], "O", { color: "#80deea", size: 60 }), set: { id: "tb2", hiCol: 3 }, wait: 0.85, gap: 0 },
           { show: dot("r4", "ax2", [2, -2], "(2; −2)", { color: "#80deea" }), set: { id: "tb2", hiCol: 4 }, wait: 0.85, gap: 0 },
-          { show: dot("r5", "ax2", [4, -8], "(4; −8)", { color: "#80deea" }), set: { id: "tb2", hiCol: 5 }, wait: 1.0 },
+          { show: dot("r5", "ax2", [4, -8], "(4; −8)", { color: "#80deea", labelSide: "left" }), set: { id: "tb2", hiCol: 5 }, wait: 1.0 },
           { who: "thay", say: "Nối các điểm bằng đường cong trơn. Vì a âm nên parabol nằm phía dưới trục hoành, O là điểm cao nhất.", sub: "a < 0: parabol phía dưới, O cao nhất", bubble: false, pose: "explain",
             set: { id: "tb2", hiCol: 0 },
             anim: [{ do: "create", id: "g2", at: 0.4, dur: 2.6, item: { type: "graph", axes: "ax2", fn: "-0.5*x^2", x0: -4.08, x1: 4.08, color: "#80deea", width: 9 } }, { do: "flash", id: "r3", at: 3.4, dur: 0.8 }] }

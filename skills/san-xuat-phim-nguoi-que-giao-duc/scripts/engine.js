@@ -731,11 +731,11 @@
         const k = c > 0 ? clamp(rv(r) - (c - 1), 0, 1) : 1;
         ctx.save(); ctx.globalAlpha *= k;
         const x = c === 0 ? cw0 / 2 : cw0 + (c - 0.5) * cw;
-        drawTex(ctx, String(cell).replace(/^-/, "−"), x, r * ch + ch / 2 + size * 0.33, c === 0 ? size * 0.9 : size, (it.cellColors && it.cellColors[r]) || col, "center", 1);
+        drawTex(ctx, String(cell).replace(/(^|[=\s(])-/g, "$1−"), x, r * ch + ch / 2 + size * 0.33, c === 0 ? size * 0.9 : size, (it.cellColors && it.cellColors[r]) || col, "center", 1);
         ctx.restore();
       }));
     },
-    dot(ctx, it) { const r = it.r || 15; ctx.fillStyle = it.color || "#ff5252"; ctx.beginPath(); ctx.arc(0, 0, r * (it._prog == null ? 1 : it._prog), 0, 7); ctx.fill(); if (it.label) drawTex(ctx, it.label, 24, -24, it.size || 52, it.color || "#ff5252", "left", 1); },
+    dot(ctx, it) { const r = it.r || 15; ctx.fillStyle = it.color || "#ff5252"; ctx.beginPath(); ctx.arc(0, 0, r * (it._prog == null ? 1 : it._prog), 0, 7); ctx.fill(); if (it.label) { const L = it.labelSide === "left"; drawTex(ctx, it.label, L ? -24 : 24, -24, it.size || 52, it.color || "#ff5252", L ? "right" : "left", 1); } },
     seg(ctx, it) { ctx.strokeStyle = it.color || (DARK ? "#fff" : INK); ctx.lineWidth = it.width || 6; strokeProg(ctx, [[it.x1 || 0, it.y1 || 0], [it.x2 || 200, it.y2 || 0]], it._prog == null ? 1 : it._prog); },
     poly(ctx, it) {
       const P = it.points || [[0, -120], [-140, 100], [140, 100]], pr = it._prog == null ? 1 : it._prog, col = it.color || (DARK ? "#58c4dd" : "#1e88e5");
