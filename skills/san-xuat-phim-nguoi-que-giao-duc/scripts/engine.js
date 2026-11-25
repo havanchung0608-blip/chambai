@@ -454,6 +454,47 @@
   }
 
   const FIGHT = new Set(["guard", "punch", "punch2", "uppercut", "kick", "highkick", "block", "victory", "fistbow"]);
+  /* Biểu diễn một điểm kiểu Manim */
+  function drawPlot(ctx, pl, S) {
+    const A = S.items[pl.ax]; if (!A) return;
+    const M = axesMap(A), x0 = A.x || 0, y0 = A.y || 0, D = pl.D, sp = (k) => (k * D) / 2.4, el = pl.el;
+    const px = x0 + M.sx(pl.at[0]), py = y0 + M.sy(pl.at[1]);
+    const ox = x0 + M.sx(clamp(0, M.xmin, M.xmax)), oy = y0 + M.sy(clamp(0, M.ymin, M.ymax));
+    const col = pl.tokenColor || "#ffeb3b", fs = pl.tokenSize || 64;
+    const T = pl.table && S.items[pl.table];
+    let cx = null;
+    if (T) { const cw0 = T.cw0 || 220, cw = T.cw || 140, ch = T.ch || 110; cx = [(T.x || 0) + cw0 + (pl.col + 0.5) * cw, (T.y || 0) + ch / 2, (T.y || 0) + ch * 1.5]; }
+    const fmt = (v) => String(v).replace("-", "−");
+    // 1) số bay: x → vạch trên Ox, y → vạch trên Oy (có vệt sáng)
+    const kf = clamp(el / sp(0.75), 0, 1), e = easeIO(kf), fade = 1 - clamp((el - sp(1.5)) / sp(0.5), 0, 1);
+    if (fade > 0) {
+      const tok = (txt, from, to, arc) => {
+        const x = lerp(from[0], to[0], e), y = lerp(from[1], to[1], e) - Math.sin(Math.PI * kf) * arc;
+        ctx.save(); ctx.globalAlpha *= fade; ctx.shadowColor = col; ctx.shadowBlur = 18 * (1 - kf) + 6;
+        drawTex(ctx, txt, x, y + fs * 0.35, fs * lerp(1.15, 0.95, e), col, "center", 1); ctx.restore();
+        if (kf > 0 && kf < 1) { ctx.save(); ctx.globalAlpha *= 0.35 * fade; ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.setLineDash([6, 10]); ctx.beginPath(); ctx.moveTo(from[0], from[1]); ctx.quadraticCurveTo((from[0] + x) / 2, Math.min(from[1], y) - arc, x, y); ctx.stroke(); ctx.restore(); }
+      };
+      const fx = cx ? [cx[0], cx[1]] : [px, py], fy = cx ? [cx[0], cx[2]] : [px, py];
+      tok(fmt(pl.at[0]), fx, [px, oy + 62], 120);
+      tok(fmt(pl.at[1]), fy, [ox - 44, py], 160);
+      // vòng sáng tại vạch khi số chạm trục
+      if (kf >= 1 && el < sp(1.4)) { const k2 = (el - sp(0.75)) / sp(0.65); ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.globalAlpha = 1 - k2; [[px, oy], [ox, py]].forEach(([a, b]) => { ctx.beginPath(); ctx.arc(a, b, 10 + 26 * k2, 0, 7); ctx.stroke(); }); ctx.restore(); }
+    }
+    // 2) đường gióng mọc từ hai vạch tới điểm
+    const kg = clamp((el - sp(0.75)) / sp(0.65), 0, 1);
+    if (kg > 0 && el < sp(1.45)) {
+      ctx.save(); ctx.setLineDash([14, 10]); ctx.lineWidth = 5; ctx.strokeStyle = col;
+      ctx.beginPath(); ctx.moveTo(px, oy); ctx.lineTo(px, lerp(oy, py, easeIO(kg))); ctx.moveTo(ox, py); ctx.lineTo(lerp(ox, px, easeIO(kg)), py); ctx.stroke();
+      ctx.restore();
+    }
+    // 3) điểm bung: tia sáng + vòng lan
+    const kb = (el - sp(1.4)) / sp(0.6);
+    if (kb > 0 && kb < 1) {
+      ctx.save(); ctx.strokeStyle = pl.color || "#fc6255"; ctx.lineWidth = 6; ctx.globalAlpha = 1 - kb;
+      for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; ctx.beginPath(); ctx.moveTo(px + Math.cos(a) * (22 + kb * 30), py + Math.sin(a) * (22 + kb * 30)); ctx.lineTo(px + Math.cos(a) * (40 + kb * 70), py + Math.sin(a) * (40 + kb * 70)); ctx.stroke(); }
+      ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(px, py, 18 + kb * 60, 0, 7); ctx.stroke(); ctx.restore();
+    }
+  }
   /* Hiệu ứng va chạm kiểu truyện tranh: chớp sáng + tia + chữ */
   function drawFx(ctx, f, S) {
     let x = f.x, y = f.y;
@@ -744,7 +785,7 @@
         ctx.restore();
       }));
     },
-    dot(ctx, it) { const r = it.r || 15; ctx.fillStyle = it.color || "#ff5252"; ctx.beginPath(); ctx.arc(0, 0, r * (it._prog == null ? 1 : it._prog), 0, 7); ctx.fill(); if (it.label) { const L = it.labelSide === "left"; drawTex(ctx, it.label, L ? -24 : 24, -24, it.size || 52, it.color || "#ff5252", L ? "right" : "left", 1); } },
+    dot(ctx, it) { const r = it.r || 15; ctx.fillStyle = it.color || "#ff5252"; ctx.beginPath(); ctx.arc(0, 0, r * (it._prog == null ? 1 : it._prog), 0, 7); ctx.fill(); if (it.label) { const L = it.labelSide === "left"; drawTex(ctx, it.label, L ? -24 : 24, -24, it.size || 52, it.color || "#ff5252", L ? "right" : "left", it._lp == null ? 1 : it._lp); } },
     seg(ctx, it) { ctx.strokeStyle = it.color || (DARK ? "#fff" : INK); ctx.lineWidth = it.width || 6; strokeProg(ctx, [[it.x1 || 0, it.y1 || 0], [it.x2 || 200, it.y2 || 0]], it._prog == null ? 1 : it._prog); },
     poly(ctx, it) {
       const P = it.points || [[0, -120], [-140, 100], [140, 100]], pr = it._prog == null ? 1 : it._prog, col = it.color || (DARK ? "#58c4dd" : "#1e88e5");
@@ -1113,6 +1154,7 @@
           });
           B.writes = ws; d = Math.max(d, off);
         }
+        arr(b.plot).forEach((pl) => { const a0 = B.start + (pl.delay || 0), D = pl.dur || 2.4, sp = (k) => (k * D) / 2.4; sfx.push({ t: a0, name: "whoosh", vol: 0.5 }); sfx.push({ t: a0 + sp(0.75), name: "swish2", vol: 0.5 }); sfx.push({ t: a0 + sp(1.4), name: "pop" }); sfx.push({ t: a0 + sp(1.45), name: "shimmer", vol: 0.6 }); d = Math.max(d, (pl.delay || 0) + D); });
         if (b.ride) { const rd = b.ride.dur || 3; d = Math.max(d, rd); sfx.push({ t: B.start, name: "skate", dur: rd, vol: 0.9 }); }
         if (b.move) arr(b.move).forEach((m) => {
           const dur = m.dur || 1.5; d = Math.max(d, dur);
@@ -1203,7 +1245,7 @@
     const writes = [];
     const cam = { x: W / 2, y: H / 2, zoom: 1, rot: 0, tilt: 1, letter: film.letterbox ? 1 : 0, follow: null, blur: 0, dof: null, handheld: null };
     if (src.cam) applyCamBeat(cam, src.cam, 1, cast, sc.start, t);
-    let speech = null, title = null, quiz = null, highlight = [], emotes = [], fxs = [], shake = null;
+    let speech = null, title = null, quiz = null, highlight = [], emotes = [], fxs = [], shake = null; const plots = [];
     sc.beats.forEach((B, bi) => {
       if (B.start > t) return;
       const b = B.src, p = (dur) => clamp((t - B.start) / (dur || 1), 0, 1);
@@ -1281,10 +1323,19 @@
       if (b.highlight && inBeat) arr(b.highlight).forEach((h) => highlight.push({ id: h, el: t - B.start }));
       if (b.emote && inBeat) arr(b.emote).forEach((e) => emotes.push({ ...e, el: t - B.start }));
       arr(b.fx).forEach((f) => { const el = t - B.start - (f.at || 0); if (el >= 0 && el < (f.dur || 0.5)) fxs.push({ ...f, el }); });
+      // biểu diễn điểm kiểu Manim: số bay từ bảng xuống trục → đường gióng mọc → điểm bung → nhãn viết dần
+      arr(b.plot).forEach((pl) => {
+        const el = t - B.start - (pl.delay || 0); if (el < 0) return;
+        const D = pl.dur || 2.4, sp = (k) => k * D / 2.4;
+        if (el < D + 0.3) plots.push({ ...pl, el, D });
+        if (pl.table && items[pl.table]) { if (el < D) items[pl.table].hiCol = pl.col + 1; else if (items[pl.table].hiCol === pl.col + 1 && pl.keepHi !== true) items[pl.table].hiCol = 0; }
+        if (el >= sp(1.4)) items[pl.id] = { type: "dot", ax: pl.ax, at: pl.at, r: pl.r || 17, color: pl.color || "#fc6255", label: pl.label, labelSide: pl.labelSide, size: pl.size || 58,
+          _lp: clamp((el - sp(1.6)) / sp(0.7), 0, 1), _born: B.start + (pl.delay || 0) + sp(1.4), _seed: 900 + bi, guideColor: pl.guideColor };
+      });
       if (b.shake) { const sh = typeof b.shake === "number" ? { amp: 22, dur: b.shake } : b.shake, el = t - B.start - (sh.at || 0); if (el >= 0 && el < (sh.dur || 0.35)) shake = { amp: (sh.amp || 22) * (1 - el / (sh.dur || 0.35)), el }; }
     });
     if (cam.follow && cast[cam.follow.who]) { const ch = cast[cam.follow.who], k = easeIO(clamp((t - cam.follow.t0) / Math.max(0.3, cam.follow.dur), 0, 1)); cam.x = lerp(cam.follow.x0, ch.x + cam.follow.lead * (ch.flip ? -1 : 1), k); }
-    return { sc, cast, items, writes, cam, speech, title, quiz, highlight, emotes, fxs, shake, lt };
+    return { sc, cast, items, writes, cam, speech, title, quiz, highlight, emotes, fxs, shake, lt, plots };
   }
 
   /* ------------------------------ khung hình ------------------------------ */
@@ -1334,6 +1385,7 @@
       const hl = S.highlight.find((h) => h.id === id);
       if (hl) { ctx.save(); ctx.strokeStyle = "#ff5252"; ctx.lineWidth = 7; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(hl.el * 8); hcircle(ctx, it.x, it.y, (it.hlR || 120) + Math.sin(hl.el * 8) * 6, 999, null); ctx.restore(); }
     });
+    S.plots.forEach((pl) => drawPlot(ctx, pl, S));
     ctx.restore();
     // nhân vật
     const speaker = S.speech && S.speech.who && S.cast[S.speech.who];
