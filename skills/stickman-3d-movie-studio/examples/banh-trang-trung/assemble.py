@@ -95,7 +95,7 @@ def main(mp4_3d, tl3d, mp4_2d, sc2d, out):
         mus[s0:s1] += seg
     talk = np.clip(np.convolve((np.abs(voice) > 0.03).astype(np.float32), np.ones(int(SR * 0.3)) / (SR * 0.3), "same") * 3, 0, 1)
     mix = voice + mus * (1 - 0.6 * talk)
-    mix = np.tanh(mix * 1.05) / np.tanh(1.05) * 0.97
+    mix = np.tanh(mix * 1.05) / np.tanh(1.05) * 0.88   # chừa đầu cho AAC (không vỡ tiếng)
     wav = tmp / "mix.wav"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "f32le", "-ar", str(SR), "-ac", "1", "-i", "-", "-ac", "2", str(wav)], input=mix.astype(np.float32).tobytes(), check=True)
     run(["ffmpeg", "-v", "error", "-y", "-i", str(vid), "-i", str(wav), "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(out)])
