@@ -521,6 +521,11 @@
     } else if (f.type === "confetti") {
       const cols = ["#ffeb3b", "#ff8a80", "#80deea", "#b9f6ca", "#ffffff", "#ce93d8"];
       for (let i = 0; i < 60; i++) { const a = hash(i * 2.7) * Math.PI * 2, sp = 200 + hash(i * 5.1) * 420, x = Math.cos(a) * sp * k, y = Math.sin(a) * sp * k + 500 * k * k; ctx.save(); ctx.globalAlpha = a > 0 ? 1 - k : 1 - k; ctx.translate(x, y); ctx.rotate(k * 12 + i); ctx.fillStyle = cols[i % cols.length]; ctx.fillRect(-7, -4, 14, 8); ctx.restore(); }
+    } else if (f.type === "aura") {   // vận công: vòng khí lan ra + tia bốc lên
+      const col = f.color || "#ffd54f"; ctx.globalAlpha = a; ctx.shadowColor = col; ctx.shadowBlur = 30; ctx.strokeStyle = col;
+      for (let i = 0; i < 3; i++) { const kk = (k * 2 + i / 3) % 1; ctx.lineWidth = 10 * (1 - kk); ctx.globalAlpha = a * (1 - kk); ctx.beginPath(); ctx.ellipse(0, 0, 120 + 260 * kk, 170 + 300 * kk, 0, 0, 7); ctx.stroke(); }
+      ctx.globalAlpha = a; ctx.lineWidth = 6; for (let i = 0; i < 12; i++) { const xx = (hash(i * 1.7) - 0.5) * 300, yy = 200 - ((k * 900 + hash(i) * 400) % 520); ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx, yy - 70); ctx.stroke(); }
+      ctx.shadowBlur = 0;
     } else if (f.type === "speed") {
       ctx.globalAlpha = a; ctx.strokeStyle = "#455a64"; ctx.lineWidth = 6; for (let i = 0; i < 6; i++) { const yy = -260 + i * 50; ctx.beginPath(); ctx.moveTo(-(f.dir || 1) * (60 + 40 * hash(i)), yy); ctx.lineTo(-(f.dir || 1) * (240 + 80 * hash(i + 4)), yy); ctx.stroke(); }
     }
@@ -748,6 +753,18 @@
         for (let x = -4000; x <= 6000; x += 80) { ctx.beginPath(); ctx.moveTo(x, -3000); ctx.lineTo(x, 4000); ctx.stroke(); }
         for (let y = -3000; y <= 4000; y += 80) { ctx.beginPath(); ctx.moveTo(-4000, y); ctx.lineTo(6000, y); ctx.stroke(); }
       }
+    },
+    mountain: {   // đỉnh núi lúc hoàng hôn — đấu võ quyết chiến
+      far: (ctx, life) => { skyFill(ctx, "#4a148c", "#ff8a65"); const g = ctx.createRadialGradient(1380, 560, 20, 1380, 560, 420); g.addColorStop(0, "rgba(255,213,79,.9)"); g.addColorStop(0.25, "rgba(255,138,101,.55)"); g.addColorStop(1, "rgba(255,138,101,0)"); ctx.fillStyle = g; ctx.fillRect(900, 100, 1000, 900); ctx.fillStyle = "#ffcc80"; ctx.beginPath(); ctx.arc(1380, 560, 120, 0, 7); ctx.fill();
+        ctx.fillStyle = "#7e57c2"; ctx.beginPath(); ctx.moveTo(-3000, GROUND); [[-1400, 380], [-700, 640], [-100, 300], [520, 600], [980, 360], [1500, 660], [2100, 280], [2800, 620], [3600, 340], [4600, GROUND]].forEach(([x, y]) => ctx.lineTo(x, y)); ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,.75)"; [[-100, 300], [980, 360], [2100, 280]].forEach(([x, y]) => { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 70, y + 70); ctx.lineTo(x - 20, y + 55); ctx.lineTo(x + 10, y + 85); ctx.lineTo(x + 70, y + 70); ctx.closePath(); ctx.fill(); });
+        for (let i = 0; i < 14; i++) { const x = ((hash(i) * 3000 + life * (30 + 20 * hash(i + 2))) % 3200) - 600, y = 200 + hash(i + 4) * 500 + Math.sin(life * 2 + i) * 30; ctx.fillStyle = i % 2 ? "rgba(255,138,128,.85)" : "rgba(255,213,79,.8)"; ctx.save(); ctx.translate(x, y); ctx.rotate(life * 3 + i); ctx.beginPath(); ctx.ellipse(0, 0, 12, 6, 0, 0, 7); ctx.fill(); ctx.restore(); } },
+      mid: (ctx) => { ctx.fillStyle = "#4527a0"; ctx.beginPath(); ctx.moveTo(-3000, GROUND); [[-1200, 560], [-500, 760], [200, 520], [800, 780], [1400, 600], [2000, 790], [2700, 540], [3600, GROUND]].forEach(([x, y]) => ctx.lineTo(x, y)); ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,.18)"; ctx.fillRect(-3000, 760, 7000, 60); },
+      main: (ctx) => { ctx.fillStyle = "#5d4037"; ctx.fillRect(-8000, GROUND, 18000, 3000); ctx.fillStyle = "#795548"; for (let x = -4000; x < 6000; x += 210) { ctx.beginPath(); ctx.moveTo(x, GROUND); ctx.lineTo(x + 70, GROUND + 40 + hash(x) * 30); ctx.lineTo(x + 160, GROUND); ctx.fill(); }
+        ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(-8000, GROUND); ctx.lineTo(10000, GROUND); ctx.stroke();
+        tile(ctx, 2400, (k) => { ctx.fillStyle = "#1b1030"; ctx.fillRect(116, 560, 22, GROUND - 560); [[0, 600], [20, 660], [40, 720]].forEach(([d, y]) => { ctx.beginPath(); ctx.moveTo(127, y - 120 + d); ctx.lineTo(127 - 90 - d, y + 10); ctx.lineTo(127 + 90 + d, y + 10); ctx.closePath(); ctx.fill(); }); hrect(ctx, 1620, 900, 180, 60, 950 + k, "#8d6e63"); }); },
+      dark: true
     },
     manim: { base: "#1c1c1c", main: (ctx) => { ctx.fillStyle = "#1c1c1c"; ctx.fillRect(-8000, -4000, 18000, 9000); }, dark: true },
     manimgrid: {
@@ -1615,7 +1632,7 @@
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     // bong bóng lời thoại (vẽ theo toạ độ màn hình để cỡ chữ luôn chuẩn slide dù máy quay phóng to)
     let bubbled = false;
-    const wantBubble = S.speech && (S.speech.bubble === true || (S.speech.bubble !== false && !BOARDS[bg]));
+    const wantBubble = S.speech && (S.speech.bubble === true || (S.speech.bubble !== false && film.bubbles !== false && !BOARDS[bg]));
     if (wantBubble && S.speech.who && S.cast[S.speech.who] && S.cast[S.speech.who]._headTop) {
       const ch = S.cast[S.speech.who], ht = worldToScreen(C, ch._p || 1, ch._headTop[0], ch._headTop[1]);
       if (ht[0] > -100 && ht[0] < W + 100 && ht[1] > -200) bubbled = drawBubble(ctx, { ...ch, _headTop: [clamp(ht[0], 60, W - 60), Math.max(260, ht[1])] }, S.speech, film);

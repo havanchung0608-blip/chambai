@@ -82,6 +82,9 @@ Tư thế: `guard` (thủ thế, nhún), `punch` (đấm thẳng), `punch2` (đ�
 - `move` thêm `style: "slide"` (bị đẩy lùi, không quay người, không bước) và `"flykick"` (tung cước bay).
 - `fx: { type, on, part, dx, dy, at, dur, text, color }`: `type` = `hit` (chớp sáng va chạm), `dust` (bụi), `speed` (vệt tốc độ, `dir`), `text` (chỉ chữ); `on` = nhân vật, `part` = `head|chest|belly|legs`; `text` chữ kiểu truyện tranh "BỐP!".
 - `shake: { amp, dur, at }` rung khung hình khi trúng đòn.
+- `fx` `type: "aura"` (vận công: vòng khí lan + tia bốc lên, `color`) — dùng khi nhân vật tung chiêu/ra chưởng.
+- "Chưởng công thức": `text` có `panel: true` hiện cạnh nhân vật rồi `anim` `move` bay tới đối thủ (thu nhỏ `scale`), cùng nhịp `hit` + `shake` (xem `examples/that-dang-than-cong.film.js`, hàm `duel`).
+- `bubbles: false` (khung FILM): tắt bóng thoại cả phim, mọi lời nói xuống phụ đề lớn — hợp phim chiếu lớp có bảng công thức gắn màn hình.
 - `sfx` dạng đối tượng `{ name, at, vol, len }` để canh tiếng đúng khoảnh khắc chạm (`len` cắt ngắn tiếng dài như `crowd`).
 - Nhịp chuẩn một đòn: nhịp ra đòn (`snap` 0,1 + `swish`, `wait` 0,13–0,15, `gap: 0`) → nhịp trúng (`hit` + `fx` + `shake` + `punch`/`kickhit` + `slide`, `wait` 0,5–0,7). Xem `examples/vo-thuat-thu.film.js`.
 
@@ -115,6 +118,7 @@ Tư thế: `guard` (thủ thế, nhún), `punch` (đấm thẳng), `punch2` (đ�
 
 ## 8. Phông nền (`bg`)
 `treasuremap`: bản đồ kho báu giấy da nhìn từ trên xuống (lưới mờ, la bàn, sóng biển, viền) — hợp bài hình học dạng "đi tìm". Vật cầm tay mới: `hold: "shovel"` (xẻng), `hold: "map"` (bản đồ); tư thế `dig` (đào đất).
+`mountain`: đỉnh núi hoàng hôn (mặt trời đỏ, núi tím nhiều lớp, lá bay, thông) — cảnh quyết chiến võ thuật.
 Phông nhiều lớp có chiều sâu: `park`, `street`, `city`, `rooftop` (đêm), `forest`, `castle`, `night`, `lab`, `beach`, `manim`, `manimgrid`. Phông một lớp: `dojo` (võ đường), `paper` (giấy trơn), `grid` (giấy ô li), `whiteboard` (bảng trắng: vùng viết x 520–1820, y 90–690), `classroom` (bảng xanh phấn: x 560–1780, y 110–650; chữ phấn trắng), `park`, `street`, `market`, `home`, `space`, `stage`.
 Bảng ở bên phải → đặt người giảng ở x ≈ 250–330.
 

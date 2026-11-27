@@ -30,6 +30,7 @@ Phân biệt với skill khác:
 | `references/film-api.md` | Tra cứu đầy đủ định dạng `window.FILM`: nhân vật, tư thế, nét mặt, đạo cụ, phông nền, mini-TeX, âm thanh |
 | `examples/hiep-si-parabol.film.js` | Mẫu đa thể loại: cổ tích + phiêu lưu + Manim, đủ kiểu máy quay, vai diễn, chuyển cảnh, nhạc nền |
 | `examples/vo-thuat-thu.film.js` | Mẫu hành động: nhịp đòn đánh, hiệu ứng va chạm, rung khung, tiếng thật |
+| `examples/that-dang-than-cong.film.js` | Mẫu võ thuật + dạy học (~10 phút): 7 hằng đẳng thức = 7 chiêu, màn tiêu đề chiêu, bảng Manim gắn màn hình, mô hình diện tích, chặt gạch tính nhẩm, đấu "chưởng công thức", bảng tổng kết |
 | `examples/phan-so-bang-nhau.film.js` | Mẫu giáo dục: tình huống → bảng → quiz |
 | `scripts/fetch_tiengdong.py` | Tải bộ tiếng động + nhạc nền TiengDong.com (chạy một lần) |
 | `scripts/build_film.py` | Ghép kịch bản + engine → 1 file HTML |
