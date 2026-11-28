@@ -300,6 +300,13 @@ def _voice_clip(a, target_rms=0.19):
     return a * 0.92
 
 
+def _boxavg(x, k):
+    """Trung bình trượt cửa sổ k mẫu (nhanh, O(n)) — thay np.convolve vốn rất chậm với phim dài."""
+    c = np.concatenate([[0.0], np.cumsum(x, dtype=np.float64)])
+    h = k // 2; i0 = np.clip(np.arange(len(x)) - h, 0, len(x)); i1 = np.clip(np.arange(len(x)) + k - h, 0, len(x))
+    return ((c[i1] - c[i0]) / k).astype(np.float32)
+
+
 def mix(total, says, files, sfx_events, music):
     n = int(SR * (total + 0.5))
     voice = np.zeros(n, np.float32)
@@ -314,7 +321,7 @@ def mix(total, says, files, sfx_events, music):
         a = sfx(e["name"], e.get("dur", 1), e.get("len")) * float(e.get("vol") or 1); st = int(e["t"] * SR)
         fx[st:st + len(a)] += a[: max(0, n - st)]
     # GIỌNG LÀ CHÍNH: khi có lời đọc, tiếng động lùi xuống ~45 %, nhạc nền lùi xuống ~20 %
-    talk = np.convolve((np.abs(voice) > 0.02).astype(np.float32), np.ones(int(SR * 0.25)) / (SR * 0.25), "same")
+    talk = _boxavg((np.abs(voice) > 0.02).astype(np.float32), int(SR * 0.25))
     talk = np.clip(talk * 3, 0, 1)
     out = voice * 1.0 + fx * 0.6 * (1 - 0.55 * talk)
     if music:
