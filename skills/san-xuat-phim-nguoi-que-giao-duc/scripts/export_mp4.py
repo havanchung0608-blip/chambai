@@ -207,6 +207,20 @@ def synth(name, dur=1.0):
         name = "tada"
     if name == "crowd":
         name = "applause"
+    if name == "type":            # tiếng gõ phím: chuỗi tiếng lách cách ngẫu nhiên suốt `dur`
+        d = max(0.2, min(12.0, dur or 1)); out = np.zeros(int(SR * d) + SR // 10, np.float32); tt = 0.0
+        while tt < d:
+            n = int(SR * 0.03); r = 0.8 + 0.4 * np.random.rand()
+            c = bandnoise(0.03, 2500 * r, 7500, 0.42) * np.exp(-np.arange(n) / (SR * 0.006))[:int(SR * 0.03)] + tone(150 * r, 0.03, 0.2, 70)[:int(SR * 0.03)]
+            st = int(tt * SR); out[st:st + len(c)] += c; tt += 0.055 + np.random.rand() * 0.07
+        return out
+    if name == "slide":           # thước nhựa trượt trên bảng
+        d = max(0.2, min(3.0, dur or 0.6)); n = bandnoise(d, 250, 1400, 0.3); return n * np.sin(np.linspace(0, np.pi, len(n)))
+    if name in ("pencil", "compass"):   # chì cào giấy (compa: thêm tiếng kẽo kẹt khớp)
+        d = max(0.2, min(6.0, dur or 1)); n = bandnoise(d, 1500, 5200, 0.16, chop=0.07)
+        if name == "compass":
+            t = np.arange(len(n)) / SR; n = n + (np.sin(2 * np.pi * 620 * t + 3 * np.sin(2 * np.pi * 7 * t)) * 0.035 * (np.sin(2 * np.pi * 1.3 * t) > 0.6)).astype(np.float32)
+        return n
     if name == "pop":
         return tone(500, 0.14, 0.35, 1100)
     if name == "ding":
@@ -336,6 +350,11 @@ def main():
     if not shutil.which("ffmpeg"):
         sys.exit("Cần cài ffmpeg.")
     W, H = map(int, a.size.lower().split("x"))
+    _fm = pathlib.Path(a.html).read_text(encoding="utf-8")
+    import re as _re
+    _ms = _re.search(r"__FILMSIZE = \[(\d+), (\d+)\]", _fm)
+    if _ms and a.size == "1920x1080":
+        W, H = int(_ms.group(1)), int(_ms.group(2))   # phim khổ dọc 9:16
     html = pathlib.Path(a.html).resolve()
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="stickfilm-"))
     with sync_playwright() as p:
@@ -381,7 +400,7 @@ def main():
         audio = mix(total, info["says"], files, info["sfx"], music)
         wav = tmp / "audio.f32"
         audio.astype(np.float32).tofile(wav)
-        pg.evaluate("""([w,h]) => { window.__c = document.createElement('canvas'); __c.width = 1920; __c.height = 1080;
+        pg.evaluate("""([w,h]) => { window.__c = document.createElement('canvas'); __c.width = STICKFILM.W; __c.height = STICKFILM.H;
                        window.__o = document.createElement('canvas'); __o.width = w; __o.height = h; }""", [W, H])
         cmd = ["ffmpeg", "-y", "-v", "error", "-f", "image2pipe", "-c:v", "mjpeg", "-framerate", str(a.fps), "-i", "-",
                "-f", "f32le", "-ar", str(SR), "-ac", "1", "-i", str(wav),

@@ -152,3 +152,10 @@ Tiếng thật TiengDong.com (sau khi chạy `fetch_tiengdong.py`): `punch` (t�
 - Đạo cụ "trên bàn": bàn `table` ở y 960 cao 190 → đặt đồ ở y ≈ 690–740.
 - Cỡ chữ: mặc định bảng 84, tối thiểu 60 (chuẩn slide trình chiếu); dòng chốt dùng `box: true` + `sfx: "ding"`.
 - Mỗi bảng tối đa ~5 dòng cỡ 84 (phân số chiếm nhiều chỗ hơn); khoảng dòng tự tính theo chiều cao công thức; nhiều hơn thì `clear: "board"`.
+
+## 12. Phim dọc 9:16 (Reels/TikTok/Shorts) và dụng cụ vẽ
+- Khung FILM: `size: [1080, 1920]`, `ground: 1700` (mặt đất). Engine, check_film, export_mp4 tự theo khổ dọc. Bảng Manim gắn màn hình ở nửa trên (`panel` `screen: true` y 20–1030), nhân vật ở nửa dưới; dùng `cam` đầu cảnh (vd. `{ x: 650, y: 1121, zoom: 1.26 }`) để phóng to nhân vật.
+- `compass` (compa): kim tại (x, y) = tâm, `r` khẩu độ, `ang` góc đầu chì. Vẽ đường tròn: `circ` `from: ang`, `anim: "create"`, `sfx: "compass"` + `tween: { id: compa, ang: ang + 360, dur }` cùng thời lượng → đầu chì chạy đúng nét.
+- `laptop` (nhìn ngang, màn hình quay về bên trái), `desk` (bàn làm việc; mặt bàn cao `h`). Tư thế `sittype` (ngồi gõ phím, tự có ghế).
+- Tiếng mới: `type` (gõ phím suốt `dur`; dùng cho `text` `anim: "write"` → chữ hiện dần kèm tiếng gõ), `slide` (thước trượt), `pencil` (bút chì kẻ), `compass` (compa quay).
+- Mẫu đầy đủ: `examples/canh-huyen-duong-kinh-doc.film.js` (mở đầu hài + 4 định lí, thước – bút chì – compa, lời giải gõ dần).

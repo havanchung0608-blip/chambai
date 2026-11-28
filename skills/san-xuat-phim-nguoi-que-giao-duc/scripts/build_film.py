@@ -21,7 +21,10 @@ def build(film_path: str, out_path: str) -> str:
     tpl = (HERE / "template.html").read_text(encoding="utf-8")
     m = re.search(r"title\s*:\s*([\"'`])(.*?)\1", film)
     title = m.group(2) if m else "Phim người que"
-    html = (tpl.replace("/*__ENGINE__*/", engine)
+    ms = re.search(r"size\s*:\s*\[\s*(\d+)\s*,\s*(\d+)\s*\]", film)
+    mg = re.search(r"ground\s*:\s*(\d+)", film)
+    pre = (f"window.__FILMSIZE = [{ms.group(1)}, {ms.group(2)}];" if ms else "") + (f"window.__FILMGROUND = {mg.group(1)};" if mg and ms else "")
+    html = (tpl.replace("/*__ENGINE__*/", pre + "\n" + engine)
                .replace("/*__FILM__*/", film)
                .replace("__TITLE__", title.replace("<", "&lt;")))
     out = pathlib.Path(out_path)

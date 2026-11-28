@@ -8,7 +8,7 @@
    ========================================================================== */
 (function () {
   "use strict";
-  const W = 1920, H = 1080, GROUND = 960;
+  const W = (window.__FILMSIZE || [1920, 1080])[0], H = (window.__FILMSIZE || [1920, 1080])[1], GROUND = window.__FILMGROUND || H - 120;   // khổ dọc: FILM.size = [1080, 1920]
   const FONT = '"Times New Roman", Times, serif';
   const INK = "#1d1d1f";
 
@@ -215,6 +215,7 @@
     facepalm: () => ({ fa: [30, 172], ba: [-10, -4], fl: [7, 0], bl: [-7, 0], head: 14 }),
     angry: (t) => ({ fa: [-40, 40], ba: [40, -40], fl: [12, 0], bl: [-12, 0], lift: Math.abs(Math.sin(t * 14)) * 3 }),
     sit: () => ({ fa: [35, 75], ba: [30, 70], fl: [90, 2], bl: [86, -2] }),
+    sittype: (t) => ({ fa: [72, 100 + Math.sin(t * 15) * 9], ba: [66, 104 - Math.sin(t * 15 + 1) * 9], fl: [90, 2], bl: [86, -2], lean: 6, head: 8 }),
     sitthink: (t) => ({ fa: [30, 165], ba: [30, 70], fl: [90, 2], bl: [86, -2], head: 6 + Math.sin(t * 1.5) * 3 }),
     sithand: (t) => ({ fa: [165, 175 + Math.sin(t * 8) * 6], ba: [30, 70], fl: [90, 2], bl: [86, -2] }),
     lie: () => ({ fa: [14, 4], ba: [-14, -4], fl: [7, 0], bl: [-7, 0], rot: -90 }),
@@ -850,7 +851,7 @@
       ctx.strokeStyle = col; ctx.lineWidth = it.width || 7; strokeProg(ctx, P, pr, it.close !== false);
       if (it.labels && pr >= 1) { const cx = P.reduce((s, p) => s + p[0], 0) / P.length, cy = P.reduce((s, p) => s + p[1], 0) / P.length; P.forEach((p, i) => { const L = it.labels[i]; if (!L) return; const dx = p[0] - cx, dy = p[1] - cy, d = Math.hypot(dx, dy) || 1; drawTex(ctx, L, p[0] + (dx / d) * 46, p[1] + (dy / d) * 46 + 18, it.size || 56, DARK ? "#fff" : INK, "center", 1); }); }
     },
-    circ(ctx, it) { const r = it.r || 120, pr = it._prog == null ? 1 : it._prog, col = it.color || (DARK ? "#fc6255" : "#e53935"); if (it.fill && pr >= 1) { ctx.save(); ctx.globalAlpha *= 0.3; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.restore(); } ctx.strokeStyle = col; ctx.lineWidth = it.width || 7; ctx.beginPath(); ctx.arc(0, 0, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pr); ctx.stroke(); }
+    circ(ctx, it) { const r = it.r || 120, pr = it._prog == null ? 1 : it._prog, col = it.color || (DARK ? "#fc6255" : "#e53935"); if (it.fill && pr >= 1) { ctx.save(); ctx.globalAlpha *= 0.3; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.restore(); } ctx.strokeStyle = col; ctx.lineWidth = it.width || 7; const a0 = it.from != null ? rad(it.from) : -Math.PI / 2; ctx.beginPath(); ctx.arc(0, 0, r, a0, a0 + Math.PI * 2 * pr); ctx.stroke(); }
   };
   function itemBounds(ctx, it) {
     if (it.type === "text" || !it.type) { const m = layout(ctx, texCache.get(it.text) || parseTex(String(it.text || "")), it.size || 64); const al = it.align || "center"; const x0 = al === "center" ? -m.w / 2 : al === "right" ? -m.w : 0; return [x0, -m.asc, m.w, m.asc + m.desc]; }
@@ -1117,6 +1118,35 @@
       ctx.strokeStyle = "#01579b"; ctx.lineWidth = 2; pts.forEach((p, i) => { if (i % 8) return; const o = outer[i], k = i % 40 === 0 ? 0.42 : 0.22; ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(lerp(p[0], o[0], k), lerp(p[1], o[1], k)); ctx.stroke(); });
       const mid = outer[Math.floor(outer.length / 2)]; ctx.fillStyle = "#01579b"; ctx.font = `bold 30px ${FONT}`; ctx.textAlign = "center"; ctx.fillText(it.text || "THƯỚC PARABOL", mid[0], mid[1] - sgn * T * 0.38 + 9);
       ctx.beginPath(); ctx.arc(mid[0] + 120, mid[1] - sgn * T * 0.45, 9, 0, 7); ctx.stroke();
+    },
+    // COMPA: kim tại (0,0) = tâm; đầu chì ở góc `ang` (độ, 0 = sang phải, chiều kim đồng hồ), khẩu độ `r`.
+    // Vẽ đường tròn: hiện `circ` (anim create, from = ang) + tween `ang` tăng 360 cùng thời lượng → đầu chì chạy đúng nét.
+    compass(ctx, it) {
+      const r = it.r || 200, a = rad(it.ang || 0), P = [r * Math.cos(a), r * Math.sin(a)], h = it.h || Math.max(150, r * 0.8);
+      const Hn = [P[0] / 2, P[1] / 2 - h];
+      ctx.save(); ctx.lineCap = "round"; ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 14; ctx.shadowOffsetY = 5;
+      const leg = (to, col) => { ctx.strokeStyle = "#37474f"; ctx.lineWidth = 15; ctx.beginPath(); ctx.moveTo(Hn[0], Hn[1]); ctx.lineTo(to[0], to[1]); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(Hn[0], Hn[1]); ctx.lineTo(to[0], to[1]); ctx.stroke(); };
+      leg([0, 0], "#cfd8dc"); leg(P, "#b0bec5"); ctx.restore();
+      // kim thép + đầu chì
+      ctx.strokeStyle = "#eceff1"; ctx.lineWidth = 4; const u0 = [-Hn[0], -Hn[1]], l0 = Math.hypot(u0[0], u0[1]) || 1; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u0[0] / l0 * -26, u0[1] / l0 * -26); ctx.stroke();
+      const u1 = [P[0] - Hn[0], P[1] - Hn[1]], l1 = Math.hypot(u1[0], u1[1]) || 1; ctx.strokeStyle = it.color || "#ffca28"; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(P[0] - u1[0] / l1 * 60, P[1] - u1[1] / l1 * 60); ctx.lineTo(P[0] - u1[0] / l1 * 14, P[1] - u1[1] / l1 * 14); ctx.stroke();
+      ctx.fillStyle = it.lead || "#f5f5ec"; ctx.beginPath(); ctx.arc(P[0], P[1], 5, 0, 7); ctx.fill();
+      // khớp + núm cầm
+      ctx.fillStyle = "#90a4ae"; ctx.strokeStyle = "#263238"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(Hn[0], Hn[1], 15, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#e53935"; roundRect(ctx, Hn[0] - 8, Hn[1] - 58, 16, 44, 6); ctx.fill(); ctx.stroke();
+    },
+    // BÀN LÀM VIỆC nhìn ngang: gốc (0,0) ở giữa, chạm sàn; mặt bàn cao `h`
+    desk(ctx, it) { const w = it.w || 340, h = it.h || 190; ctx.strokeStyle = DARK ? "#cfd8dc" : INK; ctx.lineWidth = 5; ctx.fillStyle = it.color || "#a1683a";
+      roundRect(ctx, -w / 2, -h, w, 20, 5); ctx.fill(); ctx.stroke(); ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(-w / 2 + 24, -h + 20); ctx.lineTo(-w / 2 + 34, 0); ctx.moveTo(w / 2 - 24, -h + 20); ctx.lineTo(w / 2 - 34, 0); ctx.stroke(); },
+    // LAPTOP nhìn ngang đặt trên bàn: đáy tại (0,0) dài `w`, màn hình dựng ở đầu phải, quay về bên trái (người ngồi bên trái gõ)
+    laptop(ctx, it) {
+      const w = it.w || 230, sh = it.sh || 175, tilt = rad(it.tilt == null ? 16 : it.tilt), x1 = w / 2;
+      ctx.lineJoin = "round"; ctx.fillStyle = "#b0bec5"; ctx.strokeStyle = INK; ctx.lineWidth = 4; roundRect(ctx, -w / 2, -14, w, 14, 5); ctx.fill(); ctx.stroke();
+      const top = [x1 + Math.sin(tilt) * sh, -14 - Math.cos(tilt) * sh];
+      ctx.strokeStyle = "#90a4ae"; ctx.lineWidth = 16; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(x1, -14); ctx.lineTo(top[0], top[1]); ctx.stroke();
+      if (it.on !== false) { const g = ctx.createLinearGradient(x1, -14, x1 - 160, -14); g.addColorStop(0, "rgba(128,222,234,.45)"); g.addColorStop(1, "rgba(128,222,234,0)"); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x1 - 4, -14); ctx.lineTo(top[0] - 6, top[1]); ctx.lineTo(x1 - 170, top[1] + 40); ctx.lineTo(x1 - 120, -14); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = "#80deea"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(x1 - 8, -20); ctx.lineTo(top[0] - 12, top[1] + 4); ctx.stroke(); }
+      ctx.fillStyle = "#263238"; for (let i = 0; i < 6; i++) ctx.fillRect(-w / 2 + 20 + i * 28, -12, 20, 5);
     },
     // PHẤN/BÚT CHÌ: đầu nhọn tại (0,0), thân chếch lên phải
     pencil(ctx, it) {
@@ -1654,7 +1684,7 @@
     const tr = src.trans, trd = src.transDur || 0.6;
     if (tr && S.lt < trd) { const k = S.lt / trd; ctx.save(); ctx.fillStyle = tr === "flash" ? "#fff" : "#000";
       if (tr === "fade" || tr === "flash") { ctx.globalAlpha = 1 - k; ctx.fillRect(0, 0, W, H); }
-      else if (tr === "iris") { ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.arc(W / 2, H / 2, Math.max(1, easeIO(k) * 1150), 0, Math.PI * 2, true); ctx.fill("evenodd"); }
+      else if (tr === "iris") { ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.arc(W / 2, H / 2, Math.max(1, easeIO(k) * Math.hypot(W, H) * 0.56), 0, Math.PI * 2, true); ctx.fill("evenodd"); }
       else if (tr === "wipe") ctx.fillRect(W * easeIO(k), 0, W, H);
       ctx.restore(); }
     if (film.watermark) { ctx.save(); ctx.globalAlpha = 0.55; ctx.font = `italic 30px ${FONT}`; ctx.fillStyle = DARK ? "#ddd" : "#555"; ctx.textAlign = "right"; ctx.fillText(film.watermark, W - 30, 46 + 118 * (C.letter || 0)); ctx.restore(); }
@@ -1684,7 +1714,7 @@
     // tên người nói được tính vào khi ngắt dòng → không bao giờ tràn ngang
     const size = (film && film.subSize) || 78;
     const name = sp.who && film.cast && film.cast[sp.who] && film.cast[sp.who].name;
-    const lines = wrapText(ctx, (name ? name + ": " : "") + sp.text, 1720, size).slice(-2);
+    const lines = wrapText(ctx, (name ? name + ": " : "") + sp.text, W - 200, size).slice(-2);
     const h = lines.length * size * 1.3 + 30, y = H - h - 24;
     ctx.save(); ctx.fillStyle = "rgba(10,10,20,.62)"; roundRect(ctx, 40, y, W - 80, h, 18); ctx.fill();
     ctx.fillStyle = "#fff"; ctx.font = `${size}px ${FONT}`; ctx.textAlign = "center";
@@ -1697,9 +1727,9 @@
     ctx.fillStyle = T.color || "#c62828"; ctx.textAlign = "center";
     const s = 0.9 + 0.1 * easeOutBack(clamp(T.el / 0.6, 0, 1));
     ctx.translate(W / 2, H / 2 - 30); ctx.scale(s, s);
-    ctx.font = `bold 124px ${FONT}`; const lines = wrapText(ctx, T.text || "", 1700, 124);
+    ctx.font = `bold 124px ${FONT}`; const lines = wrapText(ctx, T.text || "", W - 220, 124);
     ctx.font = `bold 124px ${FONT}`; lines.forEach((l, i) => ctx.fillText(l, 0, (i - (lines.length - 1) / 2) * 140));
-    if (T.sub) { ctx.textAlign = "left"; drawTex(ctx, T.sub, 0, lines.length * 70 + 90, 72, "#37474f", "center", 1); }
+    if (T.sub) { ctx.textAlign = "left"; drawTex(ctx, T.sub, 0, lines.length * 70 + 90, W < 1400 ? 50 : 72, T.subColor || "#37474f", "center", 1); }
     ctx.restore(); ctx.textAlign = "left";
   }
   function drawQuiz(ctx, Q, life) {

@@ -89,7 +89,7 @@ def main():
         shots = []
         for i, t in enumerate(times):
             data = pg.evaluate(
-                """(t) => { const c = document.createElement('canvas'); c.width = 1920; c.height = 1080;
+                """(t) => { const c = document.createElement('canvas'); c.width = STICKFILM.W; c.height = STICKFILM.H;
                    STICKFILM.renderAt(c.getContext('2d'), t); return c.toDataURL('image/jpeg', 0.85); }""", t)
             raw = base64.b64decode(data.split(",", 1)[1])
             fp = outdir / f"khung-{i + 1:02d}-{t:06.2f}s.jpg"
