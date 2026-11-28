@@ -1,0 +1,85 @@
+{
+  "title": "Cạnh huyền là đường kính",
+  "sub": "4 định lí · Toán 9 · Bài 27, 28, 29",
+  "voice": { "name": "Thiện Minh", "speed": 1.0 },
+  "music": "story",
+  "intro": { "say": "Xin chào các em! Thầy Chung đây. Hôm nay, thầy trò mình cùng khám phá bốn định lí về tam giác vuông và đường tròn. Bí quyết chỉ gói trong một câu: cạnh huyền... chính là đường kính!" },
+  "chapters": [
+    { "head": "ĐỊNH LÍ 1", "title": "Tam giác vuông và đường tròn ngoại tiếp", "file": "dinh-li-1.txt", "center": "O",
+      "points": { "O": [540, 560], "A": [425.9, 315.3], "B": [270, 560], "C": [810, 560] },
+      "steps": [
+        { "say": "Cho tam giác A B C vuông tại A.", "cap": "Cho ΔABC vuông tại A.", "type": ["ΔABC vuông tại A"],
+          "draw": [ { "pt": "B" }, { "pt": "C" }, { "pt": "A" }, { "seg": ["B", "C"] }, { "seg": ["A", "B"] }, { "seg": ["A", "C"] }, { "right": ["A", "B", "C"] } ] },
+        { "say": "Gọi O là trung điểm của cạnh huyền B C. Nối A với O.", "cap": "O là trung điểm của cạnh huyền BC.", "type": ["O là trung điểm của BC"],
+          "draw": [ { "pt": "O", "off": [0, 56], "color": "#ffd54f" }, { "seg": ["A", "O"], "color": "#7cc4ff", "dash": true } ] },
+        { "say": "A O là đường trung tuyến ứng với cạnh huyền, nên A O bằng nửa B C. Do đó, O A bằng O B bằng O C.", "cap": "Trung tuyến ứng với cạnh huyền bằng nửa cạnh huyền.",
+          "type": ["AO = \\frac{BC}{2}", "⇒ OA = OB = OC"],
+          "draw": [ { "ticks": ["O", "B"] }, { "ticks": ["O", "C"] }, { "ticks": ["O", "A"] } ] },
+        { "say": "Vậy ba điểm A, B, C cùng nằm trên đường tròn tâm O, bán kính bằng B C chia hai.", "cap": "A, B, C cùng thuộc đường tròn (O; \\frac{BC}{2}).",
+          "type": ["⇒ A, B, C ∈ (O; \\frac{BC}{2})"], "dd": 2.0,
+          "draw": [ { "circ": "O", "r": 270, "color": "#ffd54f", "from": -115 } ] },
+        { "say": "Định lí một: Đường tròn ngoại tiếp tam giác vuông có tâm là trung điểm của cạnh huyền. Nói gọn: cạnh huyền là đường kính!", "cap": "★ Cạnh huyền là đường kính!",
+          "stmt": "Đường tròn ngoại tiếp tam giác vuông có tâm là trung điểm của cạnh huyền.", "stmtHead": "ĐỊNH LÍ 1",
+          "draw": [ { "seg": ["B", "C"], "color": "#ffd54f", "w": 9 } ] }
+      ] },
+    { "head": "ĐỊNH LÍ 2", "title": "Góc nội tiếp chắn nửa đường tròn", "file": "dinh-li-2.txt", "center": "O",
+      "points": { "O": [540, 560], "A": [425.9, 315.3], "B": [270, 560], "C": [810, 560] },
+      "steps": [
+        { "say": "Ngược lại, cho đường tròn tâm O có đường kính B C. Lấy một điểm A bất kì trên đường tròn, khác B và C.", "cap": "(O) có đường kính BC; A ∈ (O).",
+          "type": ["BC là đường kính của (O)", "A ∈ (O), A khác B và C"],
+          "draw": [ { "circ": "O", "r": 270, "from": 180 }, { "pt": "O", "off": [0, 56] }, { "pt": "B" }, { "pt": "C" }, { "seg": ["B", "C"], "color": "#ffd54f" }, { "pt": "A", "color": "#7cc4ff" } ] },
+        { "say": "Góc B A C là góc nội tiếp chắn nửa đường tròn. Nó bằng nửa số đo cung B C, tức là một trăm tám mươi độ chia hai, bằng chín mươi độ.", "cap": "Góc nội tiếp bằng nửa số đo cung bị chắn.",
+          "type": ["\\hat{BAC} = \\frac{180°}{2} = 90°"],
+          "draw": [ { "seg": ["A", "B"] }, { "seg": ["A", "C"] }, { "right": ["A", "B", "C"] }, { "lab": "90°", "at": "A", "d": [0, 92] } ] },
+        { "say": "Cho điểm A chạy trên đường tròn... góc B A C vẫn luôn là góc vuông!", "cap": "A chạy trên đường tròn: \\hat{BAC} luôn bằng 90°.",
+          "type": ["A di chuyển: \\hat{BAC} = 90° luôn đúng"], "min": 5.5,
+          "draw": [ { "move": { "pt": "A", "c": "O", "r": 270, "a0": -115, "a1": -40 } } ] },
+        { "say": "Định lí hai: Góc nội tiếp chắn nửa đường tròn là góc vuông. Tam giác nội tiếp đường tròn, có một cạnh là đường kính, thì là tam giác vuông.", "cap": "★ Chắn nửa đường tròn ⇒ góc vuông!",
+          "stmt": "Góc nội tiếp chắn nửa đường tròn là góc vuông.", "stmtHead": "ĐỊNH LÍ 2" }
+      ] },
+    { "head": "ĐỊNH LÍ 3", "title": "Bốn điểm cùng thuộc một đường tròn", "file": "dinh-li-3.txt", "center": "O",
+      "points": { "O": [540, 560], "A": [425.9, 315.3], "B": [270, 560], "C": [810, 560], "D": [654.1, 804.7] },
+      "steps": [
+        { "say": "Bây giờ, cho hai tam giác vuông: tam giác A B C vuông tại A, và tam giác D B C vuông tại D. Chúng có chung cạnh huyền B C.", "cap": "Hai tam giác vuông chung cạnh huyền BC.",
+          "type": ["ΔABC vuông tại A", "ΔDBC vuông tại D"],
+          "draw": [ { "pt": "B" }, { "pt": "C" }, { "seg": ["B", "C"] }, { "pt": "A" }, { "seg": ["A", "B"] }, { "seg": ["A", "C"] }, { "right": ["A", "B", "C"] },
+                    { "pt": "D" }, { "seg": ["D", "B"] }, { "seg": ["D", "C"] }, { "right": ["D", "B", "C"] } ], "dd": 3.2 },
+        { "say": "Theo định lí một, A thuộc đường tròn đường kính B C. Điểm D cũng thuộc đường tròn đường kính B C.", "cap": "A và D cùng nhìn BC dưới góc vuông.",
+          "type": ["⇒ A thuộc đường tròn đường kính BC", "⇒ D thuộc đường tròn đường kính BC"],
+          "draw": [ { "pt": "O", "off": [0, -26], "color": "#ffd54f" }, { "circ": "O", "r": 270, "color": "#ffd54f", "from": -115 } ], "dd": 2.0 },
+        { "say": "Vậy bốn điểm A, B, C, D cùng thuộc một đường tròn: tâm O là trung điểm của B C, bán kính bằng B C chia hai.", "cap": "Bốn điểm A, B, C, D cùng thuộc (O; \\frac{BC}{2}).",
+          "type": ["⇒ A, B, C, D ∈ (O; \\frac{BC}{2})"],
+          "draw": [ { "hl": ["A", "B", "C", "D"] } ] },
+        { "say": "Định lí ba: Hai điểm cùng nhìn một đoạn thẳng dưới góc vuông, thì bốn điểm cùng thuộc đường tròn có đường kính là đoạn thẳng đó. Đây là cách chứng minh tứ giác nội tiếp rất hay dùng!", "cap": "★ Cách chứng minh tứ giác nội tiếp",
+          "stmt": "Hai điểm A, D cùng nhìn đoạn BC dưới góc vuông thì A, B, C, D cùng thuộc đường tròn đường kính BC.", "stmtHead": "ĐỊNH LÍ 3",
+          "draw": [ { "fill": ["A", "C", "D", "B"], "color": "#ffd54f" } ] }
+      ] },
+    { "head": "ĐỊNH LÍ 4", "title": "Hình chữ nhật nội tiếp đường tròn", "file": "dinh-li-4.txt", "center": "O",
+      "points": { "O": [540, 560], "A": [318.8, 405.1], "B": [761.2, 405.1], "C": [761.2, 714.9], "D": [318.8, 714.9] },
+      "steps": [
+        { "say": "Cuối cùng, cho hình chữ nhật A B C D.", "cap": "Cho hình chữ nhật ABCD.", "type": ["ABCD là hình chữ nhật"],
+          "draw": [ { "pt": "A" }, { "pt": "B" }, { "pt": "C" }, { "pt": "D" }, { "seg": ["A", "B"] }, { "seg": ["B", "C"] }, { "seg": ["C", "D"] }, { "seg": ["D", "A"] } ] },
+        { "say": "Tam giác A B C vuông tại B, có cạnh huyền A C. Tam giác A D C vuông tại D, cũng có cạnh huyền A C.", "cap": "B và D cùng nhìn AC dưới góc vuông.",
+          "type": ["ΔABC vuông tại B", "ΔADC vuông tại D"],
+          "draw": [ { "seg": ["A", "C"], "color": "#ffd54f" }, { "right": ["B", "A", "C"] }, { "right": ["D", "A", "C"] } ] },
+        { "say": "Theo định lí ba, bốn đỉnh A, B, C, D cùng thuộc đường tròn đường kính A C. Tâm O là trung điểm A C, cũng là giao điểm hai đường chéo.", "cap": "Tâm O là giao điểm hai đường chéo.",
+          "type": ["⇒ A, B, C, D ∈ (O; \\frac{AC}{2})", "O là giao điểm của AC và BD"],
+          "draw": [ { "seg": ["B", "D"], "color": "#7cc4ff" }, { "pt": "O", "off": [0, 60], "color": "#ffd54f" }, { "circ": "O", "r": 270, "color": "#ffd54f", "from": -145 }, { "hl": ["A", "B", "C", "D"] } ], "dd": 2.4 },
+        { "say": "Định lí bốn: Hình chữ nhật, hình vuông là các tứ giác nội tiếp; tâm đường tròn ngoại tiếp là giao điểm hai đường chéo.", "cap": "★ Đường chéo là đường kính!",
+          "stmt": "Hình chữ nhật, hình vuông nội tiếp đường tròn có tâm là giao điểm của hai đường chéo.", "stmtHead": "ĐỊNH LÍ 4" }
+      ] }
+  ],
+  "summary": {
+    "head": "4 ĐỊNH LÍ CẦN NHỚ",
+    "items": [
+      "Đường tròn ngoại tiếp tam giác vuông có tâm là trung điểm của cạnh huyền.",
+      "Góc nội tiếp chắn nửa đường tròn là góc vuông.",
+      "Hai điểm cùng nhìn đoạn BC dưới góc vuông ⇒ bốn điểm cùng thuộc đường tròn đường kính BC.",
+      "Hình chữ nhật, hình vuông nội tiếp đường tròn; tâm là giao điểm hai đường chéo."
+    ],
+    "tip": "Thấy góc vuông ⇒ nghĩ ngay đến đường tròn có đường kính là cạnh huyền!",
+    "say": "Tóm lại, bốn định lí cần nhớ. Một: đường tròn ngoại tiếp tam giác vuông có tâm là trung điểm cạnh huyền. Hai: góc nội tiếp chắn nửa đường tròn là góc vuông. Ba: hai điểm cùng nhìn một đoạn dưới góc vuông, thì bốn điểm cùng thuộc đường tròn có đường kính là đoạn đó. Bốn: hình chữ nhật, hình vuông nội tiếp đường tròn, tâm là giao điểm hai đường chéo. Bí quyết: thấy góc vuông, nghĩ ngay đến đường tròn có đường kính là cạnh huyền!"
+  },
+  "endSay": "Chúc các em học tốt! Hẹn gặp lại trong video sau!",
+  "endSub": "Chúc các em học tốt!"
+}
